@@ -1,11 +1,16 @@
 
-
 % get me a topographic matrix of all synapse strengths from neuron
 % region.(depth,i,j) in to region sourceRegion
-function[] = plotAfferentSynapses(region, col, row, depth, sourceRegion, sourceDepth)
+function plotAfferentSynapses(sourceRegion, region, col, row, depth, sourceDepth)
+
+    % Open file
+    fileID = fopen('D:\Oxford\Work\Projects\VisBack\Simulations\1Object\BlankNetwork.txt');
+    
+    % Read header
+    [networkDimensions, list, bytesRead] = loadWeightFileHeader(fileID);
 
     % Read file
-    [networkDimensions,synapses] = afferentSynapses('D:\Oxford\Work\Projects\VisBack\Simulations\1Object\BlankNetwork.txt', region, col, row, depth);
+    [networkDimensions,synapses] = afferentSynapses(fileID, region, col, row, depth);
     afferentSynapseCount = length(synapses);
     
     % Weight box
@@ -18,5 +23,4 @@ function[] = plotAfferentSynapses(region, col, row, depth, sourceRegion, sourceD
         end
     end
     
-
-   
+    plot(weightBox);
