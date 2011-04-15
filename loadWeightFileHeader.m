@@ -6,7 +6,7 @@
 % networkDimensions: struct array (dimension,depth) of regions (incl. V1)
 % list: struct array (afferentSynapseCount,offsetCount) of neurons
 % bytesRead: bytes read, this is where the file pointer is left
-function [networkDimensions, list, bytesRead] = loadWeightFileHeader(fileID)
+function [networkDimensions, list, headerSize] = loadWeightFileHeader(fileID)
 
     % Seek to start of file
     fseek(fileID, 0, 'bof');
@@ -24,5 +24,5 @@ function [networkDimensions, list, bytesRead] = loadWeightFileHeader(fileID)
         networkDimensions(r).depth = fread(fileID, 1, SOURCE_PLATFORM_USHORT);
     end
     
-    [list, bytesRead] = inDegreeHeader(fileID, networkDimensions);
-    bytesRead = bytesRead + SOURCE_PLATFORM_USHORT(1 + 2 * numRegions);
+    [list, inDegreeHeaderSize] = inDegreeHeader(fileID, networkDimensions);
+    headerSize = inDegreeHeaderSize + SOURCE_PLATFORM_USHORT(1 + 2 * numRegions);

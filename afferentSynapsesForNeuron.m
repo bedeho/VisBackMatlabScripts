@@ -8,18 +8,26 @@ SOURCE_PLATFORM_FLOAT = 'float';
 SOURCE_PLATFORM_FLOAT_SIZE = 4;
 SYNAPSE_ELEMENT_SIZE = (4 * SOURCE_PLATFORM_USHORT_SIZE + SOURCE_PLATFORM_FLOAT_SIZE); % regionNr >> depth >> row >> col >> weight
 
-% Returns struct array of all synapses from neuron r1.(d,i,j)
-function [networkDimensions, synapses, bytesRead] = afferentSynapsesForNeuron(fileID, region, col, row, depth)
-    
-    
-    
-    offsetCount = afferentSynapseLists{region}(col,row,depth).offsetCount;
-    afferentSynapseCount = afferentSynapseLists{region}(col,row,depth).afferentSynapseCount;
-    
+% AFFERENT SYNAPSES FOR ONE NEURON
+% Input=========
+% fileID: fileID of open weight file
+% region: neuron region
+% col: neuron column
+% row: neuron row
+% depth: neuron depth
+% sourceRegion: afferent region id (V1 = 1)
+% sourceDepth: depth to plot in source region (first layer = 1)
+% Output========
+% synapses: Returns struct array of all synapses (regionNR,depth,row,col,weight) into neuron
+
+function [synapses] = afferentSynapsesForNeuron(fileID, headerSize, list, region, col, row, depth)
+   
     % Find offset of synapse list of neuron region.(depth,i,j)
-    fseek(fileID, offsetCount * SYNAPSE_ELEMENT_SIZE, 'cof');
+    offsetCount = list{region}(col,row,depth).offsetCount;
+    fseek(fileID, headerSize + offsetCount * SYNAPSE_ELEMENT_SIZE, 'bof');
     
-    % Synapse struct array
+    % Allocate synapse struct array
+    afferentSynapseCount = list{region}(col,row,depth).afferentSynapseCount;
     synapses(afferentSynapseCount).regionNr = [];
     synapses(afferentSynapseCount).depth = [];
     synapses(afferentSynapseCount).row = [];

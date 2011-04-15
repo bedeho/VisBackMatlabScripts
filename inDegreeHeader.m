@@ -7,7 +7,7 @@
 % Output========
 % list: struct array (afferentSynapseCount,offsetCount) of neurons
 % bytesRead: bytes read, this is where the file pointer is left
-function [list, bytesRead] = inDegreeHeader(fileID, networkDimensions)
+function [list, inDegreeHeaderSize] = inDegreeHeader(fileID, networkDimensions)
 
     % Number of regions, NOT counting V1
     numRegions = length(networkDimensions) - 1;
@@ -31,4 +31,4 @@ function [list, bytesRead] = inDegreeHeader(fileID, networkDimensions)
         end
     end
     
-    bytesRead = offsetCount * SYNAPSE_ELEMENT_SIZE;
+    inDegreeHeaderSize = offsetCount * SYNAPSE_ELEMENT_SIZE;
