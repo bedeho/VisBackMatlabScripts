@@ -21,7 +21,7 @@ function plotAfferentSynapses(filename, region, col, row, depth, sourceRegion, s
     [networkDimensions, list, headerSize] = loadWeightFileHeader(fileID);
     
     % Get afferent synapse matrix
-    weightBox = afferentSynapsesMatrixForNeuron(fileID, headerSize, list, region, col, row, depth, sourceRegion, sourceDepth);
+    weightBox = afferentSynapseMatrixForNeuron(fileID, headerSize, list, region, col, row, depth, sourceRegion, sourceDepth);
 
     % Plot
     plot(weightBox);

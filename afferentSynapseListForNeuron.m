@@ -20,7 +20,7 @@ SYNAPSE_ELEMENT_SIZE = (4 * SOURCE_PLATFORM_USHORT_SIZE + SOURCE_PLATFORM_FLOAT_
 % Output========
 % synapses: Returns struct array of all synapses (regionNR,depth,row,col,weight) into neuron
 
-function [synapses] = afferentSynapsesForNeuron(fileID, headerSize, list, region, col, row, depth)
+function [synapses] = afferentSynapseListForNeuron(fileID, headerSize, list, region, col, row, depth)
    
     % Find offset of synapse list of neuron region.(depth,i,j)
     offsetCount = list{region}(col,row,depth).offsetCount;
