@@ -23,7 +23,7 @@ function [weightBox] = afferentSynapseMatrixForNeuron(fileID, headerSize, networ
     weightBox = zeros(sourceRegionDimension, sourceRegionDimension);
     
     for s = 1:afferentSynapseCount,
-        if synapses(s).regionNr == sourceRegion - 1 && synapses(s).depth == sourceDepth
+        if synapses(s).regionNr == sourceRegion - 1 && synapses(s).depth == sourceDepth - 1
             weightBox(synapses(s).col, synapses(s).row) = synapses(s).weight;
         end
     end

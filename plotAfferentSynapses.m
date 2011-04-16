@@ -23,24 +23,40 @@ function plotAfferentSynapses(filename, region, col, row, depth, sourceRegion, s
     % Read header
     [networkDimensions, list, headerSize] = loadWeightFileHeader(fileID);
     
-    if nargin
-    plotMatrix(fileID, headerSize, networkDimensions, list, region, col, row, depth, sourceRegion, sourceDepth);
-
-function plotMatrix(fileID, headerSize, networkDimensions, list, region, col, row, depth, sourceRegion, sourceDepth)
-        
-    % Get afferent synapse matrix
-    weightBox = afferentSynapseMatrixForNeuron(fileID, headerSize, networkDimensions, list, region, col, row, depth, sourceRegion, sourceDepth);
-    dimension = length(weightBox);
+    % Call plot routine
+    figure();
     
-    % Plot
-    % figure();
-    surf(weightBox);
+    % If no source region is provided, then the one just prior to region is
+    % chosen
+    if nargin < 6
+        sourceRegion = region - 1;
+    end
+    
+    if nargin < 2 % If no cell was chosen, then plot all cells in region
+    
+    elseif nargin < 7 % If no source depth is chosen, then all are plotted
+        for d = 1:networkDimensions(sourceRegion).depth
+            plotMatrix(fileID, headerSize, networkDimensions, list, region, col, row, depth, sourceRegion, d);
+            hold on;
+        end
+    else
+        plotMatrix(fileID, headerSize, networkDimensions, list, region, col, row, depth, sourceRegion, sourceDepth);
+    end
+    
+    dimension = networkDimensions(sourceRegion).dimension;
     
     shading interp
     lighting phong
     view([90,90])
     axis([1 dimension 1 dimension 0 0.2])
-
-    hold on
-    axis square
-    axis on   
+    axis on
+    
+% Do we need this, maybee reinject
+function plotMatrix(fileID, headerSize, networkDimensions, list, region, col, row, depth, sourceRegion, sourceDepth)
+        
+    % Get afferent synapse matrix
+    weightBox = afferentSynapseMatrixForNeuron(fileID, headerSize, networkDimensions, list, region, col, row, depth, sourceRegion, sourceDepth);
+    
+    % Plot
+    surf(weightBox);
+ 
