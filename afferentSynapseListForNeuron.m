@@ -20,21 +20,18 @@ function [synapses] = afferentSynapseListForNeuron(fileID, headerSize, list, reg
     global SOURCE_PLATFORM_FLOAT;
    
     % Find offset of synapse list of neuron region.(depth,i,j)
-    offsetCount = list{region}(col,row,depth).offsetCount;
+    offsetCount = list{region}{col,row,depth}.offsetCount;
     fseek(fileID, headerSize + offsetCount * SYNAPSE_ELEMENT_SIZE, 'bof');
     
     % Allocate synapse struct array
-    afferentSynapseCount = list{region}(col,row,depth).afferentSynapseCount;
+    afferentSynapseCount = list{region}{col,row,depth}.afferentSynapseCount;
     synapses(afferentSynapseCount).regionNr = [];
     synapses(afferentSynapseCount).depth = [];
     synapses(afferentSynapseCount).row = [];
     synapses(afferentSynapseCount).col = [];
     synapses(afferentSynapseCount).weight = [];
     
-    % Weight box
-    weightBox = zeros(col, row, depth);
-    
-    % Fill synapses and weightBox
+    % Fill synapses
     for s = 1:afferentSynapseCount,
         synapses(s).regionNr = fread(fileID, 1, SOURCE_PLATFORM_USHORT);
         synapses(s).depth = fread(fileID, 1, SOURCE_PLATFORM_USHORT);

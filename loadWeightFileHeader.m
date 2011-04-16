@@ -10,6 +10,7 @@ function [networkDimensions, list, headerSize] = loadWeightFileHeader(fileID)
 
     % Import global variables
     global SOURCE_PLATFORM_USHORT;
+    global SOURCE_PLATFORM_USHORT_SIZE;
 
     % Seek to start of file
     fseek(fileID, 0, 'bof');
@@ -28,4 +29,6 @@ function [networkDimensions, list, headerSize] = loadWeightFileHeader(fileID)
     end
     
     [list, inDegreeHeaderSize] = inDegreeHeader(fileID, networkDimensions);
-    headerSize = inDegreeHeaderSize + SOURCE_PLATFORM_USHORT(1 + 2 * numRegions);
+    
+    % We compute the size of header just read
+    headerSize = inDegreeHeaderSize + SOURCE_PLATFORM_USHORT_SIZE*(1 + 2 * numRegions);

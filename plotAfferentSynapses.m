@@ -23,8 +23,24 @@ function plotAfferentSynapses(filename, region, col, row, depth, sourceRegion, s
     % Read header
     [networkDimensions, list, headerSize] = loadWeightFileHeader(fileID);
     
-    % Get afferent synapse matrix
-    weightBox = afferentSynapseMatrixForNeuron(fileID, headerSize, list, region, col, row, depth, sourceRegion, sourceDepth);
+    if nargin
+    plotMatrix(fileID, headerSize, networkDimensions, list, region, col, row, depth, sourceRegion, sourceDepth);
 
+function plotMatrix(fileID, headerSize, networkDimensions, list, region, col, row, depth, sourceRegion, sourceDepth)
+        
+    % Get afferent synapse matrix
+    weightBox = afferentSynapseMatrixForNeuron(fileID, headerSize, networkDimensions, list, region, col, row, depth, sourceRegion, sourceDepth);
+    dimension = length(weightBox);
+    
     % Plot
-    plot(weightBox);
+    % figure();
+    surf(weightBox);
+    
+    shading interp
+    lighting phong
+    view([90,90])
+    axis([1 dimension 1 dimension 0 0.2])
+
+    hold on
+    axis square
+    axis on   

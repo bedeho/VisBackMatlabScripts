@@ -11,28 +11,31 @@ function [list, inDegreeHeaderSize] = inDegreeHeader(fileID, networkDimensions)
 
     % Import global variables
     global SOURCE_PLATFORM_USHORT;
-    global SYNAPSE_ELEMENT_SIZE;
+    global SOURCE_PLATFORM_USHORT_SIZE;
     
-    % Number of regions, NOT counting V1
-    numRegions = length(networkDimensions) - 1;
+    % Number of regions
+    numRegions = length(networkDimensions);
     
-    list = cell(numRegions,1); 
+    % Allocate cell data structure, NOT counting V1
+    list = cell(numRegions - 1,1); 
 
     % Build list of afferentSynapse count for all neurons, and
     % cumulative sum over afferentSynapseLists up to each neuron (count),
     % this is for file seeking
     offsetCount = 0;
-    for r=1:numRegions,
-        list{r} = zeros(networkDimensions(r).dimension, networkDimensions(r).dimension, networkDimensions(r).depth);
+    nrOfNeurons = 0;
+    for r=2:numRegions,
+        list{r} = cell(networkDimensions(r).dimension, networkDimensions(r).dimension, networkDimensions(r).depth);
         for d=1:networkDimensions(r).depth, % Region depth
             for i=1:networkDimensions(r).dimension, % Region row
                 for j=1:networkDimensions(r).dimension, % Region col
                     afferentSynapseCount = fread(fileID, 1, SOURCE_PLATFORM_USHORT);
-                    list{r}(j,i,d) = struct('afferentSynapseCount', afferentSynapseCount, 'offsetCount' , offsetCount);
+                    list{r}{j,i,d} = struct('afferentSynapseCount', afferentSynapseCount, 'offsetCount' , offsetCount);
                     offsetCount = offsetCount + afferentSynapseCount;
+                    nrOfNeurons = nrOfNeurons + 1;
                 end
             end
         end
     end
     
-    inDegreeHeaderSize = offsetCount * SYNAPSE_ELEMENT_SIZE;
+    inDegreeHeaderSize = nrOfNeurons * SOURCE_PLATFORM_USHORT_SIZE;
