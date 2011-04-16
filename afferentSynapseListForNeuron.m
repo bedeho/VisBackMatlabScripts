@@ -1,12 +1,4 @@
 
-% Data type sizes for platform that generated the output files
-SOURCE_PLATFORM_UINT = 'uint32';
-SOURCE_PLATFORM_UINT_SIZE = 4;
-SOURCE_PLATFORM_USHORT = 'uint16';
-SOURCE_PLATFORM_USHORT_SIZE = 2;
-SOURCE_PLATFORM_FLOAT = 'float';
-SOURCE_PLATFORM_FLOAT_SIZE = 4;
-SYNAPSE_ELEMENT_SIZE = (4 * SOURCE_PLATFORM_USHORT_SIZE + SOURCE_PLATFORM_FLOAT_SIZE); % regionNr >> depth >> row >> col >> weight
 
 % AFFERENT SYNAPSES FOR ONE NEURON
 % Input=========
@@ -21,6 +13,11 @@ SYNAPSE_ELEMENT_SIZE = (4 * SOURCE_PLATFORM_USHORT_SIZE + SOURCE_PLATFORM_FLOAT_
 % synapses: Returns struct array of all synapses (regionNR,depth,row,col,weight) into neuron
 
 function [synapses] = afferentSynapseListForNeuron(fileID, headerSize, list, region, col, row, depth)
+
+    % Import global variables
+    global SOURCE_PLATFORM_USHORT;
+    global SYNAPSE_ELEMENT_SIZE;
+    global SOURCE_PLATFORM_FLOAT;
    
     % Find offset of synapse list of neuron region.(depth,i,j)
     offsetCount = list{region}(col,row,depth).offsetCount;

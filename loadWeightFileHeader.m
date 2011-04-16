@@ -8,6 +8,9 @@
 % bytesRead: bytes read, this is where the file pointer is left
 function [networkDimensions, list, headerSize] = loadWeightFileHeader(fileID)
 
+    % Import global variables
+    global SOURCE_PLATFORM_USHORT;
+
     % Seek to start of file
     fseek(fileID, 0, 'bof');
     

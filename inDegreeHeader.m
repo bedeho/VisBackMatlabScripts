@@ -9,6 +9,10 @@
 % bytesRead: bytes read, this is where the file pointer is left
 function [list, inDegreeHeaderSize] = inDegreeHeader(fileID, networkDimensions)
 
+    % Import global variables
+    global SOURCE_PLATFORM_USHORT;
+    global SYNAPSE_ELEMENT_SIZE;
+    
     % Number of regions, NOT counting V1
     numRegions = length(networkDimensions) - 1;
     
