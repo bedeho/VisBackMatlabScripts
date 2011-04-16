@@ -12,7 +12,7 @@
 %
 % 'D:\Oxford\Work\Projects\VisBack\Simulations\1Object\BlankNetwork.txt'
 
-function plotAfferentSynapses(filename, region, col, row, depth, sourceRegion, sourceDepth)
+function plotAfferentSynapses(filename, region, depth, row, col, sourceRegion, sourceDepth)
 
     % Import global variables
     declareGlobalVars();
@@ -23,40 +23,65 @@ function plotAfferentSynapses(filename, region, col, row, depth, sourceRegion, s
     % Read header
     [networkDimensions, list, headerSize] = loadWeightFileHeader(fileID);
     
-    % Call plot routine
-    figure();
-    
     % If no source region is provided, then the one just prior to region is
     % chosen
     if nargin < 6
         sourceRegion = region - 1;
     end
     
-    if nargin < 2 % If no cell was chosen, then plot all cells in region
+    % Setup plotting ranges
+    regionDimension = networkDimensions(region).dimension;
+    % regionDepth = networkDimensions(region).depth;
     
-    elseif nargin < 7 % If no source depth is chosen, then all are plotted
-        for d = 1:networkDimensions(sourceRegion).depth
-            plotMatrix(fileID, headerSize, networkDimensions, list, region, col, row, depth, sourceRegion, d);
-            hold on;
-        end
-    else
-        plotMatrix(fileID, headerSize, networkDimensions, list, region, col, row, depth, sourceRegion, sourceDepth);
+    if nargin < 3
+        depth = 1;
     end
     
-    dimension = networkDimensions(sourceRegion).dimension;
+    % If no planar cordinate of cell are provided, 
+    if nargin < 4
+        rowRange = 1:4; %1:regionDimension;
+        colRange = 1:4; % 1:regionDimension;
+    else
+        rowRange = row:row;
+        colRange = col:col;
+    end
+    
+    % If no source depth is chosen, then all are plotted
+    if nargin < 7 
+        depthRange = 1:networkDimensions(sourceRegion).depth;
+    else
+        depthRange = sourceDepth:sourceDepth;
+    end
+    
+    
+    % Call plot routine
+    figure();
+
+    neuronCounter = 1;
+    for i=rowRange, % Region row
+        for j=colRange, % Region col
+            for d=depthRange, % Source region depth
+
+                if nargin < 4
+                    subplot(regionDimension, regionDimension, neuronCounter);
+                end
+                
+                neuronCounter = neuronCounter + 1;
+
+                % Get afferent synapse matrix
+                weightBox = afferentSynapseMatrixForNeuron(fileID, headerSize, networkDimensions, list, region, depth, i, j, sourceRegion, d);
+
+                % Plot
+                surf(weightBox);
+                hold on;
+                % pause;
+            end
+        end
+    end
     
     shading interp
     lighting phong
     view([90,90])
-    axis([1 dimension 1 dimension 0 0.2])
-    axis on
-    
-% Do we need this, maybee reinject
-function plotMatrix(fileID, headerSize, networkDimensions, list, region, col, row, depth, sourceRegion, sourceDepth)
-        
-    % Get afferent synapse matrix
-    weightBox = afferentSynapseMatrixForNeuron(fileID, headerSize, networkDimensions, list, region, col, row, depth, sourceRegion, sourceDepth);
-    
-    % Plot
-    surf(weightBox);
- 
+    %axis([1 regionDimension 1 regionDimension]) %  0 0.3
+    %axis on
+
