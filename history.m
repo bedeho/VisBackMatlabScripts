@@ -12,7 +12,7 @@
 % Output========
 % synapses: Returns struct array of all synapses (regionNR,depth,row,col,weight) into neuron
 
-function [synapses] = afferentSynapseListForNeuron(fileID, headerSize, list, region, depth, row, col)
+function [synapses] = history(fileID, headerSize, list, region, depth, row, col)
 
     % Import global variables
     global SOURCE_PLATFORM_USHORT;

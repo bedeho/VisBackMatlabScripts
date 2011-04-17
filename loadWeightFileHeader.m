@@ -13,7 +13,7 @@ function [networkDimensions, list, headerSize] = loadWeightFileHeader(fileID)
     global SOURCE_PLATFORM_USHORT_SIZE;
 
     % Seek to start of file
-    fseek(fileID, 0, 'bof');
+    frewind(fileID);
     
     % Read number of regions
     numRegions = fread(fileID, 1, SOURCE_PLATFORM_USHORT);
@@ -25,7 +25,7 @@ function [networkDimensions, list, headerSize] = loadWeightFileHeader(fileID)
     % Read dimensions
     for r=1:numRegions,
         networkDimensions(r).dimension = fread(fileID, 1, SOURCE_PLATFORM_USHORT);
-        networkDimensions(r).depth = fread(fileID, 1, SOURCE_PLATFORM_USHORT);
+        networkDimensions(r).depth = fread(fileID, 1, SOURCE_PLATFORM_USHORT); 
     end
     
     [list, inDegreeHeaderSize] = inDegreeHeader(fileID, networkDimensions);
