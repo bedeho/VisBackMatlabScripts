@@ -1,5 +1,5 @@
 
-% PLOT HISTORY
+% PLOT NEURON HISTORY
 % Input=========
 % filename: filename of weight file
 % region: region to plot, V1 = 1
@@ -26,18 +26,17 @@ function plotNeuronHistory(filename, region, depth, row, col, objects, transform
     [networkDimensions, historyDimensions, neuronOffsets, headerSize] = loadHistoryHeader(fileID)
     
     % Fill in missing arguments, 
-    % we always choose last value as default
     if nargin < 9,
-        ticks = historyDimensions.numOutputsPrTransform;
+        ticks = historyDimensions.numOutputsPrTransform;        % pick last output
 
         if nargin < 8,
-            epochs = 1:historyDimensions.numEpochs;
+            epochs = 1:historyDimensions.numEpochs;             % pick all epochs
 
             if nargin < 7,
-                transforms = 1:historyDimensions.numTransforms;
+                transforms = 1:historyDimensions.numTransforms; % pick all transforms
 
                 if nargin < 6,
-                    objects = 1:historyDimensions.numObjects;
+                    objects = 1:historyDimensions.numObjects;   % pick all objects
                 end
             end
         end
@@ -45,10 +44,7 @@ function plotNeuronHistory(filename, region, depth, row, col, objects, transform
 
         
     % Get history array
-    activity = history(fileID, historyDimensions, neuronOffsets, region, depth, row, col, objects, transforms, epochs, ticks);
-    
-    % Make title with all the good stuff encoded
-    title('Single Cell Invariance Plot');
+    activity = neuronHistory(fileID, historyDimensions, neuronOffsets, region, depth, row, col, objects, transforms, epochs, ticks);
     
     % Plot
     for ti=ticks,
@@ -57,7 +53,7 @@ function plotNeuronHistory(filename, region, depth, row, col, objects, transform
             for o=objects,
                  %for t=transforms,
                     plot(activity(:,o,ti,e));
-                    title('plot');
+                    title(['Epoch: ', num2str(e), ', Object:', num2str(o), ', Tick:', num2str(ti)]);
                     hold on;
                  %end
             end

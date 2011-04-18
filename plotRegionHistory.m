@@ -1,18 +1,20 @@
 
-% PLOT HISTORY
+% PLOT REGION HISTORY
 % Input=========
 % filename: filename of weight file
-% region: neuron region, V1 = 1
-% object:
-% transform:
-% epoch:
-% tick:
-% depth: region depth, d = 1 is top/first/most radial/farthest from retina
+% region: region to plot, V1 = 1
+% depth: region depth to plot
+% row: neuron row
+% col: neuron column
+% objects:
+% transforms:
+% epochs:
+% ticks:
 % Output========
 %
 % 'D:\Oxford\Work\Projects\VisBack\Simulations\1Object\1Epoch\firingRate.dat'
 
-function plotRegionHistory(filename, region, object, transform, epoch, tick, depth)
+function plotNeuronHistory(filename, region, depth, objects, epochs, ticks)
 
     % Import global variables
     declareGlobalVars();
@@ -21,47 +23,36 @@ function plotRegionHistory(filename, region, object, transform, epoch, tick, dep
     fileID = fopen(filename);
     
     % Read header
-    [networkDimensions, numEpochs, numObjects, numTransforms, numOutputsPrTransform, headerSize, neuronOffsets] = loadHistoryHeader(fileID)
+    [networkDimensions, historyDimensions, neuronOffsets, headerSize] = loadHistoryHeader(fileID)
     
-    % Setup plotting ranges
-    regionDimension = networkDimensions(region).dimension;
-    
-    % No cell provided 
-    if nargin < 7
-        rowRange = 1:regionDimension;
-        colRange = 1:regionDimension;
-        depthRange = 1;
-    else
-        rowRange = row:row;
-        colRange = col:col;
-        depthRange = depth;
-    end
-    
-        % Fill in missing arguments
-    if nargin < 10,
-        depth = 1; % choose frist layer as default
-        
-        if nargin < 9,
-            tick = 1; % choose first tick as default
-            
-            if nargin < 8,
-                epoch = 1; % choose first epoch as default
-                
-                if nargin < 7,
-                    transform = 1; % choose frist transform as default
-                    
-                    if nargin < 6,
-                        object = 1; % choose first object as default
-                    end
+    % Fill in missing arguments, 
+    if nargin < 6,
+        ticks = historyDimensions.numOutputsPrTransform;        % pick last output
+
+        if nargin < 5,
+            epochs = 1:historyDimensions.numEpochs;             % pick all epochs
+
+            if nargin < 4,
+                objects = 1:historyDimensions.numObjects;       % pick all transforms
+
+                if nargin < 3,
+                    depth = 1;                                  % pick first layer
                 end
             end
         end
     end
     
-
-    
     % Call plot routine
     neuronCounter = 1;
+    
+    
+    
+    
+    
+    
+    
+    
+    
     for i=rowRange, % Region row
         for j=colRange, % Region col
             for d=depthRange, % Source region depth
@@ -77,6 +68,7 @@ function plotRegionHistory(filename, region, object, transform, epoch, tick, dep
 
                 % Plot
                 surf(weightBox);
+                                    title(['Epoch: ', num2str(e), ', Object:', num2str(o), ', Tick:', num2str(ti)]);
                 hold on;
                 % pause;
             end
@@ -91,9 +83,7 @@ function plotRegionHistory(filename, region, object, transform, epoch, tick, dep
 
     
         %function temporalPlot()
-        
-            %{
-        
+
     % Dimensions of the subplot
     subplotdim = ceil(sqrt(numOutputsPrTransform));
         
