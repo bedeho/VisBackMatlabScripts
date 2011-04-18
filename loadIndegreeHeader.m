@@ -7,7 +7,7 @@
 % Output========
 % list: struct array (afferentSynapseCount,offsetCount) of neurons
 % bytesRead: bytes read, this is where the file pointer is left
-function [list, inDegreeHeaderSize] = inDegreeHeader(fileID, networkDimensions)
+function [list, inDegreeHeaderSize] = loadIndegreeHeader(fileID, networkDimensions)
 
     % Import global variables
     global SOURCE_PLATFORM_USHORT;
@@ -17,7 +17,7 @@ function [list, inDegreeHeaderSize] = inDegreeHeader(fileID, networkDimensions)
     numRegions = length(networkDimensions);
     
     % Allocate cell data structure, NOT counting V1
-    list = cell(numRegions - 1,1); 
+    list = cell(numRegions,1); 
 
     % Build list of afferentSynapse count for all neurons, and
     % cumulative sum over afferentSynapseLists up to each neuron (count),
