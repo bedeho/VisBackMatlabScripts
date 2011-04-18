@@ -20,43 +20,20 @@ function [activity] = history(fileID, historyDimensions, neuronOffsets, region, 
     fseek(fileID, streamStart, 'bof');
     
     % Allocate history array
-    activity = zeros(length(objects), length(transforms), length(epochs), length(ticks));
+    activity = zeros(length(transforms), length(objects), length(ticks), length(epochs));
     
     % Iterate history
     for e = length(epochs),
         for o = length(objects),
             for t = length(transforms),
                 for ti= length(ticks),
+                    % Seek to correct location
+                    offset = streamStart + (epochs(e) - 1)*historyDimensions.epochSize + (objects(o) - 1)*historyDimensions.objectSize + (transforms(t) - 1)*historyDimensions.transformSize + (ticks(ti) - 1)*historyDimensions.tickSize;
+                    fseek(fileID, offset, 'bof');
                     
-                    fseek(fileID,
+                    %Read
+                    activity(t,o,ti,e) = fread(fileID, 1, SOURCE_PLATFORM_FLOAT);
                 end
             end
         end
-    end
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    afferentSynapseCount = list{region}{col,row,depth}.afferentSynapseCount;
-    synapses(afferentSynapseCount).regionNr = [];
-    synapses(afferentSynapseCount).depth = [];
-    synapses(afferentSynapseCount).row = [];
-    synapses(afferentSynapseCount).col = [];
-    synapses(afferentSynapseCount).weight = [];
-    
-    % Fill synapses
-    for s = 1:afferentSynapseCount,
-        synapses(s).regionNr = fread(fileID, 1, SOURCE_PLATFORM_USHORT);
-        synapses(s).depth = fread(fileID, 1, SOURCE_PLATFORM_USHORT);
-        synapses(s).row = fread(fileID, 1, SOURCE_PLATFORM_USHORT);
-        synapses(s).col = fread(fileID, 1, SOURCE_PLATFORM_USHORT);
-        synapses(s).weight = fread(fileID, 1, SOURCE_PLATFORM_FLOAT);
     end
