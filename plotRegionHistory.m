@@ -14,7 +14,7 @@
 %
 % 'D:\Oxford\Work\Projects\VisBack\Simulations\1Object\1Epoch\firingRate.dat'
 
-function plotNeuronHistory(filename, region, depth, objects, epochs, ticks)
+function plotRegionHistory(filename, region, depth, objects, epochs, ticks)
 
     % Import global variables
     declareGlobalVars();
@@ -30,7 +30,7 @@ function plotNeuronHistory(filename, region, depth, objects, epochs, ticks)
         ticks = historyDimensions.numOutputsPrTransform;        % pick last output
 
         if nargin < 5,
-            epochs = 1:historyDimensions.numEpochs;             % pick all epochs
+            epochs = 1:10;             % pick all epochs
 
             if nargin < 4,
                 objects = 1:historyDimensions.numObjects;       % pick all transforms
@@ -42,8 +42,11 @@ function plotNeuronHistory(filename, region, depth, objects, epochs, ticks)
         end
     end
     
+    transforms = 1:historyDimensions.numTransforms;
+    regionDimension = networkDimensions(region).dimension;
+    
     % Get history array
-    activity = regionHistory(fileID, historyDimensions, neuronOffsets, networkDimensions, region, depth, row, col, objects, transforms, epochs, ticks);
+    activity = regionHistory(fileID, historyDimensions, neuronOffsets, networkDimensions, region, depth, objects, transforms, epochs, ticks);
     
     % Plot
     plotDim = ceil(sqrt(length(transforms)));
@@ -58,10 +61,17 @@ function plotNeuronHistory(filename, region, depth, objects, epochs, ticks)
                     surf(activity(:,:,t,o,ti,e));
                     title(['Epoch: ', num2str(e), ', Object:', num2str(o), ', Tick:', num2str(ti)]);
                     hold on;
+                        %shading interp
+                    lighting phong
+                    view([90,90])
+                    axis([1 regionDimension 1 regionDimension]) %  0 0.3
+
                  end
             end
         end
     end
+    
+
     
     
     %{
@@ -92,10 +102,7 @@ function plotNeuronHistory(filename, region, depth, objects, epochs, ticks)
         end
     end
     
-    shading interp
-    lighting phong
-    view([90,90])
-    %axis([1 regionDimension 1 regionDimension]) %  0 0.3
+
     %axis on
 
     
