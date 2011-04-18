@@ -15,7 +15,7 @@
 function [weightBox] = afferentSynapseMatrix(fileID, headerSize, networkDimensions, list, region, depth, row, col, sourceRegion, sourceDepth)
 
     % Read file
-    synapses = afferentSynapseListForNeuron(fileID, headerSize, list, region, depth, row, col);
+    synapses = afferentSynapseList(fileID, headerSize, list, region, depth, row, col);
     afferentSynapseCount = length(synapses);
     
     % Weight box

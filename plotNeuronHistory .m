@@ -1,18 +1,20 @@
 
-% PLOT SYNAPTIC WEIGHT MATRIX FOR NEURON
+% PLOT HISTORY
 % Input=========
 % filename: filename of weight file
 % region: neuron region, V1 = 1
-% col: neuron column
-% row: neuron row
+% object:
+% transform:
+% epoch:
+% tick:
 % depth: neuron depth
-% sourceRegion: afferent region id (V1 = 1)
-% sourceDepth: depth to plot in source region (first layer = 1)
+% row: neuron row
+% col: neuron column
 % Output========
 %
-% 'D:\Oxford\Work\Projects\VisBack\Simulations\1Object\BlankNetwork.txt'
+% 'D:\Oxford\Work\Projects\VisBack\Simulations\1Object\1Epoch\firingRate.dat'
 
-function plotAfferentSynapses(filename, region, depth, row, col, sourceRegion, sourceDepth)
+function plotRegionHistory(filename, region, object, transform, epoch, tick, depth, row, col)
 
     % Import global variables
     declareGlobalVars();
@@ -21,42 +23,26 @@ function plotAfferentSynapses(filename, region, depth, row, col, sourceRegion, s
     fileID = fopen(filename);
     
     % Read header
-    [networkDimensions, list, headerSize] = loadWeightFileHeader(fileID);
-    
-    % If no source region is provided, then the one just prior to region is
-    % chosen
-    if nargin < 6
-        sourceRegion = region - 1;
-    end
+    [networkDimensions, numEpochs, numObjects, numTransforms, numOutputsPrTransform, headerSize, neuronOffsets] = loadHistoryHeader(fileID)
     
     % Setup plotting ranges
     regionDimension = networkDimensions(region).dimension;
-    % regionDepth = networkDimensions(region).depth;
     
-    if nargin < 3
-        depth = 1;
-    end
-    
-    % If no planar cordinate of cell are provided, 
-    if nargin < 4
-        rowRange = 1:4; %1:regionDimension;
-        colRange = 1:4; % 1:regionDimension;
+    % No cell provided 
+    if nargin < 9
+        rowRange = 1:regionDimension;
+        colRange = 1:regionDimension;
+        depthRange = 1;
     else
         rowRange = row:row;
         colRange = col:col;
+        depthRange = depth;
     end
     
-    % If no source depth is chosen, then all are plotted
-    if nargin < 7 
-        depthRange = 1:networkDimensions(sourceRegion).depth;
-    else
-        depthRange = sourceDepth:sourceDepth;
-    end
     
+
     
     % Call plot routine
-    figure();
-
     neuronCounter = 1;
     for i=rowRange, % Region row
         for j=colRange, % Region col

@@ -1,27 +1,22 @@
 
-
-% AFFERENT SYNAPSES FOR ONE NEURON
+% HISTORY OF NEURON
 % Input=========
 % fileID: fileID of open weight file
+% neuronOffsets: cell array giving byte offsets (rel. to 'bof') of neurons 
 % region: neuron region
 % col: neuron column
 % row: neuron row
 % depth: neuron depth
-% sourceRegion: afferent region id (V1 = 1)
-% sourceDepth: depth to plot in source region (first layer = 1)
 % Output========
-% synapses: Returns struct array of all synapses (regionNR,depth,row,col,weight) into neuron
+% history: 
 
-function [synapses] = history(fileID, headerSize, list, region, depth, row, col)
+function [history] = history(fileID, neuronOffsets, region, depth, row, col, object, transform, epoch, tick)
 
     % Import global variables
-    global SOURCE_PLATFORM_USHORT;
-    global SYNAPSE_ELEMENT_SIZE;
     global SOURCE_PLATFORM_FLOAT;
    
-    % Find offset of synapse list of neuron region.(depth,i,j)
-    offsetCount = list{region}{col,row,depth}.offsetCount;
-    fseek(fileID, headerSize + offsetCount * SYNAPSE_ELEMENT_SIZE, 'bof');
+    % Find offset of neuron region.(depth,i,j)'s data stream
+    fseek(fileID, neuronOffsets{region}(col,row,depth).offset, 'bof');
     
     % Allocate synapse struct array
     afferentSynapseCount = list{region}{col,row,depth}.afferentSynapseCount;

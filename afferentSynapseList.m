@@ -33,9 +33,11 @@ function [synapses] = afferentSynapseList(fileID, headerSize, list, region, dept
     
     % Fill synapses
     for s = 1:afferentSynapseCount,
-        synapses(s).regionNr = fread(fileID, 1, SOURCE_PLATFORM_USHORT);
-        synapses(s).depth = fread(fileID, 1, SOURCE_PLATFORM_USHORT);
-        synapses(s).row = fread(fileID, 1, SOURCE_PLATFORM_USHORT);
-        synapses(s).col = fread(fileID, 1, SOURCE_PLATFORM_USHORT);
+        v = fread(fileID, 4, SOURCE_PLATFORM_USHORT);
+        
+        synapses(s).regionNr = v(1);
+        synapses(s).depth = v(2);
+        synapses(s).row = v(3);
+        synapses(s).col = v(4);
         synapses(s).weight = fread(fileID, 1, SOURCE_PLATFORM_FLOAT);
     end
