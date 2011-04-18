@@ -31,13 +31,13 @@ function plotNeuronHistory(filename, region, depth, row, col, objects, transform
         ticks = historyDimensions.numOutputsPrTransform;
 
         if nargin < 8,
-            epochs = historyDimensions.numEpochs;
+            epochs = 1:historyDimensions.numEpochs;
 
             if nargin < 7,
-                transforms = historyDimensions.numTransforms;
+                transforms = 1:historyDimensions.numTransforms;
 
                 if nargin < 6,
-                    objects = historyDimensions.numObjects;
+                    objects = 1:historyDimensions.numObjects;
                 end
             end
         end
@@ -61,6 +61,5 @@ function plotNeuronHistory(filename, region, depth, row, col, objects, transform
                     hold on;
                  %end
             end
-            axis([1 length(transforms)]) %  0 0.3
         end
     end

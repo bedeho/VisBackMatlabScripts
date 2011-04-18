@@ -21,7 +21,7 @@ function [networkDimensions, historyDimensions, neuronOffsets, headerSize] = loa
     % Read history dimensions
     v = fread(fileID, 4, SOURCE_PLATFORM_USHORT);   
     historyDimensions = struct('numEpochs', v(1), 'numObjects', v(2), 'numTransforms', v(3), 'numOutputsPrTransform', v(4), 'tickSize', [], 'transformSize', [], 'objectSize', [], 'epochSize', [], 'streamSize' , []);
-    historyDimensions.tickSize = SOURCE_PLATFORM_FLOAT_SIZE
+    historyDimensions.tickSize = SOURCE_PLATFORM_FLOAT_SIZE;
     historyDimensions.transformSize = historyDimensions.tickSize*historyDimensions.numOutputsPrTransform;
     historyDimensions.objectSize = historyDimensions.numTransforms*historyDimensions.transformSize;
     historyDimensions.epochSize = historyDimensions.numObjects*historyDimensions.objectSize;
@@ -45,17 +45,18 @@ function [networkDimensions, historyDimensions, neuronOffsets, headerSize] = loa
     
     % Compute the offset of each neurons datastream in the file, not V1
     % neuronOffsets = cell(numRegions,1); 
-    offset = headerSize;
+    offset = headerSize; 
     nrOfNeurons = 1;
     for r=2:numRegions,
-        neuronOffsets{r} = zeros(networkDimensions(r).dimension, networkDimensions(r).dimension, networkDimensions(r).depth);
+        neuronOffsets{r} = cell(networkDimensions(r).dimension, networkDimensions(r).dimension, networkDimensions(r).depth);
         for d=1:networkDimensions(r).depth, % Region depth
             for i=1:networkDimensions(r).dimension, % Region row
                 for j=1:networkDimensions(r).dimension, % Region col
-                    neuronOffsets{r}(j,i,d) = struct('offset', offset ,'nr' ,nrOfNeurons);
+                    neuronOffsets{r}{j,i,d} = struct('offset', offset ,'nr' ,nrOfNeurons);
                     offset = offset + historyDimensions.streamSize;
                     nrOfNeurons = nrOfNeurons + 1;
                 end
             end
         end
     end
+    

@@ -16,17 +16,16 @@ function [activity] = history(fileID, historyDimensions, neuronOffsets, region, 
     global SOURCE_PLATFORM_FLOAT;
    
     % Find offset of neuron region.(depth,i,j)'s data stream
-    streamStart = neuronOffsets{region}(col,row,depth).offset;
-    fseek(fileID, streamStart, 'bof');
+    streamStart = neuronOffsets{region}{col,row,depth}.offset;
     
     % Allocate history array
     activity = zeros(length(transforms), length(objects), length(ticks), length(epochs));
     
     % Iterate history
-    for e = length(epochs),
-        for o = length(objects),
-            for t = length(transforms),
-                for ti= length(ticks),
+    for e = 1:length(epochs),
+        for o = 1:length(objects),
+            for t = 1:length(transforms),
+                for ti= 1:length(ticks),
                     % Seek to correct location
                     offset = streamStart + (epochs(e) - 1)*historyDimensions.epochSize + (objects(o) - 1)*historyDimensions.objectSize + (transforms(t) - 1)*historyDimensions.transformSize + (ticks(ti) - 1)*historyDimensions.tickSize;
                     fseek(fileID, offset, 'bof');
