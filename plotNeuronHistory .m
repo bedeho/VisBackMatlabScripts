@@ -2,19 +2,19 @@
 % PLOT HISTORY
 % Input=========
 % filename: filename of weight file
-% region: neuron region, V1 = 1
-% object:
-% transform:
-% epoch:
-% tick:
-% depth: neuron depth
+% region: region to plot, V1 = 1
+% depth: region depth to plot
 % row: neuron row
 % col: neuron column
+% objects:
+% transforms:
+% epochs:
+% ticks:
 % Output========
 %
 % 'D:\Oxford\Work\Projects\VisBack\Simulations\1Object\1Epoch\firingRate.dat'
 
-function plotRegionHistory(filename, region, object, transform, epoch, tick, depth, row, col)
+function plotNeuronHistory(filename, region, depth, row, col, objects, transforms, epochs, ticks)
 
     % Import global variables
     declareGlobalVars();
@@ -23,51 +23,43 @@ function plotRegionHistory(filename, region, object, transform, epoch, tick, dep
     fileID = fopen(filename);
     
     % Read header
-    [networkDimensions, numEpochs, numObjects, numTransforms, numOutputsPrTransform, headerSize, neuronOffsets] = loadHistoryHeader(fileID)
+    [networkDimensions, historyDimensions, neuronOffsets, headerSize] = loadHistoryHeader(fileID)
     
-    % Setup plotting ranges
-    regionDimension = networkDimensions(region).dimension;
-    
-    % No cell provided 
-    if nargin < 9
-        rowRange = 1:regionDimension;
-        colRange = 1:regionDimension;
-        depthRange = 1;
-    else
-        rowRange = row:row;
-        colRange = col:col;
-        depthRange = depth;
-    end
-    
-    
+    % Fill in missing arguments
+    if nargin < 9,
+        tick = 1; % choose first tick as default
 
-    
-    % Call plot routine
-    neuronCounter = 1;
-    for i=rowRange, % Region row
-        for j=colRange, % Region col
-            for d=depthRange, % Source region depth
+        if nargin < 8,
+            epoch = 1; % choose first epoch as default
 
-                if nargin < 4
-                    subplot(regionDimension, regionDimension, neuronCounter);
+            if nargin < 7,
+                transform = 1; % choose frist transform as default
+
+                if nargin < 6,
+                    object = 1; % choose first object as default
                 end
-                
-                neuronCounter = neuronCounter + 1;
-
-                % Get afferent synapse matrix
-                weightBox = afferentSynapseMatrix(fileID, headerSize, networkDimensions, list, region, depth, i, j, sourceRegion, d);
-
-                % Plot
-                surf(weightBox);
-                hold on;
-                % pause;
             end
         end
     end
-    
-    shading interp
-    lighting phong
-    view([90,90])
-    %axis([1 regionDimension 1 regionDimension]) %  0 0.3
-    %axis on
 
+        
+    % Get history array
+    activity = history(fileID, historyDimensions, neuronOffsets, region, depth, row, col, objects, transforms, epochs, ticks);
+    
+    % Make title with all the good stuff encoded
+    title('Single Cell Invariance Plot');
+    
+    % Plot
+    for ti=ticks,
+        for e=epochs,
+            figure();
+            for o=objects,
+                 for t=transforms,
+                    plot(activity);
+                    title('plot');
+                    hold on;
+                 end
+            end
+            axis([1 length(transforms)]) %  0 0.3
+        end
+    end

@@ -10,15 +10,41 @@
 % Output========
 % history: 
 
-function [history] = history(fileID, neuronOffsets, region, depth, row, col, object, transform, epoch, tick)
+function [activity] = history(fileID, historyDimensions, neuronOffsets, region, depth, row, col, objects, transforms, epochs, ticks)
 
     % Import global variables
     global SOURCE_PLATFORM_FLOAT;
    
     % Find offset of neuron region.(depth,i,j)'s data stream
-    fseek(fileID, neuronOffsets{region}(col,row,depth).offset, 'bof');
+    streamStart = neuronOffsets{region}(col,row,depth).offset;
+    fseek(fileID, streamStart, 'bof');
     
-    % Allocate synapse struct array
+    % Allocate history array
+    activity = zeros(length(objects), length(transforms), length(epochs), length(ticks));
+    
+    % Iterate history
+    for e = length(epochs),
+        for o = length(objects),
+            for t = length(transforms),
+                for ti= length(ticks),
+                    
+                    fseek(fileID,
+                end
+            end
+        end
+    end
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     afferentSynapseCount = list{region}{col,row,depth}.afferentSynapseCount;
     synapses(afferentSynapseCount).regionNr = [];
     synapses(afferentSynapseCount).depth = [];

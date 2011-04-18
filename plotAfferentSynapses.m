@@ -39,8 +39,8 @@ function plotAfferentSynapses(filename, region, depth, row, col, sourceRegion, s
     
     % If no planar cordinate of cell are provided, 
     if nargin < 4
-        rowRange = 1:4; %1:regionDimension;
-        colRange = 1:4; % 1:regionDimension;
+        rowRange = 1:regionDimension; %;
+        colRange = 1:regionDimension; % ;
     else
         rowRange = row:row;
         colRange = col:col;
@@ -73,15 +73,15 @@ function plotAfferentSynapses(filename, region, depth, row, col, sourceRegion, s
 
                 % Plot
                 surf(weightBox);
+                set(gca,'xtick',[],'ytick',[])
+                    view([90,90])
+                        shading interp
+                    lighting phong
+
                 hold on;
-                % pause;
+                axis([1 regionDimension 1 regionDimension]) %  0 0.3
+                pause;
             end
         end
     end
-    
-    shading interp
-    lighting phong
-    view([90,90])
-    %axis([1 regionDimension 1 regionDimension]) %  0 0.3
-    %axis on
 

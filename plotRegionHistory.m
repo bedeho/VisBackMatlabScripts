@@ -7,14 +7,12 @@
 % transform:
 % epoch:
 % tick:
-% depth: neuron depth
-% row: neuron row
-% col: neuron column
+% depth: region depth, d = 1 is top/first/most radial/farthest from retina
 % Output========
 %
 % 'D:\Oxford\Work\Projects\VisBack\Simulations\1Object\1Epoch\firingRate.dat'
 
-function plotRegionHistory(filename, region, object, transform, epoch, tick, depth, row, col)
+function plotRegionHistory(filename, region, object, transform, epoch, tick, depth)
 
     % Import global variables
     declareGlobalVars();
@@ -29,7 +27,7 @@ function plotRegionHistory(filename, region, object, transform, epoch, tick, dep
     regionDimension = networkDimensions(region).dimension;
     
     % No cell provided 
-    if nargin < 9
+    if nargin < 7
         rowRange = 1:regionDimension;
         colRange = 1:regionDimension;
         depthRange = 1;
@@ -39,6 +37,26 @@ function plotRegionHistory(filename, region, object, transform, epoch, tick, dep
         depthRange = depth;
     end
     
+        % Fill in missing arguments
+    if nargin < 10,
+        depth = 1; % choose frist layer as default
+        
+        if nargin < 9,
+            tick = 1; % choose first tick as default
+            
+            if nargin < 8,
+                epoch = 1; % choose first epoch as default
+                
+                if nargin < 7,
+                    transform = 1; % choose frist transform as default
+                    
+                    if nargin < 6,
+                        object = 1; % choose first object as default
+                    end
+                end
+            end
+        end
+    end
     
 
     
@@ -71,3 +89,20 @@ function plotRegionHistory(filename, region, object, transform, epoch, tick, dep
     %axis([1 regionDimension 1 regionDimension]) %  0 0.3
     %axis on
 
+    
+        %function temporalPlot()
+        
+            %{
+        
+    % Dimensions of the subplot
+    subplotdim = ceil(sqrt(numOutputsPrTransform));
+        
+    % Shows temporal response to same stimuli,
+    % suitable for feedback and timea accurate models
+    for o=object,
+        for t=transform,
+            for e=epoch,
+                figure();
+                plotcounter = 1;
+                for ti=tick,
+                %}
