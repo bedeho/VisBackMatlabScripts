@@ -41,21 +41,18 @@ function plotNeuronHistory(filename, region, depth, row, col, objects, transform
             end
         end
     end
-
-        
+   
     % Get history array
     activity = neuronHistory(fileID, historyDimensions, neuronOffsets, region, depth, row, col, objects, transforms, epochs, ticks);
     
     % Plot
-    for ti=ticks,
-        for e=epochs,
+    for ti=1:length(ticks),
+        for e=1:length(epochs),
             figure();
-            for o=objects,
-                 %for t=transforms,
-                    plot(activity(:,o,ti,e));
-                    title(['Epoch: ', num2str(e), ', Object:', num2str(o), ', Tick:', num2str(ti)]);
-                    hold on;
-                 %end
+            for o=1:length(objects),
+                plot(activity(:,o,ti,e));
+                title(['Epoch: ', num2str(epochs(e)), ', Object:', num2str(objects(o)), ', Tick:', num2str(ticks(ti))]);
+                hold on;
             end
         end
     end

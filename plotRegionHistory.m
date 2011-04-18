@@ -42,16 +42,33 @@ function plotNeuronHistory(filename, region, depth, objects, epochs, ticks)
         end
     end
     
+    % Get history array
+    activity = regionHistory(fileID, historyDimensions, neuronOffsets, networkDimensions, region, depth, row, col, objects, transforms, epochs, ticks);
+    
+    % Plot
+    plotDim = ceil(sqrt(length(transforms)));
+    
+    for ti=1:length(ticks),
+        for e=1:length(epochs),
+            for o=1:length(objects),
+                figure();
+                 for t=1:length(transforms),
+                    
+                    subplot(plotDim,plotDim,t);
+                    surf(activity(:,:,t,o,ti,e));
+                    title(['Epoch: ', num2str(e), ', Object:', num2str(o), ', Tick:', num2str(ti)]);
+                    hold on;
+                 end
+            end
+        end
+    end
+    
+    
+    %{
+    
+ 
     % Call plot routine
     neuronCounter = 1;
-    
-    
-    
-    
-    
-    
-    
-    
     
     for i=rowRange, % Region row
         for j=colRange, % Region col
@@ -96,3 +113,6 @@ function plotNeuronHistory(filename, region, depth, objects, epochs, ticks)
                 plotcounter = 1;
                 for ti=tick,
                 %}
+    
+    %}
+   
