@@ -14,7 +14,7 @@
 %
 % 'D:\Oxford\Work\Projects\VisBack\Simulations\1Object\1Epoch\firingRate.dat'
 
-function [] = plotRegionStability(filename, region, depth, objects, epochs, ticks)
+function [] = plotRegionStability(filename, region, depth, objects, epochs)
 
    % Import global variables
     declareGlobalVars();
@@ -26,21 +26,20 @@ function [] = plotRegionStability(filename, region, depth, objects, epochs, tick
     [networkDimensions, historyDimensions, neuronOffsets, headerSize] = loadHistoryHeader(fileID)
     
     % Fill in missing arguments, 
-    if nargin < 6,
-        ticks = historyDimensions.numOutputsPrTransform;        % pick last output
+    if nargin < 5,
+        epochs = 1:10;                                      % pick all epochs
 
-        if nargin < 5,
-            epochs = 1:10;             % pick all epochs
+        if nargin < 4,
+            objects = 1:historyDimensions.numObjects;       % pick all transforms
 
-            if nargin < 4,
-                objects = 1:historyDimensions.numObjects;       % pick all transforms
-
-                if nargin < 3,
-                    depth = 1;                                  % pick first layer
-                end
+            if nargin < 3,
+                depth = 1;                                  % pick first layer
             end
         end
     end
+    
+    tick = historyDimensions.numOutputsPrTransform;        % pick last output
+
     
     transforms = 1:historyDimensions.numTransforms;
     regionDimension = networkDimensions(region).dimension;
@@ -51,27 +50,42 @@ function [] = plotRegionStability(filename, region, depth, objects, epochs, tick
     % Plot
     plotDim = ceil(sqrt(length(transforms)));
     
-    oldActivity = cell(transform, objects, 
-    
-    for ti=1:length(ticks),
-        for e=1:length(epochs),
-            figure();
-            title(['Tick:', num2str(ti), ', Epoch: ', num2str(e)]);
+    figure();
+    for t=1:length(transforms),
+
+        subplot(plotDim, plotDim, t);
+        title(['Transform : ', num2str(transforms(t))]);
+        
+        for o=1:length(objects),
             
-            for t=1:length(transforms),
-                subplot(plotDim,plotDim,t);
-
-                for o=1:length(objects),
-
-                end
-
-                surf(activity(:,:,t,o,ti,e));
-                title(['Transform:', num2str(t)]);
-                hold on;
-                lighting phong;
-                view([90,90]);
-                axis([1 regionDimension 1 regionDimension]); %  0 0.3
-
+            pastActive = find(activity(:,:,t,o,tick,1)); % Save first epoch
+            
+            stability = zeros(length(epochs) - 1); % To plot
+            
+            for e=2:length(epochs),
+                presentActive = find(activity(:,:,t,o,tick,e));                     % Find new activity
+                stability(e - 1) = newValuesInSecond(pastActive, presentActive);    % Find overlap in new and old activity
+                pastActive = presentActive;                                         % Save new activity
             end
+            
+            plot(stability);
+            hold on;
+            
+            %lighting phong;
+            %view([90,90]); 
+            %axis([1 regionDimension 1 regionDimension 0 1]);
         end
     end
+    
+    function [res] = newValuesInSecond(first, second)
+        res = 0;
+        for s=1:length(second),
+            
+            new = true; % assume second(s) is not present in first
+            for f=1:length(first),
+                if(second(s) == first(f)), new = false; end
+            end
+            
+            if(new), res = res + 1; end
+        end
+        
