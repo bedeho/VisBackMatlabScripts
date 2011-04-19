@@ -12,7 +12,8 @@
 % ticks:
 % Output========
 %
-% 'D:\Oxford\Work\Projects\VisBack\Simulations\1Object\1Epoch\firingRate.dat'
+% 'D:\Oxford\Work\Projects\VisBack\Simulations\1Object\1Epoch\firingRate.da
+% t'
 
 function [] = plotRegionStability(filename, region, depth, objects, epochs)
 
@@ -39,16 +40,14 @@ function [] = plotRegionStability(filename, region, depth, objects, epochs)
     end
     
     tick = historyDimensions.numOutputsPrTransform;        % pick last output
+    transforms = 1:historyDimensions.numTransforms;        % pick all transforms
 
-    
-    transforms = 1:historyDimensions.numTransforms;
-    regionDimension = networkDimensions(region).dimension;
-    
     % Get history array
-    activity = regionHistory(fileID, historyDimensions, neuronOffsets, networkDimensions, region, depth, objects, transforms, epochs, ticks);
+    activity = regionHistory(fileID, historyDimensions, neuronOffsets, networkDimensions, region, depth, objects, transforms, epochs, tick);
     
     % Plot
     plotDim = ceil(sqrt(length(transforms)));
+    stability = zeros(length(epochs) - 1); % To plot
     
     figure();
     for t=1:length(transforms),
@@ -59,9 +58,7 @@ function [] = plotRegionStability(filename, region, depth, objects, epochs)
         for o=1:length(objects),
             
             pastActive = find(activity(:,:,t,o,tick,1)); % Save first epoch
-            
-            stability = zeros(length(epochs) - 1); % To plot
-            
+
             for e=2:length(epochs),
                 presentActive = find(activity(:,:,t,o,tick,e));                     % Find new activity
                 stability(e - 1) = newValuesInSecond(pastActive, presentActive);    % Find overlap in new and old activity
