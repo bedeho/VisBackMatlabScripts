@@ -49,17 +49,20 @@ function plotRegionHistory(filename, region, depth, objects, epochs, ticks)
     activity = regionHistory(fileID, historyDimensions, neuronOffsets, networkDimensions, region, depth, objects, transforms, epochs, ticks);
     
     % Plot
+    
+    
     plotDim = ceil(sqrt(length(transforms)));
     
     for ti=1:length(ticks),
         for e=1:length(epochs),
             for o=1:length(objects),
                 figure();
+                title(['Epoch: ', num2str(e), ', Object:', num2str(o), ', Tick:', num2str(ti)]);
                  for t=1:length(transforms),
                     
                     subplot(plotDim,plotDim,t);
                     surf(activity(:,:,t,o,ti,e));
-                    title(['Epoch: ', num2str(e), ', Object:', num2str(o), ', Tick:', num2str(ti)]);
+                    title(['Transform:', num2str(t)]);
                     hold on;
                         %shading interp
                     lighting phong

@@ -21,8 +21,11 @@ function [activity] = regionHistory(fileID, historyDimensions, neuronOffsets, ne
     % Allocate history array
     activity = zeros(dimension, dimension, length(transforms), length(objects), length(ticks), length(epochs));
     
+    h = waitbar(0,'Loading Region History...');
     for r = 1:dimension,
+        waitbar(r/dimension,h); % putting progress = ((r-1)*dimension + c)/dimension^2 in inner loop makes it to slow
         for c = 1:dimension,
+            
             % Find offset of neuron region.(depth,i,j)'s data stream
             streamStart = neuronOffsets{region}{c,r,depth}.offset;
 
@@ -43,3 +46,4 @@ function [activity] = regionHistory(fileID, historyDimensions, neuronOffsets, ne
             end
         end
     end
+    close(h);
