@@ -28,7 +28,7 @@ function [] = plotRegionStability(filename, region, depth, objects, epochs)
     
     % Fill in missing arguments, 
     if nargin < 5,
-        epochs = 1:10;                                      % pick all epochs
+        epochs = 1:historyDimensions.numEpochs;             % pick all epochs
 
         if nargin < 4,
             objects = 1:historyDimensions.numObjects;       % pick all transforms
@@ -53,8 +53,7 @@ function [] = plotRegionStability(filename, region, depth, objects, epochs)
     for t=1:length(transforms),
 
         subplot(plotDim, plotDim, t);
-        title(['Transform : ', num2str(transforms(t))]);
-        
+
         for o=1:length(objects),
             
             pastActive = find(activity(:,:,t,o,tick,1)); % Save first epoch
@@ -66,6 +65,7 @@ function [] = plotRegionStability(filename, region, depth, objects, epochs)
             end
             
             plot(stability);
+            title(['Transform : ', num2str(transforms(t))]);
             hold on;
             
             %lighting phong;

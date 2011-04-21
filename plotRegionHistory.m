@@ -30,7 +30,7 @@ function plotRegionHistory(filename, region, depth, objects, epochs, ticks)
         ticks = historyDimensions.numOutputsPrTransform;        % pick last output
 
         if nargin < 5,
-            epochs = 1:10;             % pick all epochs
+            epochs = 1:historyDimensions.numEpochs;             % pick all epochs
 
             if nargin < 4,
                 objects = 1:historyDimensions.numObjects;       % pick all transforms
