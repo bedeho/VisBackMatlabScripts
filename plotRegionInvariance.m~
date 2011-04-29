@@ -26,28 +26,64 @@ function plotRegionInvariance(filename, region, depth)
     [networkDimensions, historyDimensions, neuronOffsets, headerSize] = loadHistoryHeader(fileID)
     
     % Region dimension
-    transforms = 1:historyDimensions.numTransforms;
+    numTransforms = historyDimensions.numTransforms;
     regionDimension = networkDimensions(region).dimension;
+    
+    % Allocate data structure
     invariance = zeros(regionDimension,regionDimension);
+    
     
     % Fill in missing arguments, 
     if nargin < 3,
-        depth = 1;        % pick top region
+        depth = 1;                                  % pick top layer
+        
+        if nargin < 2,
+            region = length(networkDimensions);     % pick last region
+        end
     end
     
     tick = historyDimensions.numOutputsPrTransform;     % pick last output
-    epoch = historyDimensions.numEpochs;              % pick last epoch
+    epoch = historyDimensions.numEpochs;                % pick last epoch
     transforms = 1:historyDimensions.numTransforms;     % pick all transforms
-    objects = 1:historyDimensions.numObjects;           % pick all objects
-   
-    % Iterate region depth
-    for row=1:regionDimension,
-        for col=1:regionDimension,
-            
-            % Get history array
-            activity = neuronHistory(fileID, historyDimensions, neuronOffsets, region, depth, row, col, objects, transforms, epoch, tick);
+    
+    figure();
+    
+    % Iterate objects
+    for o=1:historyDimensions.numObjects,
+        
+        % Iterate region depth
+        h = waitbar(0,'Loading Neuron History...');
+        for row=1:regionDimension,
 
-            % 
-            invariance(row,col) = nnz(activity(:,o,1,1));
+            waitbar(row/regionDimension,h); % putting progress = ((r-1)*dimension + c)/dimension^2 in inner loop makes it to slow
+
+            for col=1:regionDimension,
+
+                % Get history array
+                activity = neuronHistory(fileID, historyDimensions, neuronOffsets, region, depth, row, col, o, transforms, epoch, tick);
+
+                % count number of non zero elements
+                count = nnz(activity(:,1,1,1));
+
+                % save in proper bin and in invariance surface
+                invariance(row,col) = count;
+                bins(count + 1) = bins(count + 1) + 1;
+            end
         end
+
+        close(h);
+
+        bins(1) = 0;
+        %subplot(2,1,1);
+        plot(bins);
+        
+        %subplot(2,1,2);
+        %surf(invariance);                    
+
+        %shading interp
+        %lighting phong
+        %view([90,90])
     end
+    
+    title(filename);
+    

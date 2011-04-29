@@ -1,3 +1,10 @@
+%
+%  plotRegionInvariance.m
+%  VisBack
+%
+%  Created by Bedeho Mender on 29/04/11.
+%  Copyright 2011 OFTNAI. All rights reserved.
+%
 
 % PLOT REGION INVARIANCE
 % Input=========
@@ -14,7 +21,7 @@
 %
 % 'D:\Oxford\Work\Projects\VisBack\Simulations\1Object\1Epoch\firingRate.dat'
 
-function plotRegionInvariance(filename, region, object, depth)
+function plotRegionInvariance(filename, region, depth)
 
     % Import global variables
     declareGlobalVars();
@@ -34,47 +41,60 @@ function plotRegionInvariance(filename, region, object, depth)
     bins = zeros(numTransforms + 1);
     
     % Fill in missing arguments, 
-    if nargin < 4,
-        depth = 1;                                  % pick top region
+    if nargin < 3,
+        depth = 1;                                  % pick top layer
         
-        if nargin < 3,
-            object = historyDimensions.numObjects;  % pick last object
+        if nargin < 2,
+            region = length(networkDimensions);     % pick last region
         end
     end
     
     tick = historyDimensions.numOutputsPrTransform;     % pick last output
-    epoch = historyDimensions.numEpochs;              % pick last epoch
+    epoch = historyDimensions.numEpochs;                % pick last epoch
     transforms = 1:historyDimensions.numTransforms;     % pick all transforms
     
-    % Iterate region depth
-    h = waitbar(0,'Loading Neuron History...');
-    for row=1:regionDimension,
+    figure();
+    
+    % Iterate objects
+    for o=1:historyDimensions.numObjects,
         
-        waitbar(row/regionDimension,h); % putting progress = ((r-1)*dimension + c)/dimension^2 in inner loop makes it to slow
+        % Zero out from last object
+        invariance = 0*invariance;
+        bins = 0*bins;
         
-        for col=1:regionDimension,
-            
-            % Get history array
-            activity = neuronHistory(fileID, historyDimensions, neuronOffsets, region, depth, row, col, object, transforms, epoch, tick);
+        % Iterate region depth
+        h = waitbar(0,'Loading Neuron History...');
+        for row=1:regionDimension,
 
-            % count number of non zero elements
-            count = nnz(activity(:,1,1,1));
-            
-            % save in proper bin and in invariance surface
-            invariance(row,col) = count;
-            bins(count + 1) = bins(count + 1) + 1;
+            waitbar(row/regionDimension,h); % putting progress = ((r-1)*dimension + c)/dimension^2 in inner loop makes it to slow
+
+            for col=1:regionDimension,
+
+                % Get history array
+                activity = neuronHistory(fileID, historyDimensions, neuronOffsets, region, depth, row, col, o, transforms, epoch, tick);
+
+                % count number of non zero elements
+                count = nnz(activity(:,1,1,1));
+
+                % save in proper bin and in invariance surface
+                invariance(row,col) = count;
+                bins(count + 1) = bins(count + 1) + 1;
+            end
         end
+
+        close(h);
+
+        bins(1) = 0;
+        %subplot(2,1,1);
+        plot(bins);
+        
+        %subplot(2,1,2);
+        %surf(invariance);                    
+
+        %shading interp
+        %lighting phong
+        %view([90,90])
     end
     
-    close(h);
+    title(filename);
     
-    figure();
-    bins(1) = 0;
-    plot(bins);
-    
-    figure();
-    surf(invariance);                    
-   
-    %shading interp
-    lighting phong
-    view([90,90])
