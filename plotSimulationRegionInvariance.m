@@ -12,7 +12,7 @@
 % experiment: experiment name
 % simulation: simulation name
 
-function autoPlotRegionInvariance(project, experiment, simulation)
+function plotSimulationRegionInvariance(project, experiment, simulation)
 
     PROJECTS_FOLDER = '/Network/Servers/mac0.cns.ox.ac.uk/Volumes/Data/Users/mender/Dphil/Projects/';  % must have trailing slash
 
@@ -20,19 +20,21 @@ function autoPlotRegionInvariance(project, experiment, simulation)
     simulationFolder = [experimentFolder  simulation '/'];
 
     % Iterate all network result folders in this simulation folder
-    listing = dir(simulationFolder);
+    listing = dir(simulationFolder); 
     
     for d = 1:length(listing),
 
         % We are only looking for directories, but not the
         % 'Training' directory, since it has network evolution in training
-        dir = listing(d).name;
+        directory = listing(d).name;
         
-        if listing(d).isdir == 1 && ~strcmp(dir,'Training') && ~strcmp(dir,'.') && ~strcmp(dir,'..'),
+        if listing(d).isdir == 1 && ~strcmp(directory,'Training') && ~strcmp(directory,'.') && ~strcmp(directory,'..'),
             
-            [fig] = plotRegionInvariance([simulationFolder dir '/firingRate.dat']);
+            [fig] = plotRegionInvariance([simulationFolder directory '/firingRate.dat']);
             
-            saveas(f,[simulationFolder dir '/invariance.fig']) 
+            saveas(fig,[simulationFolder directory '/invariance.fig']);
+            
+            % copy into some place in the future?
             
             close(fig);
         end
