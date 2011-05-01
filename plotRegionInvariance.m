@@ -21,7 +21,7 @@
 %
 % 'D:\Oxford\Work\Projects\VisBack\Simulations\1Object\1Epoch\firingRate.dat'
 
-function plotRegionInvariance(filename, region, depth)
+function [fig] = plotRegionInvariance(filename, region, depth)
 
     % Import global variables
     declareGlobalVars();
@@ -32,14 +32,6 @@ function plotRegionInvariance(filename, region, depth)
     % Read header
     [networkDimensions, historyDimensions, neuronOffsets, headerSize] = loadHistoryHeader(fileID)
     
-    % Region dimension
-    numTransforms = historyDimensions.numTransforms;
-    regionDimension = networkDimensions(region).dimension;
-    
-    % Allocate data structure
-    invariance = zeros(regionDimension,regionDimension);
-    bins = zeros(numTransforms + 1);
-    
     % Fill in missing arguments, 
     if nargin < 3,
         depth = 1;                                  % pick top layer
@@ -49,11 +41,19 @@ function plotRegionInvariance(filename, region, depth)
         end
     end
     
+    % Region dimension
+    numTransforms = historyDimensions.numTransforms;
+    regionDimension = networkDimensions(region).dimension;
+    
+    % Allocate data structure
+    invariance = zeros(regionDimension,regionDimension);
+    bins = zeros(numTransforms + 1);
+        
     tick = historyDimensions.numOutputsPrTransform;     % pick last output
     epoch = historyDimensions.numEpochs;                % pick last epoch
     transforms = 1:historyDimensions.numTransforms;     % pick all transforms
     
-    figure();
+    fig = figure();
     
     % Iterate objects
     for o=1:historyDimensions.numObjects,

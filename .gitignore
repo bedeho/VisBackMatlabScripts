@@ -2,3 +2,5 @@
 *.as
 # ignore temp files
 .*
+# ignore matlab tmp files
+*~
