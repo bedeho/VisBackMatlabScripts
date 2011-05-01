@@ -36,7 +36,7 @@ function [fig] = plotRegionInvariance(filename, region, depth)
     if nargin < 3,
         depth = 1;                                  % pick top layer
         
-        if nargin < 2,
+        if nargin < 4,
             region = length(networkDimensions);     % pick last region
         end
     end
@@ -53,6 +53,16 @@ function [fig] = plotRegionInvariance(filename, region, depth)
     epoch = historyDimensions.numEpochs;                % pick last epoch
     transforms = 1:historyDimensions.numTransforms;     % pick all transforms
     
+    % detect if -nodisplay option is set
+    % http://www.mathworks.com/matlabcentral/newsreader/view_thread/136261
+    s = get(0,'Screensize');
+    
+    if s(3) == 1 && s(4) == 1,
+        progressbar = false;
+    else
+        progressbar = true;
+    end
+    
     fig = figure();
     
     % Iterate objects
@@ -63,11 +73,17 @@ function [fig] = plotRegionInvariance(filename, region, depth)
         bins = 0*bins;
         
         % Iterate region depth
-        h = waitbar(0,'Loading Neuron History...');
+        
+        if(progressbar),
+            h = waitbar(0,'Loading Neuron History...');
+        end
+        
         for row=1:regionDimension,
 
-            waitbar(row/regionDimension,h); % putting progress = ((r-1)*dimension + c)/dimension^2 in inner loop makes it to slow
-
+            if(progressbar),
+                waitbar(row/regionDimension,h); % putting progress = ((r-1)*dimension + c)/dimension^2 in inner loop makes it to slow
+            end
+            
             for col=1:regionDimension,
 
                 % Get history array
@@ -82,7 +98,9 @@ function [fig] = plotRegionInvariance(filename, region, depth)
             end
         end
 
-        close(h);
+        if(progressbar),
+            close(h);
+        end
 
         bins(1) = 0;
         %subplot(2,1,1);
