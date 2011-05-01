@@ -21,7 +21,7 @@
 %
 % 'D:\Oxford\Work\Projects\VisBack\Simulations\1Object\1Epoch\firingRate.dat'
 
-function [fig] = plotRegionInvariance(filename, region, depth)
+function [fig] = plotRegionInvariance(filename, progressbar, region, depth)
 
     % Import global variables
     declareGlobalVars();
@@ -33,10 +33,10 @@ function [fig] = plotRegionInvariance(filename, region, depth)
     [networkDimensions, historyDimensions, neuronOffsets, headerSize] = loadHistoryHeader(fileID)
     
     % Fill in missing arguments, 
-    if nargin < 3,
+    if nargin < 4,
         depth = 1;                                  % pick top layer
         
-        if nargin < 4,
+        if nargin < 3,
             region = length(networkDimensions);     % pick last region
         end
     end
@@ -55,13 +55,15 @@ function [fig] = plotRegionInvariance(filename, region, depth)
     
     % detect if -nodisplay option is set
     % http://www.mathworks.com/matlabcentral/newsreader/view_thread/136261
-    s = get(0,'Screensize');
+    %s = get(0,'Screensize');
     
+    %{
     if s(3) == 1 && s(4) == 1,
         progressbar = false;
     else
         progressbar = true;
     end
+    %}
     
     fig = figure();
     

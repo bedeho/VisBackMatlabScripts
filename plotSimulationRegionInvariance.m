@@ -30,7 +30,7 @@ function plotSimulationRegionInvariance(project, experiment, simulation)
         
         if listing(d).isdir == 1 && ~strcmp(directory,'Training') && ~strcmp(directory,'.') && ~strcmp(directory,'..'),
             
-            [fig] = plotRegionInvariance([simulationFolder directory '/firingRate.dat']);
+            [fig] = plotRegionInvariance([simulationFolder directory '/firingRate.dat'], false);
             
             saveas(fig,[simulationFolder directory '/invariance.fig']);
             
@@ -39,3 +39,6 @@ function plotSimulationRegionInvariance(project, experiment, simulation)
             close(fig);
         end
     end
+    
+    % kill matlab
+    exit;
