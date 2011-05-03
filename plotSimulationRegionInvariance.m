@@ -23,10 +23,13 @@ function [summary] = plotSimulationRegionInvariance(project, experiment, simulat
     numEntries = length(listing);
 
     % Preallocate struct array for summary
-    summary(numEntries).simulation = [];
-    summary(numEntries).directory = [];
-    summary(numEntries).maxFullInvariance = [];
-    summary(numEntries).maxMean = [];
+    summary = cell(numEntries,4);
+    %{ struct array concat issues
+    %summary(numEntries).simulation = [];
+    %summary(numEntries).directory = [];
+    %summary(numEntries).maxFullInvariance = [];
+    %summary(numEntries).maxMean = [];
+    %}
     
     % Iterate dir and do plot for each folder
     for d = 1:numEntries,
@@ -41,13 +44,20 @@ function [summary] = plotSimulationRegionInvariance(project, experiment, simulat
             
             saveas(fig,[simulationFolder directory '/invariance.fig']);
             
-            close(fig);
+            delete(fig);
             
             % Save results for summary
+            %{
             summary(d).simulation = simulation;
             summary(d).directory = directory;
             summary(d).maxFullInvariance = maxFullInvariance;
             summary(d).maxMean = maxMean;
+            %}
+            
+            summary{d,1} = simulation;
+            summary{d,2} = directory;
+            summary{d,3} = maxFullInvariance;
+            summary{d,4} = maxMean;
         end
     end
     

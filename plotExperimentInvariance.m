@@ -20,7 +20,7 @@ function plotExperimentInvariance(project, experiment)
     % Iterate simulations in this experiment folder
     listing = dir(experimentFolder); 
     
-    totalSummary = [];
+    totalSummary = cell(1,4); % empty dummy shit, take away later
     
     for d = 1:length(listing),
 
@@ -32,8 +32,8 @@ function plotExperimentInvariance(project, experiment)
             
             [summary] = plotSimulationRegionInvariance(project, experiment, directory);
             
-            totalSummary = mergeStructArray(totalSummary, summary);
-            
+            %totalSummary = mergeStructArray(totalSummary, summary);
+            totalSummary = [totalSummary; summary];
         end
         
     end
@@ -42,12 +42,14 @@ function plotExperimentInvariance(project, experiment)
     fid = fopen([experimentFolder 'summary-' date() '-' num2str(now) '.txt'], 'w'); % did note use datestr(now) since it has string
     
     for s=1:length(totalSummary),
-        fprintf(fid, '%s %s %d %d \n', totalSummary(d).simulation, totalSummary(d).directory, totalSummary(d).maxFullInvariance, totalSummary(d).maxMean);
+        fprintf(fid, '%s %s %d %d\n', totalSummary{d,1}, totalSummary{d,2}, totalSummary{d,3}, totalSummary{d,4});
+        % fprintf(fid, '%s %s %d %d\n', totalSummary{d,1).simulation, totalSummary(d).directory, totalSummary(d).maxFullInvariance, totalSummary(d).maxMean);
     end
  
     fclose(fid);
         
-% http://blogs.mathworks.com/loren/2009/10/15/concatenating-structs/#10    
+% http://blogs.mathworks.com/loren/2009/10/15/concatenating-structs/#10 
+%{
 function res = mergeStructArray(sa1, sa2)
 
     if isempty(sa1),
@@ -55,5 +57,6 @@ function res = mergeStructArray(sa1, sa2)
     elseif isempty(sa2),
         res = sa1;
     else
-        res = cell2struct([struct2cell(sa1) ; struct2cell(sa2)], fieldnames(sa1), 1);
+        res = cell2struct([struct2cell(sa1) ; struct2cell(sa2)], [fieldnames(sa1); fieldnames(sa2)], 1);
     end
+%}
