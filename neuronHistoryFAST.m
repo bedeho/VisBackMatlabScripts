@@ -17,7 +17,10 @@
 % Output========
 % history: 
 
-function [activity] = neuronHistory(fileID, historyDimensions, neuronOffsets, region, depth, row, col, objects, transforms, epochs, ticks)
+function [activity] = neuronHistoryFAST(fileID, historyDimensions, neuronOffsets, region, depth, row, col, objects, transforms, epochs, ticks)
+
+    
+    %{
 
     % Import global variables
     global SOURCE_PLATFORM_FLOAT;
@@ -43,3 +46,5 @@ function [activity] = neuronHistory(fileID, historyDimensions, neuronOffsets, re
             end
         end
     end
+
+    %}

@@ -28,16 +28,21 @@ function [activity] = neuronHistory(fileID, historyDimensions, neuronOffsets, re
     % Allocate history array
     activity = zeros(length(transforms), length(objects), length(ticks), length(epochs));
     
+    % Validate input
+    validateNeuron('neuronHistory.m', networkDimensions, region, depth, row, col);
+    validateHistory('neuronHistory.m', historyDimensions, objects, transforms, epochs, ticks)
+
     % Iterate history
     for e = 1:length(epochs),
         for o = 1:length(objects),
             for t = 1:length(transforms),
                 for ti= 1:length(ticks),
+                    
                     % Seek to correct location
                     offset = streamStart + (epochs(e) - 1)*historyDimensions.epochSize + (objects(o) - 1)*historyDimensions.objectSize + (transforms(t) - 1)*historyDimensions.transformSize + (ticks(ti) - 1)*historyDimensions.tickSize;
                     fseek(fileID, offset, 'bof');
                     
-                    %Read
+                    % Read
                     activity(t,o,ti,e) = fread(fileID, 1, SOURCE_PLATFORM_FLOAT);
                 end
             end

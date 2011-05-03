@@ -46,8 +46,8 @@ function [fig] = plotRegionInvariance(filename, progressbar, region, depth)
     regionDimension = networkDimensions(region).dimension;
     
     % Allocate data structure
-    invariance = zeros(regionDimension,regionDimension);
-    bins = zeros(numTransforms + 1);
+    invariance = zeros(regionDimension);
+    bins = zeros(numTransforms + 1,1);
         
     tick = historyDimensions.numOutputsPrTransform;     % pick last output
     epoch = historyDimensions.numEpochs;                % pick last epoch
@@ -65,10 +65,14 @@ function [fig] = plotRegionInvariance(filename, progressbar, region, depth)
     end
     %}
     
+    
+    
     fig = figure();
     
+    set(0,'DefaultAxesColorOrder',[1 0 0;0 1 0;0 0 1],'DefaultAxesLineStyleOrder','-|--|:');
+    
     % Iterate objects
-    for o=1:historyDimensions.numObjects,
+    for o=1:1 %historyDimensions.numObjects,
         
         % Zero out from last object
         invariance = 0*invariance;
@@ -92,7 +96,10 @@ function [fig] = plotRegionInvariance(filename, progressbar, region, depth)
                 activity = neuronHistory(fileID, historyDimensions, neuronOffsets, region, depth, row, col, o, transforms, epoch, tick);
 
                 % count number of non zero elements
-                count = nnz(activity(:,1,1,1));
+                %count = nnz(activity(:,1,1,1));
+                count = sigmoidFixer(activity(:,1,1,1));
+                %activity(:,1,1,1)
+                %count
 
                 % save in proper bin and in invariance surface
                 invariance(row,col) = count;
@@ -105,16 +112,32 @@ function [fig] = plotRegionInvariance(filename, progressbar, region, depth)
         end
 
         bins(1) = 0;
-        %subplot(2,1,1);
+        subplot(2,1,1);
         plot(bins);
+        hold on;
         
-        %subplot(2,1,2);
-        %surf(invariance);                    
+        %bins
+        
+        subplot(2,1,2);
+        surf(invariance);                    
 
-        %shading interp
-        %lighting phong
-        %view([90,90])
+        lighting phong
+        view([90,90])
+        hold on
     end
     
     title(filename);
     
+    format('longE');
+    v = neuronHistory(fileID, historyDimensions, neuronOffsets, 5, 1, 1, 1, 70, transforms, epoch, tick)
+    figure;
+    plot(v);
+    
+    function [count] = sigmoidFixer(v)
+        
+        count = 0;
+        for i=1:length(v);
+            if v(1) > 0.1,
+                count = count +1;
+            end
+        end

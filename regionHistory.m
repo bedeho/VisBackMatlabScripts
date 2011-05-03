@@ -18,7 +18,7 @@
 % Output========
 % history: 
 
-function [activity] = regionHistory(fileID, historyDimensions, neuronOffsets, networkDimensions,region, depth, objects, transforms, epochs, ticks)
+function [activity] = regionHistory(fileID, historyDimensions, neuronOffsets, networkDimensions, region, depth, objects, transforms, epochs, ticks)
 
     % Import global variables
     global SOURCE_PLATFORM_FLOAT;
@@ -28,6 +28,10 @@ function [activity] = regionHistory(fileID, historyDimensions, neuronOffsets, ne
     % Allocate history array
     activity = zeros(dimension, dimension, length(transforms), length(objects), length(ticks), length(epochs));
     
+    % Validate input
+    validateNeuron('neuronHistory.m', networkDimensions, region, depth);
+    validateHistory('neuronHistory.m', historyDimensions, objects, transforms, epochs, ticks);
+
     h = waitbar(0,'Loading Region History...');
     for r = 1:dimension,
         waitbar(r/dimension,h); % putting progress = ((r-1)*dimension + c)/dimension^2 in inner loop makes it to slow
