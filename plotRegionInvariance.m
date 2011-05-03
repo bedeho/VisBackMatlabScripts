@@ -5,23 +5,22 @@
 %  Created by Bedeho Mender on 29/04/11.
 %  Copyright 2011 OFTNAI. All rights reserved.
 %
-
-% PLOT REGION INVARIANCE
-% Input=========
-% filename: filename of weight file
-% region: region to plot, V1 = 1
-% depth: region depth to plot
-% row: neuron row
-% col: neuron column
-% objects:
-% transforms:
-% epochs:
-% ticks:
-% Output========
+%  PLOT REGION INVARIANCE
+%  Input=========
+%  filename: filename of weight file
+%  region: region to plot, V1 = 1
+%  depth: region depth to plot
+%  row: neuron row
+%  col: neuron column
+%  objects:
+%  transforms:
+%  epochs:
+%  ticks:
+%  Output========
 %
 % 'D:\Oxford\Work\Projects\VisBack\Simulations\1Object\1Epoch\firingRate.dat'
 
-function [fig] = plotRegionInvariance(filename, progressbar, region, depth)
+function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, standalone, region, depth)
 
     % Import global variables
     declareGlobalVars();
@@ -57,6 +56,10 @@ function [fig] = plotRegionInvariance(filename, progressbar, region, depth)
     row = 1:regionDimension;
     col = 1:regionDimension;
     
+    % Setup Max vars
+    maxFullInvariance = 0;
+    maxMean = 0;
+    
     % detect if -nodisplay option is set
     % http://www.mathworks.com/matlabcentral/newsreader/view_thread/136261
     %{ 
@@ -78,13 +81,13 @@ function [fig] = plotRegionInvariance(filename, progressbar, region, depth)
         bins = 0*bins;
         
         % Iterate region depth
-        if(progressbar),
+        if(standalone),
             h = waitbar(0,'Loading Neuron History...');
         end
         
         for r = row,
 
-            if(progressbar),
+            if(standalone),
                 waitbar(r/regionDimension,h); % putting progress = ((r-1)*dimension + c)/dimension^2 in inner loop makes it to slow
             end
             
@@ -108,19 +111,24 @@ function [fig] = plotRegionInvariance(filename, progressbar, region, depth)
             close(h);
         end
         
+        b = bins(2:length(bins));
+        
         % subplot(1,1,1);
-        plot(bins(2:length(bins)));
+        plot(b);
         hold all;
         
         %subplot(2,1,o+1);
         %surf(invariance);                    
         %lighting phong
         %view([90,90])
+        
+        % Update max values
+        maxFullInvariance = max(maxFullInvariance, b(historyDimensions.numTransforms)); % The latter is the number of neurons that are fully invariant
+        maxMean = max(maxMean, (b./(sum(b))).*transforms); % The latter is the mean level of invariance
     end
     
     title(filename);
     
-    format('longE');
-    v = neuronHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, 5, 1, 9, 1, 1, transforms, epoch, tick)
-    figure;
-    plot(v);
+    maxFullInvariance
+    maxMean
+    

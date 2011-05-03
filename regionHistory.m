@@ -5,18 +5,16 @@
 %  Created by Bedeho Mender on 29/04/11.
 %  Copyright 2011 OFTNAI. All rights reserved.
 %
-
-% HISTORY OF REGION NEURON
-% Input=========
-% fileID: fileID of open weight file
-% neuronOffsets: cell array giving byte offsets (rel. to 'bof') of neurons 
-
-% region: neuron region
-% col: neuron column
-% row: neuron row
-% depth: neuron depth
-% Output========
-% history: 
+%  HISTORY OF REGION NEURON
+%  Input=========
+%  fileID: fileID of open weight file
+%  neuronOffsets: cell array giving byte offsets (rel. to 'bof') of neurons 
+%  region: neuron region
+%  col: neuron column
+%  row: neuron row
+%  depth: neuron depth
+%  Output========
+%  history: 
 
 function [activity] = regionHistory(fileID, historyDimensions, neuronOffsets, networkDimensions, region, depth, objects, transforms, epochs, ticks)
 

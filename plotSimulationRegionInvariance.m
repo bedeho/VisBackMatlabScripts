@@ -1,18 +1,17 @@
 %
-%  autoPlotRegionInvariance.m
+%  plotSimulationRegionInvariance.m
 %  VisBack
 %
 %  Created by Bedeho Mender on 29/04/11.
 %  Copyright 2011 OFTNAI. All rights reserved.
 %
+%  PLOT REGION INVARIANCE FOR ALL SIMULATION FILES
+%  Input=========
+%  project: project name
+%  experiment: experiment name
+%  simulation: simulation name
 
-% PLOT REGION INVARIANCE FOR ALL SIMULATION FILES
-% Input=========
-% project: project name
-% experiment: experiment name
-% simulation: simulation name
-
-function plotSimulationRegionInvariance(project, experiment, simulation)
+function [summary] = plotSimulationRegionInvariance(project, experiment, simulation)
 
     PROJECTS_FOLDER = '/Network/Servers/mac0.cns.ox.ac.uk/Volumes/Data/Users/mender/Dphil/Projects/';  % must have trailing slash
 
@@ -20,9 +19,17 @@ function plotSimulationRegionInvariance(project, experiment, simulation)
     simulationFolder = [experimentFolder  simulation '/'];
 
     % Iterate all network result folders in this simulation folder
-    listing = dir(simulationFolder); 
+    listing = dir(simulationFolder);
+    numEntries = length(listing);
+
+    % Preallocate struct array for summary
+    summary(numEntries).simulation = [];
+    summary(numEntries).directory = [];
+    summary(numEntries).maxFullInvariance = [];
+    summary(numEntries).maxMean = [];
     
-    for d = 1:length(listing),
+    % Iterate dir and do plot for each folder
+    for d = 1:numEntries,
 
         % We are only looking for directories, but not the
         % 'Training' directory, since it has network evolution in training
@@ -30,15 +37,18 @@ function plotSimulationRegionInvariance(project, experiment, simulation)
         
         if listing(d).isdir == 1 && ~strcmp(directory,'Training') && ~strcmp(directory,'.') && ~strcmp(directory,'..'),
             
-            [fig] = plotRegionInvariance([simulationFolder directory '/firingRate.dat'], false);
+            [fig, maxFullInvariance, maxMean] = plotRegionInvariance([simulationFolder directory '/firingRate.dat'], false);
             
             saveas(fig,[simulationFolder directory '/invariance.fig']);
             
-            % copy into some place in the future?
-            
             close(fig);
+            
+            % Save results for summary
+            summary(d).simulation = simulation;
+            summary(d).directory = directory;
+            summary(d).maxFullInvariance = maxFullInvariance;
+            summary(d).maxMean = maxMean;
         end
     end
     
-    % kill matlab
-    exit;
+    
