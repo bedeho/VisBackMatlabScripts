@@ -48,16 +48,19 @@ function [fig] = plotRegionInvariance(filename, progressbar, region, depth)
     % Allocate data structure
     invariance = zeros(regionDimension);
     bins = zeros(numTransforms + 1,1);
-        
+    
+    % Iteration vectors
     tick = historyDimensions.numOutputsPrTransform;     % pick last output
     epoch = historyDimensions.numEpochs;                % pick last epoch
     transforms = 1:historyDimensions.numTransforms;     % pick all transforms
+    objects = 1:historyDimensions.numObjects;           % pick all objects
+    row = 1:regionDimension;
+    col = 1:regionDimension;
     
     % detect if -nodisplay option is set
     % http://www.mathworks.com/matlabcentral/newsreader/view_thread/136261
-    %s = get(0,'Screensize');
-    
-    %{
+    %{ 
+    s = get(0,'Screensize');
     if s(3) == 1 && s(4) == 1,
         progressbar = false;
     else
@@ -65,44 +68,38 @@ function [fig] = plotRegionInvariance(filename, progressbar, region, depth)
     end
     %}
     
-    
-    
     fig = figure();
     
-    set(0,'DefaultAxesColorOrder',[1 0 0;0 1 0;0 0 1],'DefaultAxesLineStyleOrder','-|--|:');
-    
     % Iterate objects
-    for o=1:1 %historyDimensions.numObjects,
+    for o = objects,
         
         % Zero out from last object
         invariance = 0*invariance;
         bins = 0*bins;
         
         % Iterate region depth
-        
         if(progressbar),
             h = waitbar(0,'Loading Neuron History...');
         end
         
-        for row=1:regionDimension,
+        for r = row,
 
             if(progressbar),
-                waitbar(row/regionDimension,h); % putting progress = ((r-1)*dimension + c)/dimension^2 in inner loop makes it to slow
+                waitbar(r/regionDimension,h); % putting progress = ((r-1)*dimension + c)/dimension^2 in inner loop makes it to slow
             end
             
-            for col=1:regionDimension,
+            for c = col,
 
                 % Get history array
-                activity = neuronHistory(fileID, historyDimensions, neuronOffsets, region, depth, row, col, o, transforms, epoch, tick);
+                activity = neuronHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, r, c, o, transforms, epoch, tick);
 
-                % count number of non zero elements
-                %count = nnz(activity(:,1,1,1));
-                count = sigmoidFixer(activity(:,1,1,1));
+                % Count number of non zero elements
+                count = length(find(activity(:,1,1,1) > 0.1));
                 %activity(:,1,1,1)
                 %count
 
-                % save in proper bin and in invariance surface
-                invariance(row,col) = count;
+                % Save in proper bin and in invariance surface
+                invariance(r, c) = count;
                 bins(count + 1) = bins(count + 1) + 1;
             end
         end
@@ -110,34 +107,20 @@ function [fig] = plotRegionInvariance(filename, progressbar, region, depth)
         if(progressbar),
             close(h);
         end
-
-        bins(1) = 0;
-        subplot(2,1,1);
-        plot(bins);
-        hold on;
         
-        %bins
+        % subplot(1,1,1);
+        plot(bins(2:length(bins)));
+        hold all;
         
-        subplot(2,1,2);
-        surf(invariance);                    
-
-        lighting phong
-        view([90,90])
-        hold on
+        %subplot(2,1,o+1);
+        %surf(invariance);                    
+        %lighting phong
+        %view([90,90])
     end
     
     title(filename);
     
     format('longE');
-    v = neuronHistory(fileID, historyDimensions, neuronOffsets, 5, 1, 1, 1, 70, transforms, epoch, tick)
+    v = neuronHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, 5, 1, 9, 1, 1, transforms, epoch, tick)
     figure;
     plot(v);
-    
-    function [count] = sigmoidFixer(v)
-        
-        count = 0;
-        for i=1:length(v);
-            if v(1) > 0.1,
-                count = count +1;
-            end
-        end

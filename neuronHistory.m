@@ -17,7 +17,7 @@
 % Output========
 % history: 
 
-function [activity] = neuronHistory(fileID, historyDimensions, neuronOffsets, region, depth, row, col, objects, transforms, epochs, ticks)
+function [activity] = neuronHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, objects, transforms, epochs, ticks)
 
     % Import global variables
     global SOURCE_PLATFORM_FLOAT;
@@ -27,11 +27,11 @@ function [activity] = neuronHistory(fileID, historyDimensions, neuronOffsets, re
     
     % Allocate history array
     activity = zeros(length(transforms), length(objects), length(ticks), length(epochs));
-    
+
     % Validate input
     validateNeuron('neuronHistory.m', networkDimensions, region, depth, row, col);
-    validateHistory('neuronHistory.m', historyDimensions, objects, transforms, epochs, ticks)
-
+    validateHistory('neuronHistory.m', historyDimensions, objects, transforms, epochs, ticks);
+    
     % Iterate history
     for e = 1:length(epochs),
         for o = 1:length(objects),
