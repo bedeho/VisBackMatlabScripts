@@ -51,4 +51,3 @@ function [summary] = plotSimulationRegionInvariance(project, experiment, simulat
         end
     end
     
-    

@@ -107,7 +107,7 @@ function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, stan
             end
         end
 
-        if(progressbar),
+        if(standalone),
             close(h);
         end
         
@@ -124,11 +124,13 @@ function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, stan
         
         % Update max values
         maxFullInvariance = max(maxFullInvariance, b(historyDimensions.numTransforms)); % The latter is the number of neurons that are fully invariant
-        maxMean = max(maxMean, (b./(sum(b))).*transforms); % The latter is the mean level of invariance
+        maxMean = max(maxMean, dot((b./(sum(b))),transforms)); % The latter is the mean level of invariance
     end
     
     title(filename);
     
     maxFullInvariance
     maxMean
+    
+    fclose(fileID);
     
