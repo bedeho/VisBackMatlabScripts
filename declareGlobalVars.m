@@ -8,6 +8,11 @@
 
 function declareGlobalVars() 
 
+    % Reason added abstraction was because
+    % perhaps data is produced on system which
+    % has makes C++ binary have different size datatypes then
+    % what is default here, if so, change values accordingly.
+
     % Data type sizes for platform that generated the output files
     global SOURCE_PLATFORM_UINT;
     SOURCE_PLATFORM_UINT = 'uint32';

@@ -25,95 +25,19 @@ function [activity] = neuronHistory(fileID, networkDimensions, historyDimensions
 
     % Validate input
     validateNeuron('neuronHistory.m', networkDimensions, region, depth, row, col);
-    
-    if nargin < 9,
-        if maxEpoch < 1 || maxEpoch > historyDimensions.numEpochs,
-            error([file ' error: epoch ' num2str(maxEpoch) ' does not exist'])
-        else
-            numEpochs = maxEpoch;
-        end
+      
+    if maxEpoch < 1 || maxEpoch > historyDimensions.numEpochs,
+        error([file ' error: epoch ' num2str(maxEpoch) ' does not exist'])
     else
-        numEpochs = historyDimensions.numEpochs;
+        numEpochs = maxEpoch;
     end
     
     % Seek to offset of neuron region.(depth,i,j)'s data stream
     fseek(fileID, neuronOffsets{region}{col,row,depth}.offset, 'bof');
     
     % Read into buffer
-    streamSize = historyDimensions.objectSize * historyDimensions.transformSize * historyDimensions.tickSize;
+    streamSize = maxEpoch * historyDimensions.numObjects * historyDimensions.numTransforms * historyDimensions.numOutputsPrTransform;
     buffer = fread(fileID, streamSize, SOURCE_PLATFORM_FLOAT);
     
     % Make history array
     activity = reshape(buffer, [historyDimensions.numOutputsPrTransform historyDimensions.numTransforms historyDimensions.numObjects numEpochs]);
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    % ==================================================================================================================================
-    % OLD TRASH
-    % ==================================================================================================================================
-    
-    %activity = zeros(historyDimensions.numTransforms, historyDimensions.numObjects, historyDimensions.numOutputsPrTransform, numEpochs);
-    %activity = 
-    %{
-    % Load history from buffer into activity array
-    counter = 1;
-    for e = 1:numEpochs,
-        for o = 1:historyDimensions.numObjects,
-            for t = 1:historyDimensions.numTransforms,
-                for ti= 1:historyDimensions.numOutputsPrTransform,
-                    activity(t,o,ti,e) = buffer(counter);
-                    counter = counter + 1;
-                end
-            end
-        end
-    end
-    %}
-    
-    %{
-    function [activity] = neuronHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, objects, transforms, epochs, ticks)
-
-    % Import global variables
-    global SOURCE_PLATFORM_FLOAT;
-   
-    % Find offset of neuron region.(depth,i,j)'s data stream
-    streamStart = neuronOffsets{region}{col,row,depth}.offset;
-    
-    % Allocate history array
-    activity = zeros(length(transforms), length(objects), length(ticks), length(epochs));
-
-    % Validate input
-    validateNeuron('neuronHistory.m', networkDimensions, region, depth, row, col);
-    validateHistory('neuronHistory.m', historyDimensions, objects, transforms, epochs, ticks);
-    
-    % Iterate history
-    for e = 1:length(epochs),
-        for o = 1:length(objects),
-            for t = 1:length(transforms),
-                for ti= 1:length(ticks),
-                    
-                    % Seek to correct location
-                    offset = streamStart + (epochs(e) - 1)*historyDimensions.epochSize + (objects(o) - 1)*historyDimensions.objectSize + (transforms(t) - 1)*historyDimensions.transformSize + (ticks(ti) - 1)*historyDimensions.tickSize;
-                    fseek(fileID, offset, 'bof');
-                    
-                    % Read
-                    activity(t,o,ti,e) = fread(fileID, 1, SOURCE_PLATFORM_FLOAT);
-                end
-            end
-        end
-    end
-    %}
