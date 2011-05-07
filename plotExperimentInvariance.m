@@ -28,7 +28,7 @@ function plotExperimentInvariance(project, experiment)
         % 'Filtered' directory, since it has filtered output
         directory = listing(d).name;
 
-        if listing(d).isdir == 1 && ~strcmp(directory,'Filtered') && ~strcmp(directory,'.') && ~strcmp(directory,'..'),
+        if listing(d).isdir == 1 && ~any(strcmp(directory, {'Filtered', 'Images', '.', '..'})),
             
             [summary] = plotSimulationRegionInvariance(project, experiment, directory);
             
@@ -42,8 +42,8 @@ function plotExperimentInvariance(project, experiment)
     fid = fopen([experimentFolder 'summary-' date() '-' num2str(now) '.txt'], 'w'); % did note use datestr(now) since it has string
     
     for s=1:length(totalSummary),
-        fprintf(fid, '%s %s %d %d\n', totalSummary{d,1}, totalSummary{d,2}, totalSummary{d,3}, totalSummary{d,4});
-        % fprintf(fid, '%s %s %d %d\n', totalSummary{d,1).simulation, totalSummary(d).directory, totalSummary(d).maxFullInvariance, totalSummary(d).maxMean);
+        fprintf(fid, '%s %s %d %d\n', totalSummary{s,1}, totalSummary{s,2}, totalSummary{s,3}, totalSummary{s,4});
+        % fprintf(fid, '%s %s %d %d\n', totalSummary(s).simulation, totalSummary(s).directory, totalSummary(s).maxFullInvariance, totalSummary(s).maxMean);
     end
  
     fclose(fid);

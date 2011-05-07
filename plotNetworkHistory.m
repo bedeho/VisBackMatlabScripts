@@ -1,5 +1,5 @@
 %
-% platRegionHistory.m
+% platNetworkHistory.m
 % VisBack
 %
 % Created by Bedeho Mender on 29/04/11.
@@ -79,56 +79,3 @@ function plotRegionHistory(filename, region, depth, objects, epochs, ticks)
             end
         end
     end
-    
-
-    
-    
-    %{
-    
- 
-    % Call plot routine
-    neuronCounter = 1;
-    
-    for i=rowRange, % Region row
-        for j=colRange, % Region col
-            for d=depthRange, % Source region depth
-
-                if nargin < 4
-                    subplot(regionDimension, regionDimension, neuronCounter);
-                end
-                
-                neuronCounter = neuronCounter + 1;
-
-                % Get afferent synapse matrix
-                weightBox = afferentSynapseMatrix(fileID, headerSize, networkDimensions, list, region, depth, i, j, sourceRegion, d);
-
-                % Plot
-                surf(weightBox);
-                                    title(['Epoch: ', num2str(e), ', Object:', num2str(o), ', Tick:', num2str(ti)]);
-                hold on;
-                % pause;
-            end
-        end
-    end
-    
-
-    %axis on
-
-    
-        %function temporalPlot()
-
-    % Dimensions of the subplot
-    subplotdim = ceil(sqrt(numOutputsPrTransform));
-        
-    % Shows temporal response to same stimuli,
-    % suitable for feedback and timea accurate models
-    for o=object,
-        for t=transform,
-            for e=epoch,
-                figure();
-                plotcounter = 1;
-                for ti=tick,
-                %}
-    
-    %}
-   

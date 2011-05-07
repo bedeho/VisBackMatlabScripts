@@ -8,31 +8,55 @@
 %  HISTORY OF REGION NEURON
 %  Input=========
 %  fileID: fileID of open weight file
+%  historyDimensions:
 %  neuronOffsets: cell array giving byte offsets (rel. to 'bof') of neurons 
 %  region: neuron region
 %  col: neuron column
 %  row: neuron row
 %  depth: neuron depth
+%  maxEpoch (optional): largest epoch you are interested in
 %  Output========
-%  history: 
+%  activity: 4-d matrix (row, col, timestep, transform, object, epoch) 
 
-function [activity] = regionHistory(fileID, historyDimensions, neuronOffsets, networkDimensions, region, depth, objects, transforms, epochs, ticks)
+function [activity] = regionHistory(fileID, historyDimensions, neuronOffsets, networkDimensions, region, depth, maxEpoch)
 
     % Import global variables
     global SOURCE_PLATFORM_FLOAT;
+
+    % Validate input
+    validateNeuron('neuronHistory.m', networkDimensions, region, depth);
+    
+    if nargin < 7,
+        if maxEpoch < 1 || maxEpoch > historyDimensions.numEpochs,
+            error([file ' error: epoch ' num2str(maxEpoch) ' does not exist'])
+        else
+            numEpochs = maxEpoch;
+        end
+    else
+        numEpochs = historyDimensions.numEpochs;
+    end
     
     dimension = networkDimensions(region).dimension;
     
-    % Allocate history array
-    activity = zeros(dimension, dimension, length(transforms), length(objects), length(ticks), length(epochs));
+    % Seek to offset of neuron region.(depth,i,j)'s data stream
+    fseek(fileID, neuronOffsets{region}{col,row,depth}.offset, 'bof');
     
-    % Validate input
-    validateNeuron('neuronHistory.m', networkDimensions, region, depth);
-    validateHistory('neuronHistory.m', historyDimensions, objects, transforms, epochs, ticks);
-
-    h = waitbar(0,'Loading Region History...');
+    % Read into buffer
+    streamSize = dimension * dimension * historyDimensions.objectSize * historyDimensions.transformSize * historyDimensions.tickSize;
+    buffer = fread(fileID, streamSize, SOURCE_PLATFORM_FLOAT);
+    
+    % Make history array
+    activity = reshape(buffer, [dimension dimension historyDimensions.numOutputsPrTransform historyDimensions.numTransforms historyDimensions.numObjects numEpochs]);    
+        
+    % ==================================================================================================================================
+    % OLD TRASH
+    % ==================================================================================================================================
+    
+    %{
+    % Allocate history array
+    activity = zeros(dimension, dimension, historyDimensions.numTransforms, historyDimensions.numObjects, historyDimensions.numOutputsPrTransform, length(epochs));
+    
     for r = 1:dimension,
-        waitbar(r/dimension,h); % putting progress = ((r-1)*dimension + c)/dimension^2 in inner loop makes it to slow
         for c = 1:dimension,
             
             % Find offset of neuron region.(depth,i,j)'s data stream
@@ -55,4 +79,4 @@ function [activity] = regionHistory(fileID, historyDimensions, neuronOffsets, ne
             end
         end
     end
-    close(h);
+    %}
