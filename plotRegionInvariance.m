@@ -18,6 +18,7 @@
 %  ticks:
 %  Output========
 %
+
 % 'D:\Oxford\Work\Projects\VisBack\Simulations\1Object\1Epoch\firingRate.dat'
 
 function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, standalone, region, depth)
@@ -40,21 +41,13 @@ function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, stan
         end
     end
     
-    % Region dimension
+    numEpochs = historyDimensions.numEpochs;
     numTransforms = historyDimensions.numTransforms;
     regionDimension = networkDimensions(region).dimension;
     
     % Allocate data structure
     invariance = zeros(regionDimension);
     bins = zeros(numTransforms + 1,1);
-    
-    % Iteration vectors
-    tick = historyDimensions.numOutputsPrTransform;     % pick last output
-    epoch = historyDimensions.numEpochs;                % pick last epoch
-    transforms = 1:historyDimensions.numTransforms;     % pick all transforms
-    objects = 1:historyDimensions.numObjects;           % pick all objects
-    row = 1:regionDimension;
-    col = 1:regionDimension;
     
     % Setup Max vars
     maxFullInvariance = 0;
@@ -73,43 +66,43 @@ function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, stan
     
     fig = figure();
     
+    floatError = 0.1;
+    
     % Iterate objects
-    for o = objects,
+    for o = 1:historyDimensions.numObjects,           % pick all objects,
         
         % Zero out from last object
         invariance = 0*invariance;
         bins = 0*bins;
         
         % Iterate region depth
-        if(standalone),
-            h = waitbar(0,'Loading Neuron History...');
-        end
+        %if(standalone),
+        %    h = waitbar(0,'Loading Neuron History...');
+        %end
         
-        for r = row,
+        for r = 1:regionDimension,
 
-            if(standalone),
-                waitbar(r/regionDimension,h); % putting progress = ((r-1)*dimension + c)/dimension^2 in inner loop makes it to slow
-            end
+            %if(standalone),
+            %    waitbar(r/regionDimension,h); % putting progress = ((r-1)*dimension + c)/dimension^2 in inner loop makes it to slow
+            %end
             
-            for c = col,
+            for c = 1:regionDimension,
 
                 % Get history array
-                activity = neuronHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, r, c, o, transforms, epoch, tick);
+                activity = neuronHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, r, c, numEpochs); % pick last epoch
 
                 % Count number of non zero elements
-                count = length(find(activity(:,1,1,1) > 0.1));
-                %activity(:,1,1,1)
-                %count
+                count = length(find(activity(historyDimensions.numOutputsPrTransform, :, o, numEpochs) > floatError));
 
                 % Save in proper bin and in invariance surface
                 invariance(r, c) = count;
                 bins(count + 1) = bins(count + 1) + 1;
             end
         end
-
-        if(standalone),
-            close(h);
-        end
+        
+        %if(standalone),
+        %    close(h);
+        %end
         
         b = bins(2:length(bins));
         
@@ -123,8 +116,8 @@ function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, stan
         %view([90,90])
         
         % Update max values
-        maxFullInvariance = max(maxFullInvariance, b(historyDimensions.numTransforms)); % The latter is the number of neurons that are fully invariant
-        maxMean = max(maxMean, dot((b./(sum(b))),transforms)); % The latter is the mean level of invariance
+        maxFullInvariance = max(maxFullInvariance, b(numTransforms)); % The latter is the number of neurons that are fully invariant
+        maxMean = max(maxMean, dot((b./(sum(b))),1:numTransforms)); % The latter is the mean level of invariance
     end
     
     title(filename);

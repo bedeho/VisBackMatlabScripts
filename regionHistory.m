@@ -15,7 +15,7 @@
 %  depth: neuron depth
 %  maxEpoch (optional): largest epoch you are interested in
 %  Output========
-%  Activity history of region/depth: 4-d matrix (row, col, timestep, transform, object, epoch) 
+%  Activity history of region/depth: 4-d matrix (timestep, transform, object, epoch, row, col) 
 
 function [activity] = regionHistory(fileID, historyDimensions, neuronOffsets, networkDimensions, region, depth) % , maxEpoch)
 
@@ -23,7 +23,7 @@ function [activity] = regionHistory(fileID, historyDimensions, neuronOffsets, ne
     global SOURCE_PLATFORM_FLOAT;
 
     % Validate input
-    validateNeuron('neuronHistory.m', networkDimensions, region, depth);
+    validateNeuron('regionHistory.m', networkDimensions, region, depth);
     
     % Quick fix
     maxEpoch = historyDimensions.numEpochs;

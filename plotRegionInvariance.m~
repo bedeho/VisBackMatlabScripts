@@ -18,6 +18,7 @@
 %  ticks:
 %  Output========
 %
+
 % 'D:\Oxford\Work\Projects\VisBack\Simulations\1Object\1Epoch\firingRate.dat'
 
 function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, standalone, region, depth)
@@ -48,16 +49,8 @@ function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, stan
     invariance = zeros(regionDimension);
     bins = zeros(numTransforms + 1,1);
     
-    % Iteration vectors
-    tick = historyDimensions.numOutputsPrTransform;     % pick last output
-    epoch = historyDimensions.numEpochs;                % pick last epoch
-    transforms = 1:historyDimensions.numTransforms;     % pick all transforms
-    objects = 1:historyDimensions.numObjects;           % pick all objects
-    row = 1:regionDimension;
-    col = 1:regionDimension;
-    
     % Setup Max vars
-    maxInvariance = 0;
+    maxFullInvariance = 0;
     maxMean = 0;
     
     % detect if -nodisplay option is set
@@ -73,8 +66,10 @@ function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, stan
     
     fig = figure();
     
+    floatError = 0.1;
+    
     % Iterate objects
-    for o = objects,
+    for o = 1:historyDimensions.numObjects,           % pick all objects,
         
         % Zero out from last object
         invariance = 0*invariance;
@@ -85,29 +80,27 @@ function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, stan
             h = waitbar(0,'Loading Neuron History...');
         end
         
-        for r = row,
+        for r = 1:regionDimension,
 
             if(standalone),
                 waitbar(r/regionDimension,h); % putting progress = ((r-1)*dimension + c)/dimension^2 in inner loop makes it to slow
             end
             
-            for c = col,
+            for c = 1:regionDimension,
 
                 % Get history array
-                activity = neuronHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, r, c, o, transforms, epoch, tick);
+                activity = neuronHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, r, c, historyDimensions.numEpochs); % pick last epoch
 
                 % Count number of non zero elements
-                count = length(find(activity(:,1,1,1) > 0.1));
-                %activity(:,1,1,1)
-                %count
+                count = length(find(activity(historyDimensions.numEpochs ,: , o, epoch) > floatError));
 
                 % Save in proper bin and in invariance surface
                 invariance(r, c) = count;
                 bins(count + 1) = bins(count + 1) + 1;
             end
         end
-
-        if(progressbar),
+        
+        if(standalone),
             close(h);
         end
         
@@ -123,12 +116,14 @@ function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, stan
         %view([90,90])
         
         % Update max values
-        meanInvarianceToThisObject = (b./(sum(b))).*transforms;
-        maxMean = max(maxMean, meanInvarianceToThisObject);
-        maxFullInvariance = max(maxInvariance, b(historyDimensions.numTransforms));
+        maxFullInvariance = max(maxFullInvariance, b(numTransforms)); % The latter is the number of neurons that are fully invariant
+        maxMean = max(maxMean, dot((b./(sum(b))),1:numTransforms)); % The latter is the mean level of invariance
     end
     
     title(filename);
     
-    maxInvariance
+    maxFullInvariance
     maxMean
+    
+    fclose(fileID);
+    
