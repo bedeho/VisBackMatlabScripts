@@ -5,7 +5,6 @@
 %  Created by Bedeho Mender on 29/04/11.
 %  Copyright 2011 OFTNAI. All rights reserved.
 %
-%  HISTORY OF NEURON ACTIVITY
 %  Input=========
 %  fileID: fileID of open weight file
 %  networkDimensions: 
@@ -17,7 +16,7 @@
 %  depth: neuron depth
 %  maxEpoch (optional): largest epoch you are interested in
 %  Output========
-%  activity: 4-d matrix (timestep, transform, object, epoch)
+%  Activity history of region: 4-d matrix (timestep, transform, object, epoch)
 
 function [activity] = neuronHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, maxEpoch)
 
@@ -46,6 +45,23 @@ function [activity] = neuronHistory(fileID, networkDimensions, historyDimensions
     
     % Make history array
     activity = reshape(buffer, [historyDimensions.numOutputsPrTransform historyDimensions.numTransforms historyDimensions.numObjects numEpochs]);
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     % ==================================================================================================================================
     % OLD TRASH

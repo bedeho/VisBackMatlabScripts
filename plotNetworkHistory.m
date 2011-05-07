@@ -13,14 +13,12 @@
 % row: neuron row
 % col: neuron column
 % objects:
-% transforms:
 % epochs:
 % ticks:
 % Output========
 %
-% 'D:\Oxford\Work\Projects\VisBack\Simulations\1Object\1Epoch\firingRate.dat'
 
-function plotRegionHistory(filename, region, depth, objects, epochs, ticks)
+function plotNetworkHistory(filename, region, depth, objects, epochs)
 
     % Import global variables
     declareGlobalVars();

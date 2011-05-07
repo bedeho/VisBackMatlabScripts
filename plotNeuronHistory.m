@@ -13,8 +13,9 @@
 %  row: neuron row
 %  col: neuron column
 %  Output========
-%
-% 'D:\Oxford\Work\Projects\VisBack\Simulations\1Object\1Epoch\firingRate.dat'
+%  Plots line plot of activity for spesific neuron, always 
+%  picks last outputted time step of every transform and does
+%  one line per object.
 
 function plotNeuronHistory(filename, region, depth, row, col)
 
@@ -35,7 +36,7 @@ function plotNeuronHistory(filename, region, depth, row, col)
     
     figure();
     for o=1:length(objects),
-        v = activity(1,:,o,e);
+        v = activity(historyDimensions.numOutputsPrTransform,:,o,e); % pick last tick
         %v
         plot(v);
         title(['Epoch: ' num2str(epochs(e)) ', Object:' num2str(objects(o)) ', Tick: LAST']);
