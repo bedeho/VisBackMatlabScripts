@@ -5,18 +5,17 @@
 %  Created by Bedeho Mender on 29/04/11.
 %  Copyright 2011 OFTNAI. All rights reserved.
 %
-
-% AFFERENT SYNAPSES FOR ONE NEURON
-% Input=========
-% fileID: fileID of open weight file
-% region: neuron region
-% col: neuron column
-% row: neuron row
-% depth: neuron depth
-% sourceRegion: afferent region id (V1 = 1)
-% sourceDepth: depth to plot in source region (first layer = 1)
-% Output========
-% synapses: Returns struct array of all synapses (regionNR,depth,row,col,weight) into neuron
+%  AFFERENT SYNAPSES FOR ONE NEURON
+%  Input=========
+%  fileID: fileID of open weight file
+%  region: neuron region
+%  col: neuron column
+%  row: neuron row
+%  depth: neuron depth
+%  sourceRegion: afferent region id (V1 = 1)
+%  sourceDepth: depth to plot in source region (first layer = 1)
+%  Output========
+%  synapses: Returns struct array of all synapses (regionNR,depth,row,col,weight) into neuron
 
 function [synapses] = afferentSynapseList(fileID, headerSize, list, region, depth, row, col)
 
