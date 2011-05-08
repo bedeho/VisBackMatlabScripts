@@ -39,8 +39,7 @@ function plotNeuronHistory(filename, region, depth, row, col, maxEpoch)
     format('longE'); % output full floats, no rounding!!
     
     v = activity(historyDimensions.numOutputsPrTransform,:,:,1:maxEpoch); % pick last tick
-    streamSize = maxEpoch * historyDimensions.numObjects * historyDimensions.numTransforms * historyDimensions.numOutputsPrTransform;
-    vect = reshape(v, [1 maxEpoch*]
+    vect = reshape(v,8
     
     gridxy([1.1 3.2 4.5],'Color','r','Linestyle',':') ;
     

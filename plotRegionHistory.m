@@ -9,7 +9,7 @@
 % filename: filename of weight file
 % region: region to plot
 % depth: region depth to plot
-% maxEpoch: last epoch to plot
+% maxEpoch (optional): last epoch to plot
 % Output========
 % Plots one 2d activity plot of region/depth pr. transform in each figure and one figure for each epoch, always 
 % picks last outputted time step of every transform
@@ -27,7 +27,7 @@ function plotRegionHistory(filename, region, depth, maxEpoch)
     
     % Fill in missing arguments
     if nargin < 4,
-        maxEpoch = 1:historyDimensions.numEpochs;           % pick all epochs
+        maxEpoch = historyDimensions.numEpochs;           % pick all epochs
         
         if nargin < 3,
             depth = 1;                                      % pick top layer by default
@@ -38,7 +38,7 @@ function plotRegionHistory(filename, region, depth, maxEpoch)
     dimension = networkDimensions(region).dimension;
     
     % Get history array
-    activity = regionHistory(fileID, historyDimensions, neuronOffsets, networkDimensions, region, depth); %, maxEpoch);
+    activity = regionHistory(fileID, historyDimensions, neuronOffsets, networkDimensions, region, depth, maxEpoch);
     
     % Plot
     plotDim = ceil(sqrt(length(transforms)));

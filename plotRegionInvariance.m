@@ -8,14 +8,12 @@
 %  PLOT REGION INVARIANCE
 %  Input=========
 %  filename: filename of weight file
+%  standalone: whether gui should be shown (i.e standalone == true)
 %  region: region to plot, V1 = 1
 %  depth: region depth to plot
 %  row: neuron row
 %  col: neuron column
-%  objects:
-%  transforms:
-%  epochs:
-%  ticks:
+%  
 %  Output========
 %
 
@@ -80,16 +78,16 @@ function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, stan
         %    h = waitbar(0,'Loading Neuron History...');
         %end
         
-        for r = 1:regionDimension,
+        for row = 1:regionDimension,
 
             %if(standalone),
             %    waitbar(r/regionDimension,h); % putting progress = ((r-1)*dimension + c)/dimension^2 in inner loop makes it to slow
             %end
             
-            for c = 1:regionDimension,
+            for col = 1:regionDimension,
 
                 % Get history array
-                activity = neuronHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, r, c, numEpochs); % pick last epoch
+                activity = neuronHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, numEpochs); % pick last epoch
 
                 % Count number of non zero elements
                 count = length(find(activity(historyDimensions.numOutputsPrTransform, :, o, numEpochs) > floatError));

@@ -17,7 +17,7 @@
 %  Output========
 %  Activity history of region/depth: 4-d matrix (timestep, transform, object, epoch, row, col) 
 
-function [activity] = regionHistory(fileID, historyDimensions, neuronOffsets, networkDimensions, region, depth, maxEpoch)
+function [activity] = regionHistory(fileID, historyDimensions, neuronOffsets, networkDimensions, region, depth) % , maxEpoch)
 
     % Import global variables
     global SOURCE_PLATFORM_FLOAT;
@@ -25,13 +25,11 @@ function [activity] = regionHistory(fileID, historyDimensions, neuronOffsets, ne
     % Validate input
     validateNeuron('regionHistory.m', networkDimensions, region, depth);
     
-    % Process input
-    if nargin < 7,
-        maxEpoch = historyDimensions.numEpochs;
-    else
-        if maxEpoch < 1 || maxEpoch > historyDimensions.numEpochs,
-            error([file ' error: epoch ' num2str(maxEpoch) ' does not exist'])
-        end
+    % Quick fix
+    maxEpoch = historyDimensions.numEpochs;
+    
+    if maxEpoch < 1 || maxEpoch > historyDimensions.numEpochs,
+        error([file ' error: epoch ' num2str(maxEpoch) ' does not exist'])
     end
 
     % Seek to offset of neuron region.(depth,1,1)'s data stream
@@ -44,18 +42,14 @@ function [activity] = regionHistory(fileID, historyDimensions, neuronOffsets, ne
     
     % Make history array
     
-    % When we are looking for full epoch history, we can get it all in one chunk
+    % When we are looking for full epoch history, we can get it all in one
+    % chunk
     if maxEpoch == historyDimensions.numEpochs,
         activity = reshape(buffer, [historyDimensions.numOutputsPrTransform historyDimensions.numTransforms historyDimensions.numObjects maxEpoch dimension dimension]);
     else
         %When we are looking for partial epoch history, then we have to
         %seek betweene neurons, so we just use neuronHistory() routine
+        error('not supported yet');
         
-        activity = zeros(historyDimensions.numOutputsPrTransform, historyDimensions.numTransforms, historyDimensions.numObjects, maxEpoch, dimension, dimension);
-        
-        for r=1:dimension,
-            for c=1:dimension,
-                activity(:, :, :, :, r, c) = neuronHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, maxEpoch);
-            end
-        end
+        for r=1:
     end
