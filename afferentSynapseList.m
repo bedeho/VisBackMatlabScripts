@@ -17,19 +17,17 @@
 %  Output========
 %  synapses: Returns struct array of all synapses (regionNR,depth,row,col,weight) into neuron
 
-function [synapses] = afferentSynapseList(fileID, headerSize, list, region, depth, row, col)
+function [synapses] = afferentSynapseList(fileID, neuronOffsets, region, depth, row, col)
 
     % Import global variables
     global SOURCE_PLATFORM_USHORT;
-    global SYNAPSE_ELEMENT_SIZE;
     global SOURCE_PLATFORM_FLOAT;
    
     % Find offset of synapse list of neuron region.(depth,i,j)
-    offsetCount = list{region}{col,row,depth}.offsetCount;
-    fseek(fileID, headerSize + offsetCount * SYNAPSE_ELEMENT_SIZE, 'bof');
+    fseek(fileID, neuronOffsets{region}{col,row,depth}.offset, 'bof');
     
     % Allocate synapse struct array
-    afferentSynapseCount = list{region}{col,row,depth}.afferentSynapseCount;
+    afferentSynapseCount = neuronOffsets{region}{col,row,depth}.afferentSynapseCount;
     synapses(afferentSynapseCount).regionNr = [];
     synapses(afferentSynapseCount).depth = [];
     synapses(afferentSynapseCount).row = [];

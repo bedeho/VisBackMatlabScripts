@@ -18,10 +18,10 @@
 %  sourceDepth: depth to plot in source region (first layer = 1)
 %  Output========
 
-function [weightBox] = afferentSynapseMatrix(fileID, headerSize, networkDimensions, list, region, depth, row, col, sourceRegion, sourceDepth)
+function [weightBox] = afferentSynapseMatrix(fileID, networkDimensions, neuronOffsets, region, depth, row, col, sourceRegion, sourceDepth)
 
     % Read file
-    synapses = afferentSynapseList(fileID, headerSize, list, region, depth, row, col);
+    synapses = afferentSynapseList(fileID, neuronOffsets, region, depth, row, col);
     afferentSynapseCount = length(synapses);
     
     % Weight box

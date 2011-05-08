@@ -1,27 +1,5 @@
 %
-%  afferentSynapseList.m
-%  VisBack
-%
-%  Created by Bedeho Mender on 29/04/11.
-%  Copyright 2011 OFTNAI. All rights reserved.
-%
-%  AFFERENT SYNAPSES FOR ONE NEURON
-%  Input=========
-%  fileID: fileID of open weight file
-%  region: neuron region
-%  col: neuron column
-%  row: neuron row
-%  depth: neuron depth
-%  sourceRegion: afferent region id (V1 = 1)
-%  sourceDepth: depth to plot in source region (first layer = 1)
-%  Output========
-%  synapses: Returns struct array of all synapses (regionNR,depth,row,col,weight) into neuron
-
-
-
-
-%
-%  neuronHistory.m
+%  synapseHistory.m
 %  VisBack
 %
 %  Created by Bedeho Mender on 29/04/11.
@@ -38,34 +16,52 @@
 %  depth: neuron depth
 %  maxEpoch (optional): largest epoch you are interested in
 %  Output========
-%  Activity history of region: 4-d matrix (timestep, transform, object, epoch)
+%  struct array of synapse activities: synapse(row,col,depth,activity = 4-d
+%  matrix (timestep, transform, object, epoch))
 
-function [activity] = neuronHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, maxEpoch)
+function [synapseActivity] = synapseHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, maxEpoch)
 
     % Import global variables
     global SOURCE_PLATFORM_USHORT;
-    global SYNAPSE_ELEMENT_SIZE;
     global SOURCE_PLATFORM_FLOAT;
+    
+    % Validate input
+    validateNeuron('synapseHistory.m', networkDimensions, region, depth, row, col);
+      
+    if maxEpoch < 1 || maxEpoch > historyDimensions.numEpochs,
+        error([file ' error: epoch ' num2str(maxEpoch) ' does not exist'])
+    end
    
     % Find offset of synapse list of neuron region.(depth,i,j)
-    offsetCount = list{region}{col,row,depth}.offsetCount;
-    fseek(fileID, headerSize + offsetCount * SYNAPSE_ELEMENT_SIZE, 'bof');
+    fseek(fileID, neuronOffsets{region}{col,row,depth}.offsetCount, 'bof');
     
     % Allocate synapse struct array
-    afferentSynapseCount = list{region}{col,row,depth}.afferentSynapseCount;
-    synapses(afferentSynapseCount).regionNr = [];
-    synapses(afferentSynapseCount).depth = [];
-    synapses(afferentSynapseCount).row = [];
-    synapses(afferentSynapseCount).col = [];
-    synapses(afferentSynapseCount).weight = [];
+    count = neuronOffsets{region}{col,row,depth}.afferentSynapseCount;
+    synapses(count).regionNr = [];
+    synapses(count).depth = [];
+    synapses(count).row = [];
+    synapses(count).col = [];
+    synapses(count).activity = [];
+    
+    % Read into buffer
+    streamSize = maxEpoch * historyDimensions.epochSize;
     
     % Fill synapses
-    for s = 1:afferentSynapseCount,
+    for s = 1:count,
         v = fread(fileID, 4, SOURCE_PLATFORM_USHORT);
         
         synapses(s).regionNr = v(1);
         synapses(s).depth = v(2);
         synapses(s).row = v(3);
         synapses(s).col = v(4);
-        synapses(s).weight = fread(fileID, 1, SOURCE_PLATFORM_FLOAT);
+        
+        buffer = fread(fileID, streamSize, SOURCE_PLATFORM_FLOAT);
+        synapses(s).activity = reshape(buffer, [historyDimensions.numOutputsPrTransform historyDimensions.numTransforms historyDimensions.numObjects maxEpoch]);
+        
+        % If we did not consume full stream, we must fseek to stream
+        % for next neuron
+        if maxEpoch < historyDimensions.numEpochs,
+             fseek(fileID, (historyDimensions.numEpochs - maxEpoch)*historyDimensions.epochSize, 'cof');
+        end
+        
     end

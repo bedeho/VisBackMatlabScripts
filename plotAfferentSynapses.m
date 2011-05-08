@@ -26,7 +26,7 @@ function plotAfferentSynapses(filename, region, depth, row, col, sourceRegion, s
     fileID = fopen(filename);
     
     % Read header
-    [networkDimensions, list, headerSize] = loadWeightFileHeader(fileID);
+    [networkDimensions, list] = loadWeightFileHeader(fileID);
     
     regionDimension = networkDimensions(region).dimension;
     
@@ -69,7 +69,7 @@ function plotAfferentSynapses(filename, region, depth, row, col, sourceRegion, s
             %neuronCounter = neuronCounter + 1;
 
             % Get afferent synapse matrix
-            weightBox = weightBox + afferentSynapseMatrix(fileID, headerSize, networkDimensions, list, region, depth, i, j, sourceRegion, sourceDepth);
+            weightBox = weightBox + afferentSynapseMatrix(fileID, networkDimensions, list, region, depth, i, j, sourceRegion, sourceDepth);
         end
     end
     

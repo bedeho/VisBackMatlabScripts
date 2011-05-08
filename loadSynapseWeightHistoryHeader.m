@@ -1,5 +1,5 @@
 %
-%  loadWeightFileHeader.m
+%  loadSynapseWeightHistoryHeader.m
 %  VisBack
 %
 %  Created by Bedeho Mender on 29/04/11.
@@ -12,25 +12,36 @@
 %  networkDimensions: struct array (dimension,depth) of regions (incl. V1)
 %  neuronOffsets: cell array of structs {region}{col,row,depth}.(afferentSynapseCount,offsetCount)
 %  headerSize: bytes read, this is where the file pointer is left
-function [networkDimensions, neuronOffsets] = loadWeightFileHeader(fileID)
+function [networkDimensions, historyDimensions, neuronOffsets] = loadSynapseWeightHistoryHeader(fileID)
 
     % Import global variables
     global SOURCE_PLATFORM_USHORT;
     global SOURCE_PLATFORM_USHORT_SIZE;
-    global SYNAPSE_ELEMENT_SIZE;
+    global SOURCE_PLATFORM_FLOAT_SIZE;
     
     % Seek to start of file
     frewind(fileID);
     
-    % Read number of regions
-    numRegions = fread(fileID, 1, SOURCE_PLATFORM_USHORT);
+    % Read history dimensions & number of regions
+    v = fread(fileID, 5, SOURCE_PLATFORM_USHORT);
+    
+    historyDimensions.numEpochs = v(1);
+    historyDimensions.numObjects = v(2);
+    historyDimensions.numTransforms = v(3);
+    historyDimensions.numOutputsPrTransform = v(4);
+    numRegions = v(5);
+   
+    % Compound stream sizes
+    historyDimensions.transformSize = historyDimensions.numOutputsPrTransform;
+    historyDimensions.objectSize = historyDimensions.transformSize * historyDimensions.numTransforms;
+    historyDimensions.epochSize = historyDimensions.objectSize * historyDimensions.numObjects;
+    historyDimensions.streamSize = historyDimensions.epochSize * historyDimensions.numEpochs;
 
     % Preallocate struct array
     networkDimensions(numRegions).dimension = [];
     networkDimensions(numRegions).depth = [];
     
-    % Allocate cell data structure, {1} is left empty because V1 is not
-    % included
+    % Allocate cell data structure, NOT counting V1, {0} is left empty
     neuronOffsets = cell(numRegions,1); 
     
     % Read dimensions and setup data structure & counter
@@ -45,7 +56,7 @@ function [networkDimensions, neuronOffsets] = loadWeightFileHeader(fileID)
             nrOfNeurons = nrOfNeurons + networkDimensions(r).dimension * networkDimensions(r).dimension * networkDimensions(r).depth;
         end
     end
-
+    
     % Build list of afferentSynapse count for all neurons, and
     % cumulative sum over afferentSynapseLists up to each neuron (count),
     % this is for file seeking
@@ -53,7 +64,7 @@ function [networkDimensions, neuronOffsets] = loadWeightFileHeader(fileID)
     buffer = fread(fileID, nrOfNeurons, SOURCE_PLATFORM_USHORT);
     
     % We compute the size of header just read
-    offset = SOURCE_PLATFORM_USHORT_SIZE*(1 + 2 * numRegions + nrOfNeurons);
+    offsetCount = SOURCE_PLATFORM_USHORT_SIZE*(5 + 2 * numRegions + nrOfNeurons);
     counter = 0;
     for r=2:numRegions,
         for d=1:networkDimensions(r).depth, % Region depth
@@ -61,9 +72,9 @@ function [networkDimensions, neuronOffsets] = loadWeightFileHeader(fileID)
                 for j=1:networkDimensions(r).dimension, % Region col
                     
                     afferentSynapseCount = buffer(counter + 1);
-                    neuronOffsets{r}{j,i,d} = struct('afferentSynapseCount', afferentSynapseCount, 'offset' , offset);
+                    neuronOffsets{r}{j,i,d} = struct('afferentSynapseCount', afferentSynapseCount, 'offset', offset);
                     
-                    offset = offset + afferentSynapseCount * SYNAPSE_ELEMENT_SIZE;
+                    offsetCount = offsetCount + afferentSynapseCount * (4 * SOURCE_PLATFORM_USHORT_SIZE + SOURCE_PLATFORM_FLOAT_SIZE * historyDimensions.streamSize);
                     counter = counter + 1;
                 end
             end
@@ -75,4 +86,4 @@ function [networkDimensions, neuronOffsets] = loadWeightFileHeader(fileID)
     end
     
     % We compute the size of header just read
-    %headerSize = SOURCE_PLATFORM_USHORT_SIZE*(1 + 2 * numRegions + nrOfNeurons);
+    % headerSize = SOURCE_PLATFORM_USHORT_SIZE*(1 + 2 * numRegions + nrOfNeurons);

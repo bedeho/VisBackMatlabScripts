@@ -28,16 +28,14 @@ function [activity] = neuronHistory(fileID, networkDimensions, historyDimensions
       
     if maxEpoch < 1 || maxEpoch > historyDimensions.numEpochs,
         error([file ' error: epoch ' num2str(maxEpoch) ' does not exist'])
-    else
-        numEpochs = maxEpoch;
     end
     
     % Seek to offset of neuron region.(depth,i,j)'s data stream
     fseek(fileID, neuronOffsets{region}{col,row,depth}.offset, 'bof');
     
     % Read into buffer
-    streamSize = maxEpoch * historyDimensions.numObjects * historyDimensions.numTransforms * historyDimensions.numOutputsPrTransform;
+    streamSize = maxEpoch * historyDimensions.epochSize;
     buffer = fread(fileID, streamSize, SOURCE_PLATFORM_FLOAT);
     
     % Make history array
-    activity = reshape(buffer, [historyDimensions.numOutputsPrTransform historyDimensions.numTransforms historyDimensions.numObjects numEpochs]);
+    activity = reshape(buffer, [historyDimensions.numOutputsPrTransform historyDimensions.numTransforms historyDimensions.numObjects maxEpoch]);

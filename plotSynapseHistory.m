@@ -1,5 +1,5 @@
 %
-%  plotNeuronHistory.m
+%  plotSynapseHistory.m
 %  VisBack
 %
 %  Created by Bedeho Mender on 29/04/11.
@@ -15,7 +15,7 @@
 %  Output========
 %  Plots line plot of activity for spesific neuron
 
-function plotNeuronHistory(filename, region, depth, row, col, maxEpoch)
+function plotSynapseHistory(filename, region, depth, row, col, maxEpoch)
 
     % Import global variables
     declareGlobalVars();
@@ -24,14 +24,14 @@ function plotNeuronHistory(filename, region, depth, row, col, maxEpoch)
     fileID = fopen(filename);
     
     % Read header
-    [networkDimensions, historyDimensions, neuronOffsets] = loadHistoryHeader(fileID);
+    [networkDimensions, historyDimensions, neuronOffsets] = loadSynapseWeightHistoryHeader(fileID)
     
     if nargin < 6,
         maxEpoch = historyDimensions.numEpochs; % pick all epochs
     end
     
     % Get history array
-    activity = neuronHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, maxEpoch);
+    synapses = synapseHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, maxEpoch);
     
     %format('longE'); % output full floats, no rounding!!
     
