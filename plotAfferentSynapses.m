@@ -5,8 +5,6 @@
 %  Created by Bedeho Mender on 29/04/11.
 %  Copyright 2011 OFTNAI. All rights reserved.
 %
-
-% PLOT SYNAPTIC WEIGHT MATRIX FOR NEURON
 % Input=========
 % filename: filename of weight file
 % region: neuron region, V1 = 1
@@ -16,8 +14,8 @@
 % sourceRegion: afferent region id (V1 = 1)
 % sourceDepth: depth to plot in source region (first layer = 1)
 % Output========
-%
-% 'D:\Oxford\Work\Projects\VisBack\Simulations\1Object\BlankNetwork.txt'
+% Sums the 2d connectivity matrixes for all synapeses to row x col in region
+% from sourceRegion at SourceDepth
 
 function plotAfferentSynapses(filename, region, depth, row, col, sourceRegion, sourceDepth)
 
@@ -30,65 +28,57 @@ function plotAfferentSynapses(filename, region, depth, row, col, sourceRegion, s
     % Read header
     [networkDimensions, list, headerSize] = loadWeightFileHeader(fileID);
     
-    % If no source region is provided, then the one just prior to region is
-    % chosen
-    if nargin < 6
-        sourceRegion = region - 1;
-    end
-    
-    % Setup plotting ranges
     regionDimension = networkDimensions(region).dimension;
-    % regionDepth = networkDimensions(region).depth;
     
-    if nargin < 3
-        depth = 1;
-    end
-    
-    % If no planar cordinate of cell are provided, 
-    if nargin < 4
-        rowRange = 1:regionDimension; %;
-        colRange = 1:regionDimension; % ;
-    else
-        rowRange = row:row;
-        colRange = col:col;
-    end
-    
-    % If no source depth is chosen, then all are plotted
-    if nargin < 7 
-        depthRange = 1:networkDimensions(sourceRegion).depth;
-    else
-        depthRange = sourceDepth:sourceDepth;
-    end
-    
-    
-    % Call plot routine
-    figure();
-
-    neuronCounter = 1;
-    for i=rowRange, % Region row
-        for j=colRange, % Region col
-            for d=depthRange, % Source region depth
-
-                if nargin < 4
-                    subplot(regionDimension, regionDimension, neuronCounter);
-                end
+    if nargin < 7,
+        
+        sourceDepth = 1;                                % pick top layer
+        
+        if nargin < 6
+            sourceRegion = region - 1;                  % pick region below
+        
+            % If no planar cordinate of cell are provided, pick full layer
+            if nargin < 4
+                rowRange = 1:regionDimension;
+                colRange = 1:regionDimension;
                 
-                neuronCounter = neuronCounter + 1;
-
-                % Get afferent synapse matrix
-                weightBox = afferentSynapseMatrix(fileID, headerSize, networkDimensions, list, region, depth, i, j, sourceRegion, d);
-
-                % Plot
-                surf(weightBox);
-                set(gca,'xtick',[],'ytick',[])
-                    view([90,90])
-                        shading interp
-                    lighting phong
-
-                hold on;
-                axis([1 regionDimension 1 regionDimension]) %  0 0.3
-                pause;
+                if nargin < 3
+                    depth = 1;
+                end
+            else
+                rowRange = row:row;
+                colRange = col:col;
             end
         end
     end
+    
+    sourceRegionDimension = networkDimensions(sourceRegion).dimension;
+    
+    % Call plot routine
+    figure();
+    
+    weightBox = zeros(sourceRegionDimension,sourceRegionDimension);
+
+    %neuronCounter = 1;
+    for i=rowRange, % Region row
+        for j=colRange, % Region col
+
+            %if nargin < 4
+            %    subplot(regionDimension, regionDimension, neuronCounter);
+            %end
+            %neuronCounter = neuronCounter + 1;
+
+            % Get afferent synapse matrix
+            weightBox = weightBox + afferentSynapseMatrix(fileID, headerSize, networkDimensions, list, region, depth, i, j, sourceRegion, sourceDepth);
+        end
+    end
+    
+    % Plot
+    surf(weightBox);
+    set(gca,'xtick',[],'ytick',[])
+    view([90,90])
+    lighting phong
+    hold on;
+    axis([1 sourceRegionDimension 1 sourceRegionDimension]) %  0 0.3
+    pause;
 

@@ -33,24 +33,23 @@ function plotRegionHistory(filename, region, depth, maxEpoch)
             depth = 1;                                      % pick top layer by default
         end
     end
-    
-    transforms = 1:historyDimensions.numTransforms;
+
     dimension = networkDimensions(region).dimension;
     
     % Get history array
     activity = regionHistory(fileID, historyDimensions, neuronOffsets, networkDimensions, region, depth, maxEpoch);
     
     % Plot
-    plotDim = ceil(sqrt(length(transforms)));
+    plotDim = ceil(sqrt(historyDimensions.numTransforms));
     
     for e=1:maxEpoch,
         for o=1:historyDimensions.numObjects,
             
             figure();
             title(['Epoch: ', num2str(e), ', Object:', num2str(o), ', Tick: LAST']);
-             for t=1:length(transforms),
+             for t=1:historyDimensions.numTransforms,
 
-                subplot(plotDim,plotDim,t);
+                subplot(plotDim,plotDim, t);
                 a = activity(historyDimensions.numOutputsPrTransform, t, o, e, :, :);
                 surf(reshape(a, [dimension dimension]));
                 title(['Transform:', num2str(t)]);

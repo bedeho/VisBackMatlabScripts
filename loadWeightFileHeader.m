@@ -35,7 +35,7 @@ function [networkDimensions, list, headerSize] = loadWeightFileHeader(fileID)
         networkDimensions(r).depth = fread(fileID, 1, SOURCE_PLATFORM_USHORT); 
     end
     
-    [list, inDegreeHeaderSize] = inDegreeHeader(fileID, networkDimensions);
+    [list, inDegreeHeaderSize] = loadIndegreeHeader(fileID, networkDimensions);
     
     % We compute the size of header just read
     headerSize = inDegreeHeaderSize + SOURCE_PLATFORM_USHORT_SIZE*(1 + 2 * numRegions);

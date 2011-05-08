@@ -53,9 +53,9 @@ function [activity] = regionHistory(fileID, historyDimensions, neuronOffsets, ne
         
         activity = zeros(historyDimensions.numOutputsPrTransform, historyDimensions.numTransforms, historyDimensions.numObjects, maxEpoch, dimension, dimension);
         
-        for r=1:dimension,
-            for c=1:dimension,
-                activity(:, :, :, :, r, c) = neuronHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, maxEpoch);
+        for row=1:dimension,
+            for col=1:dimension,
+                activity(:, :, :, :, row, col) = neuronHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, maxEpoch);
             end
         end
     end
