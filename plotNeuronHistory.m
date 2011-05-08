@@ -13,9 +13,7 @@
 %  col: neuron column
 %  maxEpoch: last epoch to plot
 %  Output========
-%  Plots line plot of activity for spesific neuron, always 
-%  picks last outputted time step of every transform and does
-%  one line per object.
+%  Plots line plot of activity for spesific neuron
 
 function plotNeuronHistory(filename, region, depth, row, col, maxEpoch)
 
@@ -35,27 +33,33 @@ function plotNeuronHistory(filename, region, depth, row, col, maxEpoch)
     % Get history array
     activity = neuronHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, maxEpoch);
     
+    %format('longE'); % output full floats, no rounding!!
+    
     % Plot
-    format('longE'); % output full floats, no rounding!!
+    v = activity(:, :, :, 1:maxEpoch);
     
-    v = activity(historyDimensions.numOutputsPrTransform,:,:,1:maxEpoch); % pick last tick
-    streamSize = maxEpoch * historyDimensions.numObjects * historyDimensions.numTransforms * historyDimensions.numOutputsPrTransform;
-    vect = reshape(v, [1 maxEpoch*]
+    streamSize = maxEpoch * historyDimensions.epochSize;
+    vect = reshape(v, [1 streamSize]);
     
-    gridxy([1.1 3.2 4.5],'Color','r','Linestyle',':') ;
+    plot(vect);
     
-    %{
-    for e=1:maxEpoch,
-        
-        figure();
-        
-        for o=1:historyDimensions.numObjects,
-            v = activity(historyDimensions.numOutputsPrTransform,:,o,e); % pick last tick
-            %v
-            plot(v);
-            title(['Epoch: ' num2str(e) ', Object:' num2str(o) ', Tick: LAST']);
-            hold all;
-        end
+    % Draw vertical divider for each transform
+    if historyDimensions.numOutputsPrTransform > 1,
+        x = historyDimensions.numOutputsPrTransform : historyDimensions.numOutputsPrTransform : streamSize;
+        gridxy(x, 'Color', 'g', 'Linestyle', ':');
     end
-    %}
+    
+    % Draw vertical divider for each object
+    if historyDimensions.numObjects > 1,
+        x = historyDimensions.objectSize : historyDimensions.objectSize : streamSize;
+        gridxy(x, 'Color', 'b', 'Linestyle', '--');
+    end
+    
+    % Draw vertical divider for each epoch
+    if maxEpoch > 1,
+        x = historyDimensions.epochSize : historyDimensions.epochSize : streamSize;
+        gridxy(x, 'Color', 'r', 'Linestyle', '-');
+    end
+    
+    axis tight;
     

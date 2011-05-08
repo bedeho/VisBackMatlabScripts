@@ -48,7 +48,7 @@ function [] = plotRegionStability(filename, region, depth, objects, maxEpoch)
     activity = regionHistory(fileID, historyDimensions, neuronOffsets, networkDimensions, region, depth, maxEpoch);
     
     % Plot
-    plotDim = ceil(sqrt(length(transforms)));
+    plotDim = ceil(sqrt(historyDimensions.numTransforms));
     stability = zeros(maxEpoch - 1); % To plot
     
     figure();
@@ -60,14 +60,14 @@ function [] = plotRegionStability(filename, region, depth, objects, maxEpoch)
             
             pastActive = find(activity(lastTimeStep, t, o, 1, :, :)); % Save first epoch
 
-            for e=2:length(epochs),
+            for e=2:maxEpoch,
                 presentActive = find(activity(lastTimeStep, t, o, e, :, :));        % Find new activity
                 stability(e - 1) = newValuesInSecond(pastActive, presentActive);    % Find overlap in new and old activity
                 pastActive = presentActive;                                         % Save new activity
             end
             
             plot(stability);
-            title(['Transform : ', num2str(transforms(t))]);
+            title(['Transform : ', num2str(t)]);
             hold on;
         end
     end

@@ -20,13 +20,19 @@ function [networkDimensions, historyDimensions, neuronOffsets, headerSize] = loa
     
     % Read history dimensions & number of regions
     v = fread(fileID, 5, SOURCE_PLATFORM_USHORT);
+    
     historyDimensions.numEpochs = v(1);
     historyDimensions.numObjects = v(2);
     historyDimensions.numTransforms = v(3);
     historyDimensions.numOutputsPrTransform = v(4);
-    historyDimensions.streamSize = v(1) * v(2) * v(3) * v(4);
-    numRegions = v(5);  
-    
+    numRegions = v(5);
+   
+    % Compound stream sizes
+    historyDimensions.transformSize = historyDimensions.numOutputsPrTransform;
+    historyDimensions.objectSize = historyDimensions.transformSize * historyDimensions.numTransforms;
+    historyDimensions.epochSize = historyDimensions.objectSize * historyDimensions.numObjects;
+    historyDimensions.streamSize = historyDimensions.epochSize * historyDimensions.numEpochs;
+
     % Preallocate struct array
     networkDimensions(numRegions).dimension = [];
     networkDimensions(numRegions).depth = [];

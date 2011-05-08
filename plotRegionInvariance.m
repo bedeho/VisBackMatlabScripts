@@ -93,7 +93,7 @@ function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, stan
                 count = length(find(activity(historyDimensions.numOutputsPrTransform, :, o, numEpochs) > floatError));
 
                 % Save in proper bin and in invariance surface
-                invariance(r, c) = count;
+                invariance(row, col) = count;
                 bins(count + 1) = bins(count + 1) + 1;
             end
         end
