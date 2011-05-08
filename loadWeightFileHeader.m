@@ -10,9 +10,9 @@
 %  fileID: Id of open file
 %  Output========
 %  networkDimensions: struct array (dimension,depth) of regions (incl. V1)
-%  list: struct array (afferentSynapseCount,offsetCount) of neurons
+%  neuronOffsets: cell array of structs {region}{col,row,depth}.(afferentSynapseCount,offsetCount)
 %  headerSize: bytes read, this is where the file pointer is left
-function [networkDimensions, list, headerSize] = loadWeightFileHeader(fileID)
+function [networkDimensions, neuronOffsets, headerSize] = loadWeightFileHeader(fileID)
 
     % Import global variables
     global SOURCE_PLATFORM_USHORT;
@@ -28,8 +28,9 @@ function [networkDimensions, list, headerSize] = loadWeightFileHeader(fileID)
     networkDimensions(numRegions).dimension = [];
     networkDimensions(numRegions).depth = [];
     
-    % Allocate cell data structure, NOT counting V1, {0} is left empty
-    list = cell(numRegions,1); 
+    % Allocate cell data structure, {1} is left empty because V1 is not
+    % included
+    neuronOffsets = cell(numRegions,1); 
     
     % Read dimensions and setup data structure & counter
     nrOfNeurons = 0;
@@ -37,7 +38,7 @@ function [networkDimensions, list, headerSize] = loadWeightFileHeader(fileID)
         networkDimensions(r).dimension = fread(fileID, 1, SOURCE_PLATFORM_USHORT);
         networkDimensions(r).depth = fread(fileID, 1, SOURCE_PLATFORM_USHORT);
         
-        list{r} = cell(networkDimensions(r).dimension, networkDimensions(r).dimension, networkDimensions(r).depth);
+        neuronOffsets{r} = cell(networkDimensions(r).dimension, networkDimensions(r).dimension, networkDimensions(r).depth);
         
         if r > 1,
             nrOfNeurons = nrOfNeurons + networkDimensions(r).dimension * networkDimensions(r).dimension * networkDimensions(r).depth;
@@ -58,7 +59,7 @@ function [networkDimensions, list, headerSize] = loadWeightFileHeader(fileID)
                 for j=1:networkDimensions(r).dimension, % Region col
                     
                     afferentSynapseCount = buffer(counter + 1);
-                    list{r}{j,i,d} = struct('afferentSynapseCount', afferentSynapseCount, 'offsetCount' , offsetCount);
+                    neuronOffsets{r}{j,i,d} = struct('afferentSynapseCount', afferentSynapseCount, 'offsetCount' , offsetCount);
                     
                     offsetCount = offsetCount + afferentSynapseCount;
                     counter = counter + 1;

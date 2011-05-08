@@ -27,7 +27,7 @@ function [] = plotRegionStability(filename, region, depth, objects, maxEpoch)
     fileID = fopen(filename);
     
     % Read header
-    [networkDimensions, historyDimensions, neuronOffsets, headerSize] = loadHistoryHeader(fileID)
+    [networkDimensions, historyDimensions, neuronOffsets, headerSize] = loadHistoryHeader(fileID);
     
     % Fill in missing arguments, 
     if nargin < 5,

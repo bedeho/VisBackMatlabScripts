@@ -35,12 +35,15 @@ function [networkDimensions, historyDimensions, neuronOffsets, headerSize] = loa
 
     % Preallocate struct array
     networkDimensions(numRegions).dimension = [];
-    networkDimensions(numRegions).depth = [];
+    networkDimensions(numRegions).depth = []; 
+    neuronOffsets = cell(numRegions,1); % {1} is left empty because V1 is not
+    % included
     
     % Read dimensions
     for r=1:numRegions,
         networkDimensions(r).dimension = fread(fileID, 1, SOURCE_PLATFORM_USHORT);
-        networkDimensions(r).depth = fread(fileID, 1, SOURCE_PLATFORM_USHORT); 
+        networkDimensions(r).depth = fread(fileID, 1, SOURCE_PLATFORM_USHORT);
+        neuronOffsets{r} = cell(networkDimensions(r).dimension, networkDimensions(r).dimension, networkDimensions(r).depth);
     end
     
     % We compute the size of header just read
@@ -51,13 +54,11 @@ function [networkDimensions, historyDimensions, neuronOffsets, headerSize] = loa
     offset = headerSize; 
     nrOfNeurons = 1;
     for r=2:numRegions,
-        neuronOffsets{r} = cell(networkDimensions(r).dimension, networkDimensions(r).dimension, networkDimensions(r).depth);
-        
         for d=1:networkDimensions(r).depth, % Region depth
             for i=1:networkDimensions(r).dimension, % Region row
                 for j=1:networkDimensions(r).dimension, % Region col
                     
-                    neuronOffsets{r}{j,i,d} = struct('offset', offset ,'nr' ,nrOfNeurons);
+                    neuronOffsets{r}{j,i,d} = struct('offset', offset, 'nr', nrOfNeurons);
                     
                     offset = offset + historyDimensions.streamSize * SOURCE_PLATFORM_FLOAT_SIZE;
                     nrOfNeurons = nrOfNeurons + 1;
@@ -65,4 +66,3 @@ function [networkDimensions, historyDimensions, neuronOffsets, headerSize] = loa
             end
         end
     end
-    

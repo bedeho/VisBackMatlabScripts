@@ -28,7 +28,7 @@ function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, stan
     fileID = fopen(filename);
     
     % Read header
-    [networkDimensions, historyDimensions, neuronOffsets, headerSize] = loadHistoryHeader(fileID)
+    [networkDimensions, historyDimensions, neuronOffsets, headerSize] = loadHistoryHeader(fileID);
     
     % Fill in missing arguments, 
     if nargin < 4,
