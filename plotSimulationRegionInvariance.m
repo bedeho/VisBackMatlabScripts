@@ -13,7 +13,10 @@
 
 function [summary] = plotSimulationRegionInvariance(project, experiment, simulation)
 
-    PROJECTS_FOLDER = '/Network/Servers/mac0.cns.ox.ac.uk/Volumes/Data/Users/mender/Dphil/Projects/';  % must have trailing slash
+    % Import global variables
+    declareGlobalVars();
+    
+    global PROJECTS_FOLDER;
 
     experimentFolder = [PROJECTS_FOLDER project '/Simulations/' experiment '/'];
     simulationFolder = [experimentFolder  simulation '/'];

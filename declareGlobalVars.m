@@ -8,6 +8,12 @@
 
 function declareGlobalVars() 
 
+    global PROJECTS_FOLDER;
+    PROJECTS_FOLDER = '/Network/Servers/mac0.cns.ox.ac.uk/Volumes/Data/Users/mender/Dphil/Projects/';  % must have trailing slash
+
+    
+
+
     % Reason added abstraction was because
     % perhaps data is produced on system which
     % has makes C++ binary have different size datatypes then

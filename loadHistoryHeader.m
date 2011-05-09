@@ -25,19 +25,18 @@ function [networkDimensions, historyDimensions, neuronOffsets, headerSize] = loa
     historyDimensions.numObjects = v(2);
     historyDimensions.numTransforms = v(3);
     historyDimensions.numOutputsPrTransform = v(4);
-    numRegions = v(5);
-   
+
     % Compound stream sizes
     historyDimensions.transformSize = historyDimensions.numOutputsPrTransform;
     historyDimensions.objectSize = historyDimensions.transformSize * historyDimensions.numTransforms;
     historyDimensions.epochSize = historyDimensions.objectSize * historyDimensions.numObjects;
     historyDimensions.streamSize = historyDimensions.epochSize * historyDimensions.numEpochs;
-
+    
     % Preallocate struct array
+    numRegions = v(5);
     networkDimensions(numRegions).dimension = [];
     networkDimensions(numRegions).depth = []; 
-    neuronOffsets = cell(numRegions,1); % {1} is left empty because V1 is not
-    % included
+    neuronOffsets = cell(numRegions,1); % {1} is left empty because V1 is not included
     
     % Read dimensions
     for r=1:numRegions,
@@ -50,7 +49,7 @@ function [networkDimensions, historyDimensions, neuronOffsets, headerSize] = loa
     headerSize = SOURCE_PLATFORM_USHORT_SIZE*(5 + 2 * numRegions);
     
     % Compute and store the offset of each neuron's datastream in the file, not V1
-    %neuronOffsets = cell(numRegions,1); 
+    % neuronOffsets = cell(numRegions,1); 
     offset = headerSize; 
     nrOfNeurons = 1;
     for r=2:numRegions,

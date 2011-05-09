@@ -19,11 +19,12 @@
 %  struct array of synapse activities: synapse(row,col,depth,activity = 4-d
 %  matrix (timestep, transform, object, epoch))
 
-function [synapseActivity] = synapseHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, maxEpoch)
+function [synapses] = synapseHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, maxEpoch)
 
     % Import global variables
     global SOURCE_PLATFORM_USHORT;
     global SOURCE_PLATFORM_FLOAT;
+    global SOURCE_PLATFORM_FLOAT_SIZE;
     
     % Validate input
     validateNeuron('synapseHistory.m', networkDimensions, region, depth, row, col);
@@ -33,7 +34,7 @@ function [synapseActivity] = synapseHistory(fileID, networkDimensions, historyDi
     end
    
     % Find offset of synapse list of neuron region.(depth,i,j)
-    fseek(fileID, neuronOffsets{region}{col,row,depth}.offsetCount, 'bof');
+    fseek(fileID, neuronOffsets{region}{col,row,depth}.offset, 'bof');
     
     % Allocate synapse struct array
     count = neuronOffsets{region}{col,row,depth}.afferentSynapseCount;
@@ -46,8 +47,13 @@ function [synapseActivity] = synapseHistory(fileID, networkDimensions, historyDi
     % Read into buffer
     streamSize = maxEpoch * historyDimensions.epochSize;
     
+    %h = waitbar(0,'Loading Synapses History...');
+    
     % Fill synapses
     for s = 1:count,
+        
+        %waitbar(s/count,h);
+        
         v = fread(fileID, 4, SOURCE_PLATFORM_USHORT);
         
         synapses(s).regionNr = v(1);
@@ -61,7 +67,8 @@ function [synapseActivity] = synapseHistory(fileID, networkDimensions, historyDi
         % If we did not consume full stream, we must fseek to stream
         % for next neuron
         if maxEpoch < historyDimensions.numEpochs,
-             fseek(fileID, (historyDimensions.numEpochs - maxEpoch)*historyDimensions.epochSize, 'cof');
+             fseek(fileID, (historyDimensions.numEpochs - maxEpoch)*historyDimensions.epochSize * SOURCE_PLATFORM_FLOAT_SIZE, 'cof');
         end
-        
     end
+    
+    %close(h);

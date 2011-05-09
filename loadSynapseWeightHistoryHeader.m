@@ -64,7 +64,7 @@ function [networkDimensions, historyDimensions, neuronOffsets] = loadSynapseWeig
     buffer = fread(fileID, nrOfNeurons, SOURCE_PLATFORM_USHORT);
     
     % We compute the size of header just read
-    offsetCount = SOURCE_PLATFORM_USHORT_SIZE*(5 + 2 * numRegions + nrOfNeurons);
+    offset = SOURCE_PLATFORM_USHORT_SIZE*(5 + 2 * numRegions + nrOfNeurons);
     counter = 0;
     for r=2:numRegions,
         for d=1:networkDimensions(r).depth, % Region depth
@@ -74,7 +74,7 @@ function [networkDimensions, historyDimensions, neuronOffsets] = loadSynapseWeig
                     afferentSynapseCount = buffer(counter + 1);
                     neuronOffsets{r}{j,i,d} = struct('afferentSynapseCount', afferentSynapseCount, 'offset', offset);
                     
-                    offsetCount = offsetCount + afferentSynapseCount * (4 * SOURCE_PLATFORM_USHORT_SIZE + SOURCE_PLATFORM_FLOAT_SIZE * historyDimensions.streamSize);
+                    offset = offset + afferentSynapseCount * (4 * SOURCE_PLATFORM_USHORT_SIZE + SOURCE_PLATFORM_FLOAT_SIZE * historyDimensions.streamSize);
                     counter = counter + 1;
                 end
             end

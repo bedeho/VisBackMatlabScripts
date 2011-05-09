@@ -15,38 +15,102 @@
 %  Output========
 %  Plots line plot of activity for spesific neuron
 
-function plotSynapseHistory(filename, region, depth, row, col, maxEpoch)
+function plotSynapseHistory(folder, region, depth, row, col, maxEpoch)
 
     % Import global variables
     declareGlobalVars();
-
+    
+    synapseFile = [folder '/synapticWeights.dat'];
+    
     % Open file
-    fileID = fopen(filename);
+    fileID = fopen(synapseFile);
     
     % Read header
-    [networkDimensions, historyDimensions, neuronOffsets] = loadSynapseWeightHistoryHeader(fileID)
+    [networkDimensions, historyDimensions, neuronOffsets] = loadSynapseWeightHistoryHeader(fileID);
     
     if nargin < 6,
         maxEpoch = historyDimensions.numEpochs; % pick all epochs
     end
+    
+    streamSize = maxEpoch * historyDimensions.epochSize;
     
     % Get history array
     synapses = synapseHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, maxEpoch);
     
     %format('longE'); % output full floats, no rounding!!
     
+    figure();
+    for s=1:length(synapses),
+
+        % Plot
+        v = synapses(s).activity(:, :, :, 1:maxEpoch);
+
+        vect = reshape(v, [1 streamSize]);
+
+        plot(vect);
+        hold on;
+    end
+    
+    fclose(fileID);
+    
+    %=====================================================================================================================
+    % FIRING
+    %=====================================================================================================================
+    
+    firingRateFile = [folder '/firingRate.dat'];
+    
+    % Open file
+    fileID = fopen(firingRateFile);
+    
+    % Read header
+    [networkDimensions, historyDimensions, neuronOffsets] = loadHistoryHeader(fileID);
+    
+    % Get history array
+    activity = neuronHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, maxEpoch);
+    
     % Plot
     v = activity(:, :, :, 1:maxEpoch);
     
     streamSize = maxEpoch * historyDimensions.epochSize;
     vect = reshape(v, [1 streamSize]);
+    plot(vect,'r');
+    hold on;
+
+    fclose(fileID);
     
-    plot(vect);
+    %=====================================================================================================================
+    % TRACE
+    %=====================================================================================================================
+        
+    traceRateFile = [folder '/trace.dat'];
+    
+    % Open file
+    fileID = fopen(traceRateFile);
+    
+    % Read header
+    [networkDimensions, historyDimensions, neuronOffsets] = loadHistoryHeader(fileID);
+    
+    % Get history array
+    activity = neuronHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, maxEpoch);
+    
+    % Plot
+    v = activity(:, :, :, 1:maxEpoch);
+    
+    streamSize = maxEpoch * historyDimensions.epochSize;
+    vect = reshape(v, [1 streamSize]);
+    plot(vect,'m');
+    hold on;
+
+    fclose(fileID);
+    
+    %=====================================================================================================================
+    % GRID
+    %=====================================================================================================================
     
     % Draw vertical divider for each transform
     if historyDimensions.numOutputsPrTransform > 1,
         x = historyDimensions.numOutputsPrTransform : historyDimensions.numOutputsPrTransform : streamSize;
-        gridxy(x, 'Color', 'g', 'Linestyle', ':');
+        gridxy(x, 'Color', 'c', 'Linestyle', ':');
     end
     
     % Draw vertical divider for each object
@@ -58,7 +122,7 @@ function plotSynapseHistory(filename, region, depth, row, col, maxEpoch)
     % Draw vertical divider for each epoch
     if maxEpoch > 1,
         x = historyDimensions.epochSize : historyDimensions.epochSize : streamSize;
-        gridxy(x, 'Color', 'r', 'Linestyle', '-');
+        gridxy(x, 'Color', 'k', 'Linestyle', '-');
     end
     
     axis tight;

@@ -41,8 +41,6 @@ function plotNetworkHistory(filename, depth, maxEpoch)
     end
     
     % Plot
-    plotDim = ceil(sqrt(historyDimensions.numTransforms));
-
     for e=1:maxEpoch,
         for o=1:historyDimensions.numObjects,
             for t=1:historyDimensions.numTransforms,
