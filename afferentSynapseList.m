@@ -15,7 +15,7 @@
 %  sourceRegion: afferent region id (V1 = 1)
 %  sourceDepth: depth to plot in source region (first layer = 1)
 %  Output========
-%  synapses: Returns struct array of all synapses (regionNR,depth,row,col,weight) into neuron
+%  synapses: Returns struct array of all synapses (region, depth, row, col, weight) into neuron
 
 function [synapses] = afferentSynapseList(fileID, neuronOffsets, region, depth, row, col)
 
@@ -28,7 +28,7 @@ function [synapses] = afferentSynapseList(fileID, neuronOffsets, region, depth, 
     
     % Allocate synapse struct array
     afferentSynapseCount = neuronOffsets{region}{col,row,depth}.afferentSynapseCount;
-    synapses(afferentSynapseCount).regionNr = [];
+    synapses(afferentSynapseCount).region = [];
     synapses(afferentSynapseCount).depth = [];
     synapses(afferentSynapseCount).row = [];
     synapses(afferentSynapseCount).col = [];
@@ -38,7 +38,7 @@ function [synapses] = afferentSynapseList(fileID, neuronOffsets, region, depth, 
     for s = 1:afferentSynapseCount,
         v = fread(fileID, 4, SOURCE_PLATFORM_USHORT);
         
-        synapses(s).regionNr = v(1);
+        synapses(s).region = v(1);
         synapses(s).depth = v(2);
         synapses(s).row = v(3);
         synapses(s).col = v(4);

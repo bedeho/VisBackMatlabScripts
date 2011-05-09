@@ -39,4 +39,4 @@ function declareGlobalVars()
     SOURCE_PLATFORM_FLOAT_SIZE = 4;
     
     global SYNAPSE_ELEMENT_SIZE;
-    SYNAPSE_ELEMENT_SIZE = (4 * SOURCE_PLATFORM_USHORT_SIZE + SOURCE_PLATFORM_FLOAT_SIZE); % regionNr >> depth >> row >> col >> weight
+    SYNAPSE_ELEMENT_SIZE = (4 * SOURCE_PLATFORM_USHORT_SIZE + SOURCE_PLATFORM_FLOAT_SIZE); % region >> depth >> row >> col >> weight

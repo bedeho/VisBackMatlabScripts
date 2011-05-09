@@ -38,7 +38,7 @@ function [synapses] = synapseHistory(fileID, networkDimensions, historyDimension
     
     % Allocate synapse struct array
     count = neuronOffsets{region}{col,row,depth}.afferentSynapseCount;
-    synapses(count).regionNr = [];
+    synapses(count).region = [];
     synapses(count).depth = [];
     synapses(count).row = [];
     synapses(count).col = [];
@@ -56,7 +56,7 @@ function [synapses] = synapseHistory(fileID, networkDimensions, historyDimension
         
         v = fread(fileID, 4, SOURCE_PLATFORM_USHORT);
         
-        synapses(s).regionNr = v(1);
+        synapses(s).region = v(1);
         synapses(s).depth = v(2);
         synapses(s).row = v(3);
         synapses(s).col = v(4);

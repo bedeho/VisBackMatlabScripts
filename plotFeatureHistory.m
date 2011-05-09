@@ -60,8 +60,13 @@ function plotFeatureHistory(folder, region, depth, row, col, maxEpoch)
             % (timestep, transform, object, epoch)
             
             for s=1:length(synapses), % For each synapse
-                childSources(s) = findV1Sources(networkDimensions, historyDimensions, neuronOffsets, synapses(s).regionNr, synapses(s).depth, synapses(s).row, synapses(s).col, maxEpoch);
-            end 
+                childSources(s) = findV1Sources(networkDimensions, historyDimensions, neuronOffsets, synapses(s).region, synapses(s).depth, synapses(s).row, synapses(s).col, maxEpoch);
+            end
+            
+            % Allocate space for history
+            sources(historyDimensions.numOutputsPrTransform, historyDimensions.numTransforms, historyDimensions.numObjects, maxEpoch, length(synapses)).row = [];
+            sources(historyDimensions.numOutputsPrTransform, historyDimensions.numTransforms, historyDimensions.numObjects, maxEpoch, length(synapses)).col = [];
+            sources(historyDimensions.numOutputsPrTransform, historyDimensions.numTransforms, historyDimensions.numObjects, maxEpoch, length(synapses)).region = [];
             
             % Iterate history,
             for e=1:maxEpoch,
@@ -69,7 +74,13 @@ function plotFeatureHistory(folder, region, depth, row, col, maxEpoch)
                     for t=1:historyDimensions.numTransforms,
                         for ti=1:historyDimensions.numOutputsPrTransform,
                             
-                            for s=1:length(synapses), % For each synapse
+                            % For each synapse, look up pool of features
+                            % it is connected to for present time, and
+                            % include in .this neurons pool for this time
+                            % given certain critirea, e.g. if synapse is
+                            % strong enough, or compund weight is strong
+                            % enough etc.
+                            for s=1:length(synapses), 
                                 
                             end
 
