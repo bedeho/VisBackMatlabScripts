@@ -17,7 +17,7 @@
 %  maxEpoch (optional): largest epoch you are interested in
 %  Output========
 %  struct array of synapse activities: synapse(row,col,depth,activity = 4-d
-%  matrix (timestep, transform, object, epoch))
+%  matrix (timestep, transform, object, epoch)
 
 function [synapses] = synapseHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, maxEpoch)
 

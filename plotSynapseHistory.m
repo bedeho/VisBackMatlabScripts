@@ -44,10 +44,7 @@ function plotSynapseHistory(folder, region, depth, row, col, maxEpoch)
 
         % Plot
         v = synapses(s).activity(:, :, :, 1:maxEpoch);
-
-        vect = reshape(v, [1 streamSize]);
-
-        plot(vect);
+        plot(reshape(v, [1 streamSize]));
         hold on;
     end
     

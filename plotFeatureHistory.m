@@ -1,5 +1,5 @@
 %
-%  plotNeuronHistory.m
+%  plotFeatureHistory.m
 %  VisBack
 %
 %  Created by Bedeho Mender on 29/04/11.
@@ -15,51 +15,78 @@
 %  Output========
 %  Plots line plot of activity for spesific neuron
 
-function plotNeuronHistory(filename, region, depth, row, col, maxEpoch)
+function plotFeatureHistory(folder, region, depth, row, col, maxEpoch)
 
     % Import global variables
     declareGlobalVars();
-
+    
+    synapseFile = [folder '/synapticWeights.dat'];
+    
     % Open file
-    fileID = fopen(filename);
+    fileID = fopen(synapseFile);
     
     % Read header
-    [networkDimensions, historyDimensions, neuronOffsets] = loadHistoryHeader(fileID);
+    [networkDimensions, historyDimensions, neuronOffsets] = loadSynapseWeightHistoryHeader(fileID);
     
     if nargin < 6,
         maxEpoch = historyDimensions.numEpochs; % pick all epochs
     end
     
-    % Get history array
-    activity = neuronHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, maxEpoch);
-    
-    %format('longE'); % output full floats, no rounding!!
-    
-    % Plot
-    v = activity(:, :, :, 1:maxEpoch);
-    
     streamSize = maxEpoch * historyDimensions.epochSize;
-    vect = reshape(v, [1 streamSize]);
+    
+    % Get history array
+    sources = findV1Sources(region, depth, row, col);
+    
     figure();
-    plot(vect);
-    
-    % Draw vertical divider for each transform
-    if historyDimensions.numOutputsPrTransform > 1,
-        x = historyDimensions.numOutputsPrTransform : historyDimensions.numOutputsPrTransform : streamSize;
-        gridxy(x, 'Color', 'c', 'Linestyle', ':');
+    for s=1:length(synapses),
+
+        % Plot
+        v = synapses(s).activity(:, :, :, 1:maxEpoch);
+        plot(reshape(v, [1 streamSize]));
+        hold on;
     end
     
-    % Draw vertical divider for each object
-    if historyDimensions.numObjects > 1,
-        x = historyDimensions.objectSize : historyDimensions.objectSize : streamSize;
-        gridxy(x, 'Color', 'b', 'Linestyle', '--');
-    end
+    fclose(fileID);
     
-    % Draw vertical divider for each epoch
-    if maxEpoch > 1,
-        x = historyDimensions.epochSize : historyDimensions.epochSize : streamSize;
-        gridxy(x, 'Color', 'k', 'Linestyle', '-');
-    end
+    % sources = struct array (timestep, transform, object, epoch).(col,row,depth, productWeight)
     
-    axis tight;
+    function [sources] = findV1Sources(networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, maxEpoch)
+        
+        if region == 1, % termination condition, V1 cells return them self
+            sources = zeros(historyDimensions.numOutputsPrTransform, historyDimensions.numTransforms, historyDimensions.numObjects, maxEpoch);
+        elseif region > 1, 
+        
+            synapses = synapseHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, maxEpoch);
+            % (timestep, transform, object, epoch)
+            
+            for s=1:length(synapses), % For each synapse
+                childSources(s) = findV1Sources(networkDimensions, historyDimensions, neuronOffsets, synapses(s).regionNr, synapses(s).depth, synapses(s).row, synapses(s).col, maxEpoch);
+            end 
+            
+            % Iterate history,
+            for e=1:maxEpoch,
+                for o=1:historyDimensions.numObjects,
+                    for t=1:historyDimensions.numTransforms,
+                        for ti=1:historyDimensions.numOutputsPrTransform,
+                            
+                            for s=1:length(synapses), % For each synapse
+                                
+                            end
+
+                            %if synapses(s).activity(ti, t, o, e)
+
+                            %sources = [sources ];
+                        end
+                    end
+                end
+            end
+            
+        end
+    
+    function initCanvas()
+    
+    function drawFeature(depth, row, col, weight)
+        
+    function [orrientation, wavelength, phase] = decodeDepth(depth)
+        
     
