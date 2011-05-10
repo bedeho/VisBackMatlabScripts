@@ -9,13 +9,11 @@
 %  filename: filename of weight file
 %  region: region to plot, V1 = 1
 %  depth: region depth to plot
-%  row: neuron row
-%  col: neuron column
 %  maxEpoch: last epoch to plot
 %  Output========
 %  Plots line plot of activity for spesific neuron
 
-function plotSynapseHistory(folder, region, depth, row, col, maxEpoch)
+function plotSynapticLearning(folder, region, depth, maxEpoch)
 
     % Import global variables
     declareGlobalVars();
@@ -28,99 +26,41 @@ function plotSynapseHistory(folder, region, depth, row, col, maxEpoch)
     % Read header
     [networkDimensions, historyDimensions, neuronOffsets] = loadSynapseWeightHistoryHeader(fileID);
     
-    if nargin < 6,
+    if nargin < 4,
         maxEpoch = historyDimensions.numEpochs; % pick all epochs
     end
     
     streamSize = maxEpoch * historyDimensions.epochSize;
+    dimension = networkDimensions(region).dimension;
+    learningMetric = zeros(dimension, dimension);
     
-    % Get history array
-    synapses = synapseHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, maxEpoch);
-    
-    %format('longE'); % output full floats, no rounding!!
+    % Iterate all cells
+    for row=1:dimension,
+        for col=1:dimension,
+            
+            % Get history array
+            synapses = synapseHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, maxEpoch);
+            
+            variances = zeros(length(synapses),1);
+            for s=1:length(synapses),
+
+                v = synapses(s).activity(:, :, :, 1:maxEpoch);
+                variances(s) = var(reshape(v, [1 streamSize]));
+            end
+            
+            plotSynapseHistory(folder, region, depth, row, col, maxEpoch);
+            learningMetric(row, col) = length(find(variances > 0.001))
+        end
+    end
     
     figure();
-    for s=1:length(synapses),
-
-        % Plot
-        v = synapses(s).activity(:, :, :, 1:maxEpoch);
-        plot(reshape(v, [1 streamSize]));
-        hold on;
-    end
-    
-    fclose(fileID);
-    
-    %=====================================================================================================================
-    % FIRING
-    %=====================================================================================================================
-    
-    firingRateFile = [folder '/firingRate.dat'];
-    
-    % Open file
-    fileID = fopen(firingRateFile);
-    
-    % Read header
-    [networkDimensions, historyDimensions, neuronOffsets] = loadHistoryHeader(fileID);
-    
-    % Get history array
-    activity = neuronHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, maxEpoch);
-    
-    % Plot
-    v = activity(:, :, :, 1:maxEpoch);
-    
-    streamSize = maxEpoch * historyDimensions.epochSize;
-    vect = reshape(v, [1 streamSize]);
-    plot(vect,'r');
-    hold on;
+    surf(learningMetric);
+    %shading interp
+    lighting phong
+    view([90,90])
+    axis([1 dimension 1 dimension]) %  0 0.3
 
     fclose(fileID);
-    
-    %=====================================================================================================================
-    % TRACE
-    %=====================================================================================================================
-        
-    traceRateFile = [folder '/trace.dat'];
-    
-    % Open file
-    fileID = fopen(traceRateFile);
-    
-    % Read header
-    [networkDimensions, historyDimensions, neuronOffsets] = loadHistoryHeader(fileID);
-    
-    % Get history array
-    activity = neuronHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, maxEpoch);
-    
-    % Plot
-    v = activity(:, :, :, 1:maxEpoch);
-    
-    streamSize = maxEpoch * historyDimensions.epochSize;
-    vect = reshape(v, [1 streamSize]);
-    plot(vect,'m');
-    hold on;
 
-    fclose(fileID);
-    
-    %=====================================================================================================================
-    % GRID
-    %=====================================================================================================================
-    
-    % Draw vertical divider for each transform
-    if historyDimensions.numOutputsPrTransform > 1,
-        x = historyDimensions.numOutputsPrTransform : historyDimensions.numOutputsPrTransform : streamSize;
-        gridxy(x, 'Color', 'c', 'Linestyle', ':');
-    end
-    
-    % Draw vertical divider for each object
-    if historyDimensions.numObjects > 1,
-        x = historyDimensions.objectSize : historyDimensions.objectSize : streamSize;
-        gridxy(x, 'Color', 'b', 'Linestyle', '--');
-    end
-    
-    % Draw vertical divider for each epoch
-    if maxEpoch > 1,
-        x = historyDimensions.epochSize : historyDimensions.epochSize : streamSize;
-        gridxy(x, 'Color', 'k', 'Linestyle', '-');
-    end
-    
     axis tight;
     
