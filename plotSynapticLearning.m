@@ -48,19 +48,17 @@ function plotSynapticLearning(folder, region, depth, maxEpoch)
                 variances(s) = var(reshape(v, [1 streamSize]));
             end
             
-            plotSynapseHistory(folder, region, depth, row, col, maxEpoch);
-            learningMetric(row, col) = length(find(variances > 0.001))
+            %plotSynapseHistory(folder, region, depth, row, col, maxEpoch);
+            %variances
+            %length(find(variances > 0.001))/length(synapses)
+            %pause
+            learningMetric(row, col) = length(find(variances > 0.00001))/length(synapses);
         end
     end
     
     figure();
-    surf(learningMetric);
-    %shading interp
-    lighting phong
-    view([90,90])
-    axis([1 dimension 1 dimension]) %  0 0.3
+    imagesc(learningMetric);
+    colorbar
 
     fclose(fileID);
-
-    axis tight;
     

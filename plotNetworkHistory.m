@@ -58,13 +58,9 @@ function plotNetworkHistory(filename, depth, maxEpoch)
                         subplot(historyDimensions.numOutputsPrTransform, numRegions-1, plotCounter);
 
                         a = activity{r-1}(ti, t, o, e, :, :);
-                        surf(reshape(a, [dimension dimension]));
+                        imagesc(reshape(a, [dimension dimension]));
+                        colorbar
                         hold on;
-
-                        %shading interp
-                        lighting phong
-                        view([90,90])
-                        axis([1 dimension 1 dimension]) %  0 0.3
 
                         plotCounter = plotCounter + 1;
                     end
@@ -75,3 +71,4 @@ function plotNetworkHistory(filename, depth, maxEpoch)
         end
     end 
    
+    fclose(fileID);

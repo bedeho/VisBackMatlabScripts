@@ -109,9 +109,8 @@ function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, stan
         hold all;
         
         %subplot(2,1,o+1);
-        %surf(invariance);                    
-        %lighting phong
-        %view([90,90])
+        %imagesc(invariance);                    
+        %colorbar
         
         % Update max values
         maxFullInvariance = max(maxFullInvariance, b(numTransforms)); % The latter is the number of neurons that are fully invariant

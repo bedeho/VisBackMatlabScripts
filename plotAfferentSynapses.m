@@ -74,11 +74,8 @@ function plotAfferentSynapses(filename, region, depth, row, col, sourceRegion, s
     end
     
     % Plot
-    surf(weightBox);
-    set(gca,'xtick',[],'ytick',[])
-    view([90,90])
-    lighting phong
+    imagesc(weightBox);
+    colorbar
     hold on;
-    axis([1 sourceRegionDimension 1 sourceRegionDimension]) %  0 0.3
-    pause;
-
+    
+    fclose(fileID);

@@ -39,14 +39,14 @@ function plotExperimentInvariance(project, experiment)
     end
     
     % Save results for summary
-    fid = fopen([experimentFolder 'summary-' date() '-' num2str(now) '.txt'], 'w'); % did note use datestr(now) since it has string
+    fileID = fopen([experimentFolder 'summary-' date() '-' num2str(now) '.txt'], 'w'); % did note use datestr(now) since it has string
     
     for s=1:length(totalSummary),
         fprintf(fid, '%s %s %d %d\n', totalSummary{s,1}, totalSummary{s,2}, totalSummary{s,3}, totalSummary{s,4});
         % fprintf(fid, '%s %s %d %d\n', totalSummary(s).simulation, totalSummary(s).directory, totalSummary(s).maxFullInvariance, totalSummary(s).maxMean);
     end
  
-    fclose(fid);
+    fclose(fileID);
         
 % http://blogs.mathworks.com/loren/2009/10/15/concatenating-structs/#10 
 %{

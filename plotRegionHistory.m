@@ -51,15 +51,12 @@ function plotRegionHistory(filename, region, depth, maxEpoch)
 
                 subplot(plotDim,plotDim, t);
                 a = activity(historyDimensions.numOutputsPrTransform, t, o, e, :, :);
-                surf(reshape(a, [dimension dimension]));
+                imagesc(reshape(a, [dimension dimension]));
+                colorbar
                 title(['Transform:', num2str(t)]);
                 hold on;
-                
-                %shading interp
-                lighting phong
-                view([90,90])
-                axis([1 dimension 1 dimension]) %  0 0.3
              end
         end
     end 
    
+    fclose(fileID);

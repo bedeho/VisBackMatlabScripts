@@ -63,3 +63,5 @@ function plotNeuronHistory(filename, region, depth, row, col, maxEpoch)
     
     axis tight;
     
+    fclose(fileID);
+    
