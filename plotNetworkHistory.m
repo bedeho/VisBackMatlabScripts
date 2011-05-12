@@ -59,7 +59,8 @@ function plotNetworkHistory(filename, depth, maxEpoch)
 
                         a = activity{r-1}(ti, t, o, e, :, :);
                         imagesc(reshape(a, [dimension dimension]));
-                        colorbar
+                        axis square;
+                        %colorbar
                         hold on;
 
                         plotCounter = plotCounter + 1;

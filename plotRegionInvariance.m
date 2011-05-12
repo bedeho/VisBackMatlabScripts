@@ -30,7 +30,11 @@ function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, stan
     % Read header
     [networkDimensions, historyDimensions, neuronOffsets, headerSize] = loadHistoryHeader(fileID);
     
-    % Fill in missing arguments, 
+    % Fill in missing arguments
+    if region < 2,
+        error('Region is to small');
+    end
+    
     if nargin < 4,
         depth = 1;                                  % pick top layer
         
@@ -44,7 +48,7 @@ function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, stan
     regionDimension = networkDimensions(region).dimension;
     
     % Allocate data structure
-    invariance = zeros(regionDimension);
+    invariance = zeros(regionDimension, regionDimension, historyDimensions.numObjects);
     bins = zeros(numTransforms + 1,1);
     
     % Setup Max vars
@@ -93,7 +97,7 @@ function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, stan
                 count = length(find(activity(historyDimensions.numOutputsPrTransform, :, o, numEpochs) > floatError));
 
                 % Save in proper bin and in invariance surface
-                invariance(row, col) = count;
+                invariance(row, col, o) = count;
                 bins(count + 1) = bins(count + 1) + 1;
             end
         end
@@ -104,13 +108,9 @@ function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, stan
         
         b = bins(2:length(bins));
         
-        % subplot(1,1,1);
+        subplot(historyDimensions.numObjects+1, 1,1);
         plot(b);
         hold all;
-        
-        %subplot(2,1,o+1);
-        %imagesc(invariance);                    
-        %colorbar
         
         % Update max values
         maxFullInvariance = max(maxFullInvariance, b(numTransforms)); % The latter is the number of neurons that are fully invariant
@@ -118,6 +118,15 @@ function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, stan
     end
     
     title(filename);
+    
+    % Iterate objects
+    for o = 1:historyDimensions.numObjects,           % pick all objects,
+        
+        subplot(historyDimensions.numObjects+1, 1, o+1);
+        imagesc(invariance(:, :, o));                    
+        colorbar
+        axis square;
+    end
     
     maxFullInvariance
     maxMean

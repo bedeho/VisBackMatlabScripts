@@ -36,38 +36,60 @@ function plotFeatureHistory(folder, region, depth, row, col, maxEpoch)
     
     V1Dimension = networkDimensions(1).dimension;
     
-    % Setup plotting figure
-    initCanvas(V1Dimension);
+    % Setup plotting figure and movie matrix
+    fig = figure();
+    initCanvas(V1Dimension); % we must call this first so we can record the proper size with get()
+    %movegui(fig); % move to main screen, showing on secondary screen in dual screen trips up get().
+    %winsize = get(fig, 'Position');
+    
+    %moviein doesnt work, lets make what moviein
+    %would do!
+    %A = cell(2,1)%moviein(streamSize, fig, winsize);
+    %for i=1:
+    %A{1} = uint8(zeros(winsize(4), winsize(3), 3));
     
     % Get history array
     sources = findV1Sources(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, maxEpoch);
 
     % Iterate history,
+    frameCounter = 1;
+    h = waitbar(0,'Building Movie...');
+    
     for e=1:maxEpoch,
+        
+        waitbar(e/maxEpoch,h);
+        
         for o=1:historyDimensions.numObjects,
             for t=1:historyDimensions.numTransforms,
                 for ti=1:historyDimensions.numOutputsPrTransform,
                     
+                    % Clears old content and sets up right axis dimensions
+                    initCanvas(V1Dimension);
+                    
                     % Iterate all afferent synapses above threshold for
-                    % this time step
+                    % this time step and draw
                     
                     synapses = sources{ti, t, o, e};
                     
                     for s=1:length(synapses),
-                        
-                        % plot
-                        drawFeature(synapses(s).row, synapses(s).col, synapses(s).depth, synapses(s).compound)
-                        
+                        drawFeature(synapses(s).row, synapses(s).col, synapses(s).depth, synapses(s).compound);
                     end
-                    
-                    hold off;
-                    disp 'Plotted';
-                    pause
                 end
             end
         end
+        
+       A(frameCounter) = getframe(fig);
+       frameCounter = frameCounter + 1;
+        
     end
     
+    close(h);
+    
+    % Play movie
+    movie(fig, A, 5, 3)
+    
+    % Save movie
+    save filename.mat A
     
     fclose(fileID);
 
@@ -172,17 +194,15 @@ function [sources] = findV1Sources(fileID, networkDimensions, historyDimensions,
             end
         end
     
-function [fig] = initCanvas(dimension)
+function initCanvas(dimension)
         
-    fig = figure();
-    
-    plot([0 dimension+1],[0 dimension+1], 'b'); 
-    hold on;
+    clf
+    axis([0 dimension+1 0 dimension+1]); 
+    hold on; % hold axis
+    %hold on;
     %axis[0, (dimension-1), 0, (dimension-1)];
+    %axis tight;
 
-    axis tight;
-
-    
 function drawFeature(row, col, depth, weight)
 
     halfSegmentLength = 0.5;
