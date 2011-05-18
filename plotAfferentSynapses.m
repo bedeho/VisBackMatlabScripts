@@ -76,6 +76,5 @@ function plotAfferentSynapses(filename, region, depth, row, col, sourceRegion, s
     % Plot
     imagesc(weightBox);
     colorbar
-    hold on;
     
     fclose(fileID);

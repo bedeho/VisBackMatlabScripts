@@ -56,10 +56,10 @@ function [synapses] = synapseHistory(fileID, networkDimensions, historyDimension
         
         v = fread(fileID, 4, SOURCE_PLATFORM_USHORT);
         
-        synapses(s).region = v(1);
-        synapses(s).depth = v(2);
-        synapses(s).row = v(3);
-        synapses(s).col = v(4);
+        synapses(s).region = v(1)+1;
+        synapses(s).depth = v(2)+1;
+        synapses(s).row = v(3)+1;
+        synapses(s).col = v(4)+1;
         
         buffer = fread(fileID, streamSize, SOURCE_PLATFORM_FLOAT);
         synapses(s).activity = reshape(buffer, [historyDimensions.numOutputsPrTransform historyDimensions.numTransforms historyDimensions.numObjects maxEpoch]);

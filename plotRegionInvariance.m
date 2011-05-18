@@ -19,7 +19,7 @@
 
 % 'D:\Oxford\Work\Projects\VisBack\Simulations\1Object\1Epoch\firingRate.dat'
 
-function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, standalone, region, depth)
+function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, region, depth)
 
     % Import global variables
     declareGlobalVars();
@@ -30,17 +30,17 @@ function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, stan
     % Read header
     [networkDimensions, historyDimensions, neuronOffsets, headerSize] = loadHistoryHeader(fileID);
     
-    % Fill in missing arguments
-    if region < 2,
-        error('Region is to small');
-    end
-    
+    % Fill in missing arguments    
     if nargin < 4,
         depth = 1;                                  % pick top layer
         
         if nargin < 3,
             region = length(networkDimensions);     % pick last region
         end
+    end
+    
+    if region < 2,
+        error('Region is to small');
     end
     
     numEpochs = historyDimensions.numEpochs;
