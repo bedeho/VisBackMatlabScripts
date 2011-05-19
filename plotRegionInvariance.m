@@ -31,10 +31,10 @@ function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, regi
     [networkDimensions, historyDimensions, neuronOffsets, headerSize] = loadHistoryHeader(fileID);
     
     % Fill in missing arguments    
-    if nargin < 4,
+    if nargin < 3,
         depth = 1;                                  % pick top layer
         
-        if nargin < 3,
+        if nargin < 2,
             region = length(networkDimensions);     % pick last region
         end
     end
