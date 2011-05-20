@@ -10,7 +10,7 @@
 % Output========
 % Netstates file that VNFRates and Infoanalysis can use
 
-function convertToNetstats(filename)
+function convertToNetstates(filename)
 
     % Import global variables
     declareGlobalVars();
@@ -35,8 +35,8 @@ function convertToNetstats(filename)
     fclose(fileID);
     
     % Open 
-    [pathstr, name, ext] = fileparts(filename)
-    netStates = fopen([pathstr sep 'netstates-' name ext]);
+    [pathstr, name, ext] = fileparts(filename);
+    netStates = fopen([pathstr '/netstates-' name ext], 'w+');
     
         % Write Netstates header
         fprintf(netStates, 'Version 1.00\n');
@@ -74,7 +74,7 @@ function convertToNetstats(filename)
                 
                 % NBNB, check that cells that order of cols rows is correct
                 a = activity{r-1}(timestep, t, o, maxEpoch, :, :);
-                b = reshape(a, dimension*dimension);
+                b = reshape(a, [dimension*dimension 1] );
                     
                 fwrite(netStates, b, 'float');
             end
