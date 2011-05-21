@@ -42,7 +42,7 @@ function plotExperimentInvariance(project, experiment)
     fileID = fopen([experimentFolder 'summary-' date() '-' num2str(now) '.txt'], 'w'); % did note use datestr(now) since it has string
     
     for s=1:length(totalSummary),
-        fprintf(fid, '%s %s %d %d\n', totalSummary{s,1}, totalSummary{s,2}, totalSummary{s,3}, totalSummary{s,4});
+        fprintf(fileID, '%s %s %d %d\n', totalSummary{s,1}, totalSummary{s,2}, totalSummary{s,3}, totalSummary{s,4});
         % fprintf(fid, '%s %s %d %d\n', totalSummary(s).simulation, totalSummary(s).directory, totalSummary(s).maxFullInvariance, totalSummary(s).maxMean);
     end
  

@@ -43,7 +43,7 @@ function [summary] = plotSimulationRegionInvariance(project, experiment, simulat
         
         if listing(d).isdir == 1 && ~strcmp(directory,'Training') && ~strcmp(directory,'.') && ~strcmp(directory,'..'),
             
-            [fig, maxFullInvariance, maxMean] = plotRegionInvariance([simulationFolder directory '/firingRate.dat'], false);
+            [fig, maxFullInvariance, maxMean] = plotRegionInvariance([simulationFolder directory '/firingRate.dat']);
             
             saveas(fig,[simulationFolder directory '/invariance.fig']);
             
