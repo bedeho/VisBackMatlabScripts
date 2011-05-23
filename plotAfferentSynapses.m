@@ -26,7 +26,7 @@ function plotAfferentSynapses(filename, region, depth, row, col, sourceRegion, s
     fileID = fopen(filename);
     
     % Read header
-    [networkDimensions, list] = loadWeightFileHeader(fileID);
+    [networkDimensions, neuronOffsets] = loadWeightFileHeader(fileID);
     
     regionDimension = networkDimensions(region).dimension;
     

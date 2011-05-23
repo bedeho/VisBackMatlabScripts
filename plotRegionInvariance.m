@@ -74,7 +74,6 @@ function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, regi
     for o = 1:historyDimensions.numObjects,           % pick all objects,
         
         % Zero out from last object
-        invariance = 0*invariance;
         bins = 0*bins;
         
         % Iterate region depth
@@ -125,11 +124,16 @@ function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, regi
         subplot(historyDimensions.numObjects+1, 1, o+1);
         imagesc(invariance(:, :, o));                    
         colorbar
-        axis square;
+        colormap(jet(historyDimensions.numTransforms + 1));
     end
     
     maxFullInvariance
     maxMean
     
     fclose(fileID);
+    
+    %while 1
+    %    v = round(ginput(1));
+    %    ['row: ' int2str(v(2)) ', col: ' int2str(v(1))]
+    %end
     

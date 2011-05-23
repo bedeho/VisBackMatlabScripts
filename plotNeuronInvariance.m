@@ -42,6 +42,7 @@ function plotNeuronInvariance(filename, region, depth, row, col)
         imagesc(inv');
         
         colorbar
+        colormap(jet(historyDimensions.numTransforms + 1));
         
         axis tight;
     end
