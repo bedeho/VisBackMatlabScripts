@@ -21,6 +21,8 @@
 
 function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, region, depth)
 
+    INFO_ANALYSIS_FOLDER = '/Network/Servers/mac0.cns.ox.ac.uk/Volumes/Data/Users/mender/Dphil/InfoAnalysis';
+
     % Import global variables
     declareGlobalVars();
 
@@ -76,17 +78,8 @@ function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, regi
         % Zero out from last object
         bins = 0*bins;
         
-        % Iterate region depth
-        %if(standalone),
-        %    h = waitbar(0,'Loading Neuron History...');
-        %end
-        
         for row = 1:regionDimension,
 
-            %if(standalone),
-            %    waitbar(r/regionDimension,h); % putting progress = ((r-1)*dimension + c)/dimension^2 in inner loop makes it to slow
-            %end
-            
             for col = 1:regionDimension,
 
                 % Get history array
@@ -101,13 +94,10 @@ function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, regi
             end
         end
         
-        %if(standalone),
-        %    close(h);
-        %end
-        
         b = bins(2:length(bins));
         
-        subplot(historyDimensions.numObjects+1, 1,1);
+        %subplot(historyDimensions.numObjects+1, 1,1);
+        subplot(3, 1, 1);
         plot(b);
         hold all;
         
@@ -118,22 +108,62 @@ function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, regi
     
     title(filename);
     
-    % Iterate objects
-    for o = 1:historyDimensions.numObjects,           % pick all objects,
-        
-        subplot(historyDimensions.numObjects+1, 1, o+1);
-        imagesc(invariance(:, :, o));                    
-        colorbar
-        colormap(jet(historyDimensions.numTransforms + 1));
+    fclose(fileID);
+    
+    % Convert firingRate file into NetStates file
+    netStatesFilename = convertToNetstates(filename);
+    
+    % Copy NetStates1 to info analysis folder
+    copyfile(netStatesFilename, [INFO_ANALYSIS_FOLDER '/NetStates1'])
+
+    % Change present working directory to infoanalysis folder, and run analysis there
+    initialPwd = pwd;
+    cd(INFO_ANALYSIS_FOLDER);   % We have to be in the working directory of infoanalysis and run it from there, otherwise it will not find its file
+    [status, result] = system(['./infoanalysis -f 1 -b 10 -l ' num2str(region - 2)]);
+    
+    if status,
+        result
+        return;
     end
+    
+    % Load single cell & plot
+    system(['./infoplot -s -f 1 -x ' num2str(regionDimension*regionDimension) ' -y 3 -z -0.5 -l ' num2str(region - 2) ' -n "trace" -t "Single cell Analysis"']);
+    
+    if status,
+        result
+        %return;
+    end
+    
+    load data0s;
+    subplot(3, 1, 2);
+    plot(data0s(:,2));
+    title('Single cell');
+    
+    % Load multiple cell & plot
+    system(['./infoplot -m -f 1 -x ' num2str(regionDimension*regionDimension) ' -y 3 -z -0.5 -l ' num2str(region - 2) ' -n "trace" -t "Single cell Analysis"']);
+    
+    if status,
+        result
+        %return;
+    end
+    
+    load data0m;
+    subplot(3, 1, 3);
+    plot(data0m(:,2));
+    title('Multiple cell');
+
+    % Iterate objects
+    %for o = 1:historyDimensions.numObjects,           % pick all objects,
+    %    
+    %    subplot(historyDimensions.numObjects+1, 1, o+1);
+    %    imagesc(invariance(:, :, o));                    
+    %    colorbar
+    %    colormap(jet(historyDimensions.numTransforms + 1));
+    %end
     
     maxFullInvariance
     maxMean
     
-    fclose(fileID);
+    cd(initialPwd);
     
-    %while 1
-    %    v = round(ginput(1));
-    %    ['row: ' int2str(v(2)) ', col: ' int2str(v(1))]
-    %end
     

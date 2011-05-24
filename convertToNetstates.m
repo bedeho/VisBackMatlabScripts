@@ -10,7 +10,7 @@
 % Output========
 % Netstates file that VNFRates and Infoanalysis can use
 
-function convertToNetstates(filename)
+function [netStatesFilename] = convertToNetstates(filename)
 
     % Import global variables
     declareGlobalVars();
@@ -36,7 +36,8 @@ function convertToNetstates(filename)
     
     % Open 
     [pathstr, name, ext] = fileparts(filename);
-    netStates = fopen([pathstr '/netstates-' name ext], 'w+');
+    netStatesFilename = [pathstr '/NetStates1'];
+    netStates = fopen(netStatesFilename, 'w+');
     
         % Write Netstates header
         fprintf(netStates, 'Version 1.00\n');
