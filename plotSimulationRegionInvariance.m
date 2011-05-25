@@ -26,7 +26,7 @@ function [summary] = plotSimulationRegionInvariance(project, experiment, simulat
     numEntries = length(listing);
 
     % Preallocate struct array for summary
-    summary = cell(numEntries,4);
+    summary = cell(numEntries,6);
     %{ struct array concat issues
     %summary(numEntries).simulation = [];
     %summary(numEntries).directory = [];
@@ -43,7 +43,7 @@ function [summary] = plotSimulationRegionInvariance(project, experiment, simulat
         
         if listing(d).isdir == 1 && ~strcmp(directory,'Training') && ~strcmp(directory,'.') && ~strcmp(directory,'..'),
             
-            [fig, maxFullInvariance, maxMean] = plotRegionInvariance([simulationFolder directory '/firingRate.dat']);
+            [fig, maxFullInvariance, maxMean, nrOfSingleCell, multiCell] = plotRegionInvariance([simulationFolder directory '/firingRate.dat']);
             
             saveas(fig,[simulationFolder directory '/invariance.fig']);
             
@@ -61,6 +61,8 @@ function [summary] = plotSimulationRegionInvariance(project, experiment, simulat
             summary{d,2} = directory;
             summary{d,3} = maxFullInvariance;
             summary{d,4} = maxMean;
+            summary{d,5} = multiCell;
+            summary{d,6} = nrOfSingleCell;
         end
     end
     

@@ -20,7 +20,7 @@ function plotExperimentInvariance(project, experiment)
     % Iterate simulations in this experiment folder
     listing = dir(experimentFolder); 
     
-    totalSummary = cell(1,4); % empty dummy shit, take away later
+    totalSummary = cell(1,6); % empty dummy shit, take away later
     
     for d = 1:length(listing),
 
@@ -42,7 +42,7 @@ function plotExperimentInvariance(project, experiment)
     fileID = fopen([experimentFolder 'summary-' date() '-' num2str(now) '.txt'], 'w'); % did note use datestr(now) since it has string
     
     for s=1:length(totalSummary),
-        fprintf(fileID, '%s %s %d %d\n', totalSummary{s,1}, totalSummary{s,2}, totalSummary{s,3}, totalSummary{s,4});
+        fprintf(fileID, '%s %s %d %d %d %d\n', totalSummary{s,1}, totalSummary{s,2}, totalSummary{s,3}, totalSummary{s,4}, totalSummary{s,5} , totalSummary{s,6});
         % fprintf(fid, '%s %s %d %d\n', totalSummary(s).simulation, totalSummary(s).directory, totalSummary(s).maxFullInvariance, totalSummary(s).maxMean);
     end
  

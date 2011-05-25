@@ -19,7 +19,7 @@
 
 % 'D:\Oxford\Work\Projects\VisBack\Simulations\1Object\1Epoch\firingRate.dat'
 
-function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, region, depth)
+function [fig, maxFullInvariance, maxMean, nrOfSingleCell, multiCell] = plotRegionInvariance(filename, region, depth)
 
     INFO_ANALYSIS_FOLDER = '/Network/Servers/mac0.cns.ox.ac.uk/Volumes/Data/Users/mender/Dphil/InfoAnalysis';
 
@@ -115,6 +115,9 @@ function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, regi
     
     % Copy NetStates1 to info analysis folder
     copyfile(netStatesFilename, [INFO_ANALYSIS_FOLDER '/NetStates1'])
+    
+    MaxInfo = log2(historyDimensions.numObjects);
+    numCells = regionDimension*regionDimension;
 
     % Change present working directory to infoanalysis folder, and run analysis there
     initialPwd = pwd;
@@ -127,7 +130,7 @@ function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, regi
     end
     
     % Load single cell & plot
-    system(['./infoplot -s -f 1 -x ' num2str(regionDimension*regionDimension) ' -y 3 -z -0.5 -l ' num2str(region - 2) ' -n "trace" -t "Single cell Analysis"']);
+    system(['./infoplot -s -f 1 -x ' num2str(numCells) ' -y 3 -z -0.5 -l ' num2str(region - 2) ' -n "trace" -t "Single cell Analysis"']);
     
     if status,
         result
@@ -137,10 +140,13 @@ function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, regi
     load data0s;
     subplot(3, 1, 2);
     plot(data0s(:,2));
+    hold all;
+    line([1 numCells], [MaxInfo MaxInfo]);
+    axis([1 numCells 0 (MaxInfo+0.5)]);
     title('Single cell');
     
     % Load multiple cell & plot
-    system(['./infoplot -m -f 1 -x ' num2str(regionDimension*regionDimension) ' -y 3 -z -0.5 -l ' num2str(region - 2) ' -n "trace" -t "Single cell Analysis"']);
+    system(['./infoplot -m -f 1 -x ' num2str(numCells) ' -y 3 -z -0.5 -l ' num2str(region - 2) ' -n "trace" -t "Single cell Analysis"']);
     
     if status,
         result
@@ -150,6 +156,9 @@ function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, regi
     load data0m;
     subplot(3, 1, 3);
     plot(data0m(:,2));
+    hold all;
+    line([1 (historyDimensions.numObjects * 13)], [MaxInfo MaxInfo]); % I have no clue what x axis of multiple cell is, but seems to lie close to historyDimensions.numObjects * 10
+    axis([1 (historyDimensions.numObjects * 13) 0 (MaxInfo+0.5)]);
     title('Multiple cell');
 
     % Iterate objects
@@ -163,6 +172,8 @@ function [fig, maxFullInvariance, maxMean] = plotRegionInvariance(filename, regi
     
     maxFullInvariance
     maxMean
+    nrOfSingleCell = nnz(data0s(:,2) >= MaxInfo) % Count cells 
+    multiCell = nnz(data0s(:,2) >= log2(historyDimensions.numObjects)) % Count cells 
     
     cd(initialPwd);
     
