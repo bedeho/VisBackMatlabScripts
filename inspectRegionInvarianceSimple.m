@@ -1,5 +1,5 @@
 
-function plotRegionInvariance2(filename, region, depth)
+function inspectRegionInvarianceSimple(filename, region, depth)
 
     % Import global variables
     declareGlobalVars();
@@ -35,13 +35,13 @@ function plotRegionInvariance2(filename, region, depth)
     
     w = activity(historyDimensions.numOutputsPrTransform, :, :, numEpochs, :, :) > floatError;
     p = squeeze(sum(squeeze(sum(squeeze(w)))));
-    imagesc(p');
+    imagesc(p');s
     colorbar
 
     title(filename);
     
-    mark = ['+:', 's-', 'o--']; 
-    
+    %mark = ['r', ':b', 'g--']; 
+    %set(0,'DefaultAxesLineStyleOrder',{'-*','-s','-o'})
 
     % Capture mouse click
     while 1
@@ -56,12 +56,10 @@ function plotRegionInvariance2(filename, region, depth)
         
         figure();
         
-        set(0,'DefaultAxesLineStyleOrder',{'-*',':','o'})
-        
         for o=1:historyDimensions.numObjects,
             
             activity = neuronHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, numEpochs); % pick last epoch
-            plot(activity(historyDimensions.numOutputsPrTransform, :, o, numEpochs) , mark(o)); %
+            plot(activity(historyDimensions.numOutputsPrTransform, :, o, numEpochs)); % , mark(o)
             hold all;
         end
         
