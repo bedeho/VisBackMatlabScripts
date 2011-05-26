@@ -54,22 +54,12 @@ function plotAfferentSynapses(filename, region, depth, row, col, sourceRegion, s
     
     sourceRegionDimension = networkDimensions(sourceRegion).dimension;
     
-    % Call plot routine
-    figure();
-    
     weightBox = zeros(sourceRegionDimension,sourceRegionDimension);
 
-    %neuronCounter = 1;
     for i=rowRange, % Region row
         for j=colRange, % Region col
-
-            %if nargin < 4
-            %    subplot(regionDimension, regionDimension, neuronCounter);
-            %end
-            %neuronCounter = neuronCounter + 1;
-
             % Get afferent synapse matrix
-            weightBox = weightBox + afferentSynapseMatrix(fileID, networkDimensions, list, region, depth, i, j, sourceRegion, sourceDepth);
+            weightBox = weightBox + afferentSynapseMatrix(fileID, networkDimensions, neuronOffsets, region, depth, i, j, sourceRegion, sourceDepth);
         end
     end
     

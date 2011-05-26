@@ -25,7 +25,6 @@ function inspectRegionInvarianceSimple(filename, region, depth)
 
     numEpochs = historyDimensions.numEpochs;
     numTransforms = historyDimensions.numTransforms;
-    %regionDimension = networkDimensions(region).dimension;
 
     fig = figure();
 
@@ -68,17 +67,5 @@ function inspectRegionInvarianceSimple(filename, region, depth)
         
         title(str);
     end
-    
-    
-%    %for row = 1:regionDimension,
-%    %    for col = 1:regionDimension,
-%
-%            % Get history array
-%            activity = neuronHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, numEpochs); % pick last epoch
-%
-%            % Count number of non zero elements
-%            neuronCount(row,col) = length(find(activity(historyDimensions.numOutputsPrTransform, :, :, numEpochs) > floatError));
-%        end
-%    end
 
     
