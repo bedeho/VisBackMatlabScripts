@@ -9,15 +9,8 @@
 %  Input=========
 %  filename: filename of weight file
 %  standalone: whether gui should be shown (i.e standalone == true)
-%  region: region to plot, V1 = 1
-%  depth: region depth to plot
-%  row: neuron row
-%  col: neuron column
-%  
 %  Output========
 %
-
-% 'D:\Oxford\Work\Projects\VisBack\Simulations\1Object\1Epoch\firingRate.dat'
 
 function inspectRegionInvariance(folder, networkFile)
 
@@ -25,13 +18,8 @@ function inspectRegionInvariance(folder, networkFile)
     declareGlobalVars();
 
     % Fill in missing arguments    
-    if nargin < 3,
-        
-        networkFile = '/TrainedNetwork.txt';
-        
-        if nargin < 2,
-            disp('missing arguments!');
-        end
+    if nargin < 2,
+        networkFile = '/firingRate.dat';
     end
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -39,7 +27,7 @@ function inspectRegionInvariance(folder, networkFile)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     % Open files
-    invarianceFileID = fopen([folder '/firingRate.dat']);
+    invarianceFileID = fopen([folder networkFile]);
     
     % Read header
     [networkDimensions, historyDimensions, neuronOffsets, headerSize] = loadHistoryHeader(invarianceFileID);
@@ -61,15 +49,15 @@ function inspectRegionInvariance(folder, networkFile)
     % 2) Setup callbacks for mouse clicks
     for r=2:numRegions,
         
-        % Dimension of present region
+        % Get region activity
         regionDimension = networkDimensions(r).dimension;
-        
         regionActivity{r - 1} = regionHistory(invarianceFileID, historyDimensions, neuronOffsets, networkDimensions, r, depth, numEpochs);
         
+        % Save axis
+        axisVals(r-1,1) = subplot(numRegions, 3, 3*(r-2) + 1);
+
+        % Plot invariance historgram for region
         for o=1:numObjects,
-        
-            % Plot region histogram
-            axisVals(r-1,1) = subplot(numRegions,3, 3*(r-2) + 1);
             
             w = regionActivity{r - 1}(historyDimensions.numOutputsPrTransform, :, o, numEpochs, :, :);
             q = reshape(squeeze(sum(w > floatError)), [1 regionDimension*regionDimension]); %sum goes along first non singleton dimension, so it skeeps all our BS 1dimension
@@ -77,65 +65,73 @@ function inspectRegionInvariance(folder, networkFile)
             plot(regionHistogram(2:numTransforms));
             axis tight
             hold all
-            
-            % Setup callback
         end
         
-        % Plot region invarinceCount
-        %axisVals(r-1,2) = subplot(numRegions,3, 3*(r-2) + 2);
-        %imagesc(invarinceCount{r - 1}(:, :));
-        %colorbar
-        %colormap(jet(numTransforms + 1));
+        % Save axis
+        axisVals(r-1, 2) = subplot(numRegions, 3, 3*(r-2) + 2);
         
+        % Plot region invarinceCount
+        w = regionActivity{r - 1}(historyDimensions.numOutputsPrTransform, :, :, numEpochs, :, :);
+        invarinceCount = squeeze(sum(sum(w > floatError))); %sum goes along first non singleton dimension, so it skeeps all our BS 1dimension
+        im = imagesc(invarinceCount);
+        colorbar
+        colormap(jet(numTransforms + 1));
+        
+        set(im, 'ButtonDownFcn', {@invarianceCallBack, r}); %@{invarianceCallBack, r}
     end
     
+    fclose(invarianceFileID);
+    
+    % Setup blank present cell invariance plot
+    axisVals(numRegions, [1 3]) = subplot(numRegions, 3, [3*(numRegions-1) + 1, 3*(numRegions-1) + 3]);
+    plot(0);
+    
     %(timestep, transform, object, epoch , row, col)
+
     
-    %w = activity(historyDimensions.numOutputsPrTransform, :, :, numEpochs, :, :) > floatError;
-    %p = squeeze(sum(squeeze(sum(squeeze(w)))));
-    
-   
-    
-    
-    function invarianceCallBack()
+    function invarianceCallBack(varargin)
+        
+        % Extract region,row,col
+        region = varargin{3};
+        pos=get(axisVals(region-1, 2),'CurrentPoint');
+        
+        row = imageScClick(pos(1, 2));
+        col = imageScClick(pos(1, 1));
+        
+        disp(['You clicked X:' num2str(col) ', Y:', num2str(row)]);
+        
+        % Populate invariance plot
+        for obj=1:numObjects,
+            
+            w2 = regionActivity{r - 1}(historyDimensions.numOutputsPrTransform, :, o, numEpochs, :, :);
+            %q2 = reshape(squeeze(sum(w > floatError)), [1 regionDimension*regionDimension]); %sum goes along first non singleton dimension, so it skeeps all our BS 1dimension
+            %regionHistogram = hist(q,1:numTransforms);
+            %plot(regionHistogram(2:numTransforms));
+            %axis tight
+            %hold all
+        end
+        
+        
+        
+        
     end
     
 
     function connectivityCallBack()
     end
+
+    function [res] = imageScClick(i)
+
+        if i < 0.5
+            res = 1;
+        else
+            res = round(i);
+        end
+    end
     
 end
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
     
     %{
     
