@@ -35,7 +35,7 @@ function inspectRegionInvarianceSimple(filename, region, depth)
     
     w = activity(historyDimensions.numOutputsPrTransform, :, :, numEpochs, :, :) > floatError;
     p = squeeze(sum(squeeze(sum(squeeze(w)))));
-    imagesc(p');s
+    imagesc(p');
     colorbar
 
     title(filename);
