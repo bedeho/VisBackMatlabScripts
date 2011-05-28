@@ -47,13 +47,17 @@ function [networkDimensions, historyDimensions, neuronOffsets] = loadSynapseWeig
     % Read dimensions and setup data structure & counter
     nrOfNeurons = 0;
     for r=1:numRegions,
-        networkDimensions(r).dimension = fread(fileID, 1, SOURCE_PLATFORM_USHORT);
-        networkDimensions(r).depth = fread(fileID, 1, SOURCE_PLATFORM_USHORT);
+        dimension = fread(fileID, 1, SOURCE_PLATFORM_USHORT);
+        depth = fread(fileID, 1, SOURCE_PLATFORM_USHORT);
         
-        neuronOffsets{r} = cell(networkDimensions(r).dimension, networkDimensions(r).dimension, networkDimensions(r).depth);
+        networkDimensions(r).dimension = dimension;
+        networkDimensions(r).depth = depth;
+        
+        neuronOffsets{r}(dimension, dimension, depth).afferentSynapseCount = [];
+        neuronOffsets{r}(dimension, dimension, depth).offset = [];
         
         if r > 1,
-            nrOfNeurons = nrOfNeurons + networkDimensions(r).dimension * networkDimensions(r).dimension * networkDimensions(r).depth;
+            nrOfNeurons = nrOfNeurons + dimension * dimension * depth;
         end
     end
     
@@ -68,11 +72,12 @@ function [networkDimensions, historyDimensions, neuronOffsets] = loadSynapseWeig
     counter = 0;
     for r=2:numRegions,
         for d=1:networkDimensions(r).depth, % Region depth
-            for i=1:networkDimensions(r).dimension, % Region row
-                for j=1:networkDimensions(r).dimension, % Region col
+            for row=1:networkDimensions(r).dimension, % Region row
+                for col=1:networkDimensions(r).dimension, % Region col
                     
                     afferentSynapseCount = buffer(counter + 1);
-                    neuronOffsets{r}{j,i,d} = struct('afferentSynapseCount', afferentSynapseCount, 'offset', offset);
+                    neuronOffsets{r}(row, col, d).afferentSynapseCount = afferentSynapseCount;
+                    neuronOffsets{r}(row, col, d).offset = offset;
                     
                     offset = offset + afferentSynapseCount * (4 * SOURCE_PLATFORM_USHORT_SIZE + SOURCE_PLATFORM_FLOAT_SIZE * historyDimensions.streamSize);
                     counter = counter + 1;

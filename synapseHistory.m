@@ -34,10 +34,10 @@ function [synapses] = synapseHistory(fileID, networkDimensions, historyDimension
     end
    
     % Find offset of synapse list of neuron region.(depth,i,j)
-    fseek(fileID, neuronOffsets{region}{col,row,depth}.offset, 'bof');
+    fseek(fileID, neuronOffsets{region}(row, col, depth).offset, 'bof');
     
     % Allocate synapse struct array
-    count = neuronOffsets{region}{col,row,depth}.afferentSynapseCount;
+    count = neuronOffsets{region}(row, col, depth).afferentSynapseCount;
     synapses(count).region = [];
     synapses(count).depth = [];
     synapses(count).row = [];
