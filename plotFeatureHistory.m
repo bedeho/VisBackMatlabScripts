@@ -131,7 +131,7 @@ function [sources] = findV1Sources(fileID, networkDimensions, historyDimensions,
             % Notice that we add +1 since the numbers from the file is in
             % 0 based C++ indexing
             for s=1:afferentSynapseCount % For each child
-                childSources{s} = findV1Sources(fileID, networkDimensions, historyDimensions, neuronOffsets, synapses(s).region + 1, synapses(s).depth + 1, synapses(s).row + 1, synapses(s).col + 1, maxEpoch);
+                childSources{s} = findV1Sources(fileID, networkDimensions, historyDimensions, neuronOffsets, synapses(s).region, synapses(s).depth, synapses(s).row, synapses(s).col, maxEpoch);
             end
             
             % Iterate history,

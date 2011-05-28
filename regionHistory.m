@@ -15,7 +15,7 @@
 %  depth: neuron depth
 %  maxEpoch (optional): largest epoch you are interested in
 %  Output========
-%  Activity history of region/depth: 4-d matrix (timestep, transform, object, epoch, row, col) 
+%  Activity history of region/depth: 6-d array (timestep, transform, object, epoch, row, col) 
 
 function [activity] = regionHistory(fileID, historyDimensions, neuronOffsets, networkDimensions, region, depth, maxEpoch)
 
@@ -33,19 +33,19 @@ function [activity] = regionHistory(fileID, historyDimensions, neuronOffsets, ne
             error([file ' error: epoch ' num2str(maxEpoch) ' does not exist'])
         end
     end
-
-    % Seek to offset of neuron region.(depth,1,1)'s data stream
-    fseek(fileID, neuronOffsets{region}{1,1,depth}.offset, 'bof');
     
-    % Read into buffer
     dimension = networkDimensions(region).dimension;
-    streamSize = dimension * dimension * maxEpoch * historyDimensions.numObjects * historyDimensions.numTransforms * historyDimensions.numOutputsPrTransform;
-    buffer = fread(fileID, streamSize, SOURCE_PLATFORM_FLOAT);
-    
-    % Make history array
     
     % When we are looking for full epoch history, we can get it all in one chunk
     if maxEpoch == historyDimensions.numEpochs,
+        
+        % Seek to offset of neuron region.(depth,1,1)'s data stream
+        fseek(fileID, neuronOffsets{region}(1, 1, depth).offset, 'bof');
+
+        % Read into buffer
+        streamSize = dimension * dimension * maxEpoch * historyDimensions.epochSize;
+        buffer = fread(fileID, streamSize, SOURCE_PLATFORM_FLOAT);
+
         activity = reshape(buffer, [historyDimensions.numOutputsPrTransform historyDimensions.numTransforms historyDimensions.numObjects maxEpoch dimension dimension]);
     else
         %When we are looking for partial epoch history, then we have to

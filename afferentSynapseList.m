@@ -24,7 +24,7 @@ function [synapses] = afferentSynapseList(fileID, neuronOffsets, region, depth, 
     global SOURCE_PLATFORM_FLOAT;
    
     % Find offset of synapse list of neuron region.(depth,i,j)
-    fseek(fileID, neuronOffsets{region}{col,row,depth}.offset, 'bof');
+    fseek(fileID, neuronOffsets{region}(row, col, depth).offset, 'bof');
     
     % Allocate synapse struct array
     afferentSynapseCount = neuronOffsets{region}{col,row,depth}.afferentSynapseCount;

@@ -31,7 +31,7 @@ function [activity] = neuronHistory(fileID, networkDimensions, historyDimensions
     end
     
     % Seek to offset of neuron region.(depth,i,j)'s data stream
-    fseek(fileID, neuronOffsets{region}{col,row,depth}.offset, 'bof');
+    fseek(fileID, neuronOffsets{region}(row, col, depth).offset, 'bof');
     
     % Read into buffer
     streamSize = maxEpoch * historyDimensions.epochSize;

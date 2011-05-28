@@ -12,103 +12,29 @@
 %  Output========
 %
 
-function inspectRegionInvariance(folder, networkFile)
+function inspectConnectivity(filename)
 
     % Import global variables
     declareGlobalVars();
 
-    % Fill in missing arguments    
-    if nargin < 2,
-        networkFile = 'TrainedNetwork.txt';
-    end
-    
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Invariance Plots
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-    % Open files
-    invarianceFileID = fopen([folder '/firingRate.dat']);
-    
-    % Read header
-    [networkDimensions, historyDimensions, neuronOffsets, headerSize] = loadHistoryHeader(invarianceFileID);
-    
     % Open file
-    connectivityFileID = fopen([folder '/' networkFile]);
+    connectivityFileID = fopen(filename);
 
     % Read header
     [networkDimensions, neuronOffsets2] = loadWeightFileHeader(connectivityFileID);
-        
     
     % Setup vars
     numRegions = length(networkDimensions);
     depth = 1;
-    numEpochs = historyDimensions.numEpochs;
-    numTransforms = historyDimensions.numTransforms;
-    numObjects = historyDimensions.numObjects;
-    floatError = 0.1;
-    
-    % Allocate datastructure
-    regionActivity = cell(numRegions - 1);
-    axisVals = zeros(numRegions, 3);
-    
-    figure();
-    
-    % Iterate regions to
-    % 1) Do initial plots
-    % 2) Setup callbacks for mouse clicks
-    for r=2:numRegions,
-        
-        % Get region activity
-        regionDimension = networkDimensions(r).dimension;
-        regionActivity{r - 1} = regionHistory(invarianceFileID, historyDimensions, neuronOffsets, networkDimensions, r, depth, numEpochs);
 
-        % Save axis
-        axisVals(r-1,1) = subplot(numRegions, 3, 3*(numRegions - r) + 1);
-        
-        w = regionActivity{r - 1}(historyDimensions.numOutputsPrTransform, :, :, numEpochs, :, :);
-        q = reshape(sum(w > floatError), [numObjects regionDimension*regionDimension]); %sum goes along first non singleton dimension, so it skeeps all our BS 1dimension
-
-        % Plot invariance historgram for region
-        for o=1:numObjects,
-            
-            regionHistogram = hist(q(o,:), 0:numTransforms); % One extra for the 0 bucket
-            plot(regionHistogram(2:(numTransforms+1)));
-            hold all;
-        end
-        
-        axis tight
-        
-        % Save axis
-        axisVals(r-1, 2) = subplot(numRegions, 3, 3*(numRegions - r) + 2);
-        
-        % Plot region invarinceCount
-        w = regionActivity{r - 1}(historyDimensions.numOutputsPrTransform, :, :, numEpochs, :, :);
-        invarinceCount = squeeze(sum(sum(w > floatError))); %sum goes along first non singleton dimension, so it skeeps all our BS 1dimension
-        im = imagesc(invarinceCount);
-        colorbar
-        colormap(jet(max(max(invarinceCount))));
-        
-        % Setup callback
-        set(im, 'ButtonDownFcn', {@invarianceCallBack, r});
-    end
-    
-    fclose(invarianceFileID);
-    
-    % Setup blank present cell invariance plot
-    axisVals(numRegions, [1 3]) = subplot(numRegions, 3, [3*(numRegions-1) + 1, 3*(numRegions-1) + 3]);
-    
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Weight Plots
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
     % Setup dummy weight plots
-    for r=1:(numRegions-1)
-
+    for r=1:numRegions,
+        
         % Get region dimension
         regionDimension = networkDimensions(r).dimension;
-
+        
         % Save axis
-        axisVals(r, 3) = subplot(numRegions, 3, 3*(numRegions - r - 1) + 3);
+        axisVals(r) = subplot(numRegions, 1, r);
         
         % Only setup callback for V2+
         if r > 1,
@@ -117,51 +43,33 @@ function inspectRegionInvariance(folder, networkFile)
 
             set(im, 'ButtonDownFcn', {@connectivityCallBack, r});
         end
+        
+        axis square;
     end
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % CALLBACKS
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    function invarianceCallBack(varargin)
-        
-        % Extract region,row,col
-        region = varargin{3};
-        pos=get(axisVals(region-1, 2), 'CurrentPoint');
-        
-        row = imagescClick(pos(1, 2));
-        col = imagescClick(pos(1, 1));
-        
-        disp(['You clicked R:' num2str(region) ', X:' num2str(col) ', Y:', num2str(row)]);
-        
-        updateInvariancePlot(region, row, col);
-        
-        % For top region, initiate weight plot
-        if region == numRegions,
-            updateWeightPlot(numRegions, row, col);
-        end
-    end
-    
     function connectivityCallBack(varargin)
         
         % Extract region,row,col
         region = varargin{3};
-        
-        pos=get(axisVals(region, 3), 'CurrentPoint');
+        pos=get(axisVals(region), 'CurrentPoint');
         
         row = imagescClick(pos(1, 2));
         col = imagescClick(pos(1, 1));
         
-        disp(['You clicked R:' num2str(region) ', X:' num2str(col) ', Y:', num2str(row)]);
+        disp(['You clicked X:' num2str(col) ', Y:', num2str(row)]);
         
         if region > 2
             updateWeightPlot(region, row, col);
         end
-
+        
         % Do feature plot
         v1Dimension = networkDimensions(1).dimension
 
-        axisVals(1, 3) = subplot(numRegions, 3, 3);
+        axisVals(1) = subplot(numRegions, 1, 1);
 
         hold off
 
@@ -170,13 +78,11 @@ function inspectRegionInvariance(folder, networkFile)
         for k = 1:length(syn),
             drawFeature(syn(k).row, syn(k).col, syn(k).depth)
         end
-        
-        axis([0 v1Dimension+1 0 v1Dimension+1]); 
 
+        axis([0 v1Dimension+1 0 v1Dimension+1]); 
         axis square;
 
-        
-        updateInvariancePlot(region, row, col);
+
         
         
                                 % sources = cell  of struct  (1..n_i).(col,row,depth, productWeight)  
@@ -248,38 +154,20 @@ function inspectRegionInvariance(folder, networkFile)
         end
     end
 
-    function updateInvariancePlot(region, row, col)
-        
-        % Populate invariance plot
-        subplot(numRegions, 3, [3*(numRegions-1) + 1, 3*(numRegions-1) + 3]);
-        
-        for obj=1:numObjects,
-            
-            w2 = regionActivity{region - 1}(historyDimensions.numOutputsPrTransform, :, obj, numEpochs, row, col);
-            q2 = w2 > floatError;
-            plot(q2);
-            hold all;
-        end  
-        
-        axis([1 numTransforms -0.1 1.1]);
-        
-        hold;
-    end
-
     function updateWeightPlot(region, row, col) 
-
+        
         % Get weightbox
         weights = afferentSynapseMatrix(connectivityFileID, networkDimensions, neuronOffsets2, region, depth, col, row, region - 1, 1);
 
         % Save axis
-        r2 = region - 1;
-        axisVals(r2, 3) = subplot(numRegions, 3, 3*(numRegions-r2) + 3);
+        axisVals(region-1) = subplot(numRegions, 1, region-1);
         im2 = imagesc(weights);
         colorbar;
         axis square;
 
         % Setup callback
-        set(im2, 'ButtonDownFcn', {@connectivityCallBack, r2});
+        set(im2, 'ButtonDownFcn', {@connectivityCallBack, region});
+        
     end
 
 end

@@ -106,6 +106,8 @@ function [fig, maxFullInvariance, maxMean, nrOfSingleCell, multiCell] = plotRegi
         maxMean = max(maxMean, dot((b./(sum(b))),1:numTransforms)); % The latter is the mean level of invariance
     end
     
+    axis tight;
+    
     title(filename);
     
     fclose(fileID);

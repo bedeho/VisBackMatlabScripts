@@ -33,14 +33,19 @@ function inspectRegionInvarianceSimple(filename, region, depth)
     activity = regionHistory(fileID, historyDimensions, neuronOffsets, networkDimensions, region, depth, numEpochs);
     
     w = activity(historyDimensions.numOutputsPrTransform, :, :, numEpochs, :, :) > floatError;
-    p = squeeze(sum(squeeze(sum(squeeze(w)))));
-    imagesc(p');
+    p = squeeze(sum(sum(w)));
+    imagesc(p);
     colorbar
-
+    
+    colormap(jet(max(max(p))));
+    
+    axis square;
+    
     title(filename);
     
-    %mark = ['r', ':b', 'g--']; 
-    %set(0,'DefaultAxesLineStyleOrder',{'-*','-s','-o'})
+    fclose(fileID);
+    
+    mark = ['+', 's', 'o']; 
 
     % Capture mouse click
     while 1
@@ -53,17 +58,17 @@ function inspectRegionInvarianceSimple(filename, region, depth)
         
         str = ['row: ' int2str(row) ', col: ' int2str(col)]
         
+        set(0,'DefaultAxesLineStyleOrder',{'-*','-s','-o'})
+        
         figure();
         
         for o=1:historyDimensions.numObjects,
             
-            activity = neuronHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, numEpochs); % pick last epoch
-            plot(activity(historyDimensions.numOutputsPrTransform, :, o, numEpochs)); % , mark(o)
+            plot(activity(historyDimensions.numOutputsPrTransform, :, o, numEpochs, row, col), mark(o)); % 
             hold all;
         end
         
         axis([1 numTransforms -0.1 1.1]);
-        
         
         title(str);
     end
