@@ -81,67 +81,38 @@ function inspectConnectivity(filename)
 
         axis([0 v1Dimension+1 0 v1Dimension+1]); 
         axis square;
-
-
         
-        
-                                % sources = cell  of struct  (1..n_i).(col,row,depth, productWeight)  
-                                function [sources] = findV1Sources(region, depth, row, col)
+        % sources = cell  of struct  (1..n_i).(col,row,depth, productWeight)  
+        function [sources] = findV1Sources(region, depth, row, col)
 
-                                    THRESHOLD = 0.2;
+            THRESHOLD = 0.15;
 
-                                    if region == 1, % termination condition, V1 cells return them self
+            if region == 1, % termination condition, V1 cells return them self
 
-                                        % Make 1x1 struct array
-                                        sources(1).region = region;
-                                        sources(1).row = row;
-                                        sources(1).col = col;
-                                        sources(1).depth = depth;
-                                        sources(1).compound = 1;
+                % Make 1x1 struct array
+                sources(1).region = region;
+                sources(1).row = row;
+                sources(1).col = col;
+                sources(1).depth = depth;
+                %sources(1).compound = 1;
 
-                                    elseif region > 1, 
+            elseif region > 1, 
 
-                                        synapses = afferentSynapseList(connectivityFileID, neuronOffsets2, region, depth, row, col);
-                                        afferentSynapseCount = length(synapses);
+                synapses = afferentSynapseList(connectivityFileID, neuronOffsets2, region, depth, row, col);
 
-                                        childSources = cell(afferentSynapseCount, 1);
+                sources = [];
+                
+                for s=1:length(synapses) % For each child
 
-                                        childSourcesSize = 0; % Count the number of neurons we will have
-                                        for s=1:afferentSynapseCount % For each child
-                                            
-                                            if synapses(s).weight > THRESHOLD,
-                                                childSources{s} = findV1Sources(synapses(s).region, synapses(s).depth, synapses(s).row, synapses(s).col);
-                                                childSourcesSize = childSourcesSize + length(childSources{s});
-                                            end
-                                        end
-
-                                        if childSourcesSize > 0,
-                                            sources(childSourcesSize).region = region;
-                                            sources(childSourcesSize).row = row;
-                                            sources(childSourcesSize).col = col;
-                                            sources(childSourcesSize).depth = depth;
-                                            sources(childSourcesSize).compound = 1;
-                                            
-                                            counter = 1;
-                                            for s=1:afferentSynapseCount, 
-
-                                                if synapses(s).weight > THRESHOLD,
-
-                                                     for cs=1:length(childSources{s}),
-                                                         sources(counter).region = childSources{s}(cs).region;
-                                                         sources(counter).row = childSources{s}(cs).row;
-                                                         sources(counter).col = childSources{s}(cs).col;
-                                                         sources(counter).depth = childSources{s}(cs).depth;
-                                                         sources(counter).compound = childSources{s}(cs).compound * synapses(s).weight;
-                                                         counter = counter + 1;
-                                                     end
-                                                end
-                                            end
-                                        else
-                                            sources = [];
-                                        end
-                                    end
-                                end
+                    % Check that presynaptic neuron is in lower region (in
+                    % case feedback network we dont want eternal loop), and
+                    % that weight is over threshold
+                    if synapses(s).weight > THRESHOLD && synapses(s).region < region
+                        sources = [sources findV1Sources(synapses(s).region, synapses(s).depth, synapses(s).row, synapses(s).col)];
+                    end
+                end
+            end
+        end
 
     end
 

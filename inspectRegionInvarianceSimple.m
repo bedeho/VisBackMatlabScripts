@@ -58,8 +58,6 @@ function inspectRegionInvarianceSimple(filename, region, depth)
         
         str = ['row: ' int2str(row) ', col: ' int2str(col)]
         
-        set(0,'DefaultAxesLineStyleOrder',{'-*','-s','-o'})
-        
         figure();
         
         for o=1:historyDimensions.numObjects,

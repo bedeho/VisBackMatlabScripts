@@ -51,6 +51,9 @@ function inspectRegionInvariance(folder, networkFile)
     regionActivity = cell(numRegions - 1);
     axisVals = zeros(numRegions, 3);
     
+    %axisVals(i,1) = axisVals(i,2) = for region V(i+1)
+    %axisVals(i,3) = for region Vi
+    
     figure();
     
     % Iterate regions to
@@ -76,8 +79,8 @@ function inspectRegionInvariance(folder, networkFile)
             hold all;
         end
         
-        axis tight
-        
+        axis tight;
+
         % Save axis
         axisVals(r-1, 2) = subplot(numRegions, 3, 3*(numRegions - r) + 2);
         
@@ -86,7 +89,9 @@ function inspectRegionInvariance(folder, networkFile)
         invarinceCount = squeeze(sum(sum(w > floatError))); %sum goes along first non singleton dimension, so it skeeps all our BS 1dimension
         im = imagesc(invarinceCount);
         colorbar
-        colormap(jet(max(max(invarinceCount))));
+        colormap(jet(max(max(invarinceCount)) + 1)); %();
+        
+        axis tight;
         
         % Setup callback
         set(im, 'ButtonDownFcn', {@invarianceCallBack, r});
@@ -127,13 +132,19 @@ function inspectRegionInvariance(folder, networkFile)
         
         % Extract region,row,col
         region = varargin{3};
+        
+        %axes(axisVals(region-1, 2));
+        %set(gcf,'CurrentAxes',axisVals(region-1, 2)) 
+        %v = round(ginput(1));
+        %row = v(2);
+        %col = v(1);
+        
         pos=get(axisVals(region-1, 2), 'CurrentPoint');
-        
-        row = imagescClick(pos(1, 2));
-        col = imagescClick(pos(1, 1));
-        
-        disp(['You clicked R:' num2str(region) ', X:' num2str(col) ', Y:', num2str(row)]);
-        
+        [row, col] = imagescClick(pos(1, 2), pos(1, 1), networkDimensions(region).dimension);
+
+        disp(['You clicked R:' num2str(region) ', row:' num2str(pos(1, 2)) ', col:', num2str(pos(1, 1))]);
+        disp(['You clicked R:' num2str(region) ', row:' num2str(row) ', col:', num2str(col)]);
+
         updateInvariancePlot(region, row, col);
         
         % For top region, initiate weight plot
@@ -149,103 +160,81 @@ function inspectRegionInvariance(folder, networkFile)
         
         pos=get(axisVals(region, 3), 'CurrentPoint');
         
-        row = imagescClick(pos(1, 2));
-        col = imagescClick(pos(1, 1));
+        %row = imagescClick(pos(1, 2));
+        %col = imagescClick(pos(1, 1));
         
-        disp(['You clicked R:' num2str(region) ', X:' num2str(col) ', Y:', num2str(row)]);
+        [row, col] = imagescClick(pos(1, 2), pos(1, 1), networkDimensions(region).dimension);
         
-        if region > 2
+        disp(['You clicked R:' num2str(region) ', row:' num2str(pos(1, 2)) ', col:', num2str(pos(1, 1))]);
+        disp(['You clicked R:' num2str(region) ', row:' num2str(row) ', col:', num2str(col)]);
+        
+        if region > 2,
             updateWeightPlot(region, row, col);
         end
-
-        % Do feature plot
-        v1Dimension = networkDimensions(1).dimension
-
-        axisVals(1, 3) = subplot(numRegions, 3, 3);
-
-        hold off
-
-        syn = findV1Sources(region, depth, row, col);
         
-        for k = 1:length(syn),
-            drawFeature(syn(k).row, syn(k).col, syn(k).depth)
+        % Do feature plot ========================
+        
+        v1Dimension = networkDimensions(1).dimension;
+
+        axisVals(1, 3) = subplot(numRegions, 3, 3*(numRegions-1));
+
+        hold off;
+        
+        features = findV1Sources(region, depth, row, col);
+        numFeatures = length(features);
+        
+        if numFeatures > 0,
+        
+            for k = 1:numFeatures,
+                drawFeature(features(k).row, features(k).col, features(k).depth);
+            end
+        else
+             % this is needed in case there are no features found, because in this
+             % case we would ordinarily not get the content cleared, even
+             % with hold off.
+            plot([(v1Dimension+1)/2 (v1Dimension+1)/2], [0 v1Dimension+1], 'r');
+            hold on;
+            plot([0 v1Dimension+1], [(v1Dimension+1)/2 (v1Dimension+1)/2], 'r');
         end
         
         axis([0 v1Dimension+1 0 v1Dimension+1]); 
-
+        
         axis square;
-
         
         updateInvariancePlot(region, row, col);
         
-        
-                                % sources = cell  of struct  (1..n_i).(col,row,depth, productWeight)  
-                                function [sources] = findV1Sources(region, depth, row, col)
+        % sources = cell  of struct  (1..n_i).(col,row,depth, productWeight)  
+        function [sources] = findV1Sources(region, depth, row, col)
 
-                                    THRESHOLD = 0.2;
+            THRESHOLD = 0.15;
 
-                                    if region == 1, % termination condition, V1 cells return them self
+            if region == 1, % termination condition, V1 cells return them self
 
-                                        % Make 1x1 struct array
-                                        sources(1).region = region;
-                                        sources(1).row = row;
-                                        sources(1).col = col;
-                                        sources(1).depth = depth;
-                                        sources(1).compound = 1;
+                % Make 1x1 struct array
+                sources(1).region = region;
+                sources(1).row = row;
+                sources(1).col = col;
+                sources(1).depth = depth;
+                %sources(1).compound = 1;
 
-                                    elseif region > 1, 
+            elseif region > 1, 
 
-                                        synapses = afferentSynapseList(connectivityFileID, neuronOffsets2, region, depth, row, col);
-                                        afferentSynapseCount = length(synapses);
+                synapses = afferentSynapseList(connectivityFileID, neuronOffsets2, region, depth, row, col);
 
-                                        childSources = cell(afferentSynapseCount, 1);
+                sources = [];
+                
+                for s=1:length(synapses) % For each child
 
-                                        childSourcesSize = 0; % Count the number of neurons we will have
-                                        for s=1:afferentSynapseCount % For each child
-                                            
-                                            if synapses(s).weight > THRESHOLD,
-                                                childSources{s} = findV1Sources(synapses(s).region, synapses(s).depth, synapses(s).row, synapses(s).col);
-                                                childSourcesSize = childSourcesSize + length(childSources{s});
-                                            end
-                                        end
-
-                                        if childSourcesSize > 0,
-                                            sources(childSourcesSize).region = region;
-                                            sources(childSourcesSize).row = row;
-                                            sources(childSourcesSize).col = col;
-                                            sources(childSourcesSize).depth = depth;
-                                            sources(childSourcesSize).compound = 1;
-                                            
-                                            counter = 1;
-                                            for s=1:afferentSynapseCount, 
-
-                                                if synapses(s).weight > THRESHOLD,
-
-                                                     for cs=1:length(childSources{s}),
-                                                         sources(counter).region = childSources{s}(cs).region;
-                                                         sources(counter).row = childSources{s}(cs).row;
-                                                         sources(counter).col = childSources{s}(cs).col;
-                                                         sources(counter).depth = childSources{s}(cs).depth;
-                                                         sources(counter).compound = childSources{s}(cs).compound * synapses(s).weight;
-                                                         counter = counter + 1;
-                                                     end
-                                                end
-                                            end
-                                        else
-                                            sources = [];
-                                        end
-                                    end
-                                end
-
-    end
-
-    function [res] = imagescClick(i)
-
-        if i < 0.5
-            res = 1;
-        else
-            res = round(i);
+                    % Check that presynaptic neuron is in lower region (in
+                    % case feedback network we dont want eternal loop), and
+                    % that weight is over threshold
+                    if synapses(s).weight > THRESHOLD && synapses(s).region < region
+                        sources = [sources findV1Sources(synapses(s).region, synapses(s).depth, synapses(s).row, synapses(s).col)];
+                    end
+                end
+            end
         end
+
     end
 
     function updateInvariancePlot(region, row, col)
@@ -255,9 +244,7 @@ function inspectRegionInvariance(folder, networkFile)
         
         for obj=1:numObjects,
             
-            w2 = regionActivity{region - 1}(historyDimensions.numOutputsPrTransform, :, obj, numEpochs, row, col);
-            q2 = w2 > floatError;
-            plot(q2);
+            plot(regionActivity{region - 1}(historyDimensions.numOutputsPrTransform, :, obj, numEpochs, row, col) > floatError);
             hold all;
         end  
         
@@ -272,21 +259,41 @@ function inspectRegionInvariance(folder, networkFile)
         weights = afferentSynapseMatrix(connectivityFileID, networkDimensions, neuronOffsets2, region, depth, col, row, region - 1, 1);
 
         % Save axis
-        r2 = region - 1;
-        axisVals(r2, 3) = subplot(numRegions, 3, 3*(numRegions-r2) + 3);
+        axisVals(region - 1, 3) = subplot(numRegions, 3, 3*(numRegions - region - 1 + 1) + 3);
         im2 = imagesc(weights);
         colorbar;
-        axis square;
+        %axis square;
 
         % Setup callback
-        set(im2, 'ButtonDownFcn', {@connectivityCallBack, r2});
+        set(im2, 'ButtonDownFcn', {@connectivityCallBack, region - 1});
+    end
+end
+
+% Made with random experiemtnation with imagesc behavior, MAY not work
+% in other settings because of border BS, check it out later, use
+% ginput() if possible 
+function [row, col] = imagescClick(i, j, dimension)
+
+    if i < 1
+        row = 1;
+    else
+        row = floor(i);
     end
 
+    if j < 0.5
+        col = 1;
+    else
+        col = round(j);
+
+        if col > dimension,
+            col = dimension;
+        end
+    end
 end
 
 function drawFeature(row, col, depth)
 
-    halfSegmentLength = 0.5;
+    halfSegmentLength = 3;%0.5;
     [orrientation, wavelength, phase] = decodeDepth(depth);
     featureOrrientation = orrientation + 90; % orrientation is the param to the filter, but it corresponds to a perpendicular image feature
 
@@ -297,7 +304,7 @@ function drawFeature(row, col, depth)
     x2 = col + dx;
     y1 = row - dy;
     y2 = row + dy;
-    plot([x1 x2], [y1 y2], '-');
+    plot([x1 x2], [y1 y2], '-r');
     hold on;
 
 end   
