@@ -22,14 +22,13 @@ function [weightBox] = afferentSynapseMatrix(fileID, networkDimensions, neuronOf
 
     % Read file
     synapses = afferentSynapseList(fileID, neuronOffsets, region, depth, row, col);
-    afferentSynapseCount = length(synapses);
     
     % Weight box
     sourceRegionDimension = networkDimensions(sourceRegion).dimension;
     weightBox = zeros(sourceRegionDimension, sourceRegionDimension);
     
-    for s = 1:afferentSynapseCount,
+    for s = 1:length(synapses),
         if synapses(s).region == sourceRegion && synapses(s).depth == sourceDepth
-            weightBox(synapses(s).col, synapses(s).row) = synapses(s).weight;
+            weightBox(synapses(s).row, synapses(s).col) = synapses(s).weight;
         end
     end

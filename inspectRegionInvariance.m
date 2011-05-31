@@ -148,9 +148,9 @@ function inspectRegionInvariance(folder, networkFile)
         updateInvariancePlot(region, row, col);
         
         % For top region, initiate weight plot
-        if region == numRegions,
-            updateWeightPlot(numRegions, row, col);
-        end
+        %if region == numRegions,
+            updateWeightPlot(region, row, col);
+        %end
     end
     
     function connectivityCallBack(varargin)
@@ -188,6 +188,8 @@ function inspectRegionInvariance(folder, networkFile)
             for k = 1:numFeatures,
                 drawFeature(features(k).row, features(k).col, features(k).depth);
             end
+            
+            set(gca,'YDir','reverse');
         else
              % this is needed in case there are no features found, because in this
              % case we would ordinarily not get the content cleared, even
@@ -206,7 +208,7 @@ function inspectRegionInvariance(folder, networkFile)
         % sources = cell  of struct  (1..n_i).(col,row,depth, productWeight)  
         function [sources] = findV1Sources(region, depth, row, col)
 
-            THRESHOLD = 0.15;
+            THRESHOLD = 0.2;
 
             if region == 1, % termination condition, V1 cells return them self
 
@@ -215,7 +217,6 @@ function inspectRegionInvariance(folder, networkFile)
                 sources(1).row = row;
                 sources(1).col = col;
                 sources(1).depth = depth;
-                %sources(1).compound = 1;
 
             elseif region > 1, 
 

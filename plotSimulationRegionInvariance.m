@@ -23,46 +23,34 @@ function [summary] = plotSimulationRegionInvariance(project, experiment, simulat
 
     % Iterate all network result folders in this simulation folder
     listing = dir(simulationFolder);
-    numEntries = length(listing);
 
     % Preallocate struct array for summary
-    summary = cell(numEntries,6);
-    %{ struct array concat issues
-    %summary(numEntries).simulation = [];
-    %summary(numEntries).directory = [];
-    %summary(numEntries).maxFullInvariance = [];
-    %summary(numEntries).maxMean = [];
-    %}
-    
-    % Iterate dir and do plot for each folder
-    for d = 1:numEntries,
+    summary = [];
+    counter = 1;
 
+    % Iterate dir and do plot for each folder
+    for d = 1:length(listing),
+        
         % We are only looking for directories, but not the
         % 'Training' directory, since it has network evolution in training
         directory = listing(d).name;
         
         if listing(d).isdir == 1 && ~strcmp(directory,'Training') && ~strcmp(directory,'.') && ~strcmp(directory,'..'),
             
-            [fig, maxFullInvariance, maxMean, nrOfSingleCell, multiCell] = plotRegionInvariance([simulationFolder directory '/firingRate.dat']);
+            [fig, fullInvariance, meanInvariance, nrOfSingleCell, multiCell] = plotRegionInvariance([simulationFolder directory '/firingRate.dat']);
             
             saveas(fig,[simulationFolder directory '/invariance.fig']);
             
             delete(fig);
             
             % Save results for summary
-            %{
-            summary(d).simulation = simulation;
-            summary(d).directory = directory;
-            summary(d).maxFullInvariance = maxFullInvariance;
-            summary(d).maxMean = maxMean;
-            %}
+            summary(counter).directory = directory;
+            summary(counter).fullInvariance = fullInvariance;
+            summary(counter).meanInvariance = meanInvariance;
+            summary(counter).multiCell = multiCell;
+            summary(counter).nrOfSingleCell = nrOfSingleCell;
             
-            summary{d,1} = simulation;
-            summary{d,2} = directory;
-            summary{d,3} = maxFullInvariance;
-            summary{d,4} = maxMean;
-            summary{d,5} = multiCell;
-            summary{d,6} = nrOfSingleCell;
+            counter = counter + 1;
         end
     end
     

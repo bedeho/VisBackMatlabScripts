@@ -20,43 +20,70 @@ function plotExperimentInvariance(project, experiment)
     % Iterate simulations in this experiment folder
     listing = dir(experimentFolder); 
     
-    totalSummary = cell(1,6); % empty dummy shit, take away later
+    % Save results for summary
+    filename = [experimentFolder 'Summary.html'];
+    fileID = fopen(filename, 'w'); % did note use datestr(now) since it has string
+    
+    fprintf(fileID, '<h1>%s - %s</h1>\n', experiment, date());
+
+    fprintf(fileID, '<table cellpadding="10" style="border: solid 1px">\n');
+
+    fprintf(fileID, '<tr> <th>Simulation</th> <th>Network</th> <th>#Invariant</th> <th>Mean(Invariance level)</th> <th>SCA</th> <th>MCA</th> <th>Figure</th> <th>Inspector</th> </tr>\n');
+    
+    %h = waitbar(0, 'Plotting&Infoanalysis...');
+    counter = 1;
     
     for d = 1:length(listing),
 
         % We are only looking for directories, but not the
         % 'Filtered' directory, since it has filtered output
-        directory = listing(d).name;
+        simulation = listing(d).name;
 
-        if listing(d).isdir == 1 && ~any(strcmp(directory, {'Filtered', 'Images', '.', '..'})),
+        if listing(d).isdir && ~any(strcmp(simulation, {'Filtered', 'Images', '.', '..'})),
             
-            [summary] = plotSimulationRegionInvariance(project, experiment, directory);
+            %waitbar(counter/(nnz([listing(:).isdir]) - 2), h);
+            disp(['******** Doing ' num2str(counter) ' out of ' num2str((nnz([listing(:).isdir]) - 2)) '********']); 
+            counter = counter + 1;
             
-            %totalSummary = mergeStructArray(totalSummary, summary);
-            totalSummary = [totalSummary; summary];
+            summary = plotSimulationRegionInvariance(project, experiment, simulation);
+
+            for s=1:length(summary),
+                
+                netDir = [experimentFolder  simulation '/' summary(s).directory];
+                
+                figCommand = ['matlab:open(\''' netDir '/invariance.fig\'')'];
+                inspectorCommand = ['matlab:inspectRegionInvariance(\''' netDir '\'',\''' summary(s).directory '.txt\'')'];
+                
+                fprintf(fileID, '<tr>\n'); %flip color here
+                fprintf(fileID, '<td> %s </td>\n', simulation);
+                fprintf(fileID, '<td> %s </td>\n', summary(s).directory);
+                fprintf(fileID, '<td> %d </td>\n', summary(s).fullInvariance);
+                fprintf(fileID, '<td> %d </td>\n', summary(s).meanInvariance);
+                
+                if summary(s).nrOfSingleCell < 0.1,
+                    fprintf(fileID, '<td style=''background-color:green;''> %d </td>\n', summary(s).nrOfSingleCell);
+                else    
+                    fprintf(fileID, '<td> %d </td>\n', summary(s).nrOfSingleCell);
+                end
+                
+                if summary(s).multiCell < 0.1,
+                    fprintf(fileID, '<td style=''background-color:green;''> %d </td>\n', summary(s).multiCell);
+                else
+                    fprintf(fileID, '<td> %d </td>\n', summary(s).multiCell);
+                end
+                
+                fprintf(fileID, '<td> <input type="button" value="Figure" onclick="document.location=''%s''"/></td>\n', figCommand);
+                fprintf(fileID, '<td> <input type="button" value="Inspector" onclick="document.location=''%s''"/></td>\n', inspectorCommand);
+                fprintf(fileID, '</tr>\n');
+            end
+            
         end
-        
     end
     
-    % Save results for summary
-    fileID = fopen([experimentFolder 'summary-' date() '-' num2str(now) '.txt'], 'w'); % did note use datestr(now) since it has string
+    %close(h);
     
-    for s=1:length(totalSummary),
-        fprintf(fileID, '%s %s %d %d %d %d\n', totalSummary{s,1}, totalSummary{s,2}, totalSummary{s,3}, totalSummary{s,4}, totalSummary{s,5} , totalSummary{s,6});
-        % fprintf(fid, '%s %s %d %d\n', totalSummary(s).simulation, totalSummary(s).directory, totalSummary(s).maxFullInvariance, totalSummary(s).maxMean);
-    end
- 
-    fclose(fileID);
-        
-% http://blogs.mathworks.com/loren/2009/10/15/concatenating-structs/#10 
-%{
-function res = mergeStructArray(sa1, sa2)
+    fprintf(fileID, '</table>');
 
-    if isempty(sa1),
-        res = sa2;
-    elseif isempty(sa2),
-        res = sa1;
-    else
-        res = cell2struct([struct2cell(sa1) ; struct2cell(sa2)], [fieldnames(sa1); fieldnames(sa2)], 1);
-    end
-%}
+    fclose(fileID);
+    
+    web(filename);

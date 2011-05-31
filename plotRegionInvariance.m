@@ -19,7 +19,7 @@
 
 % 'D:\Oxford\Work\Projects\VisBack\Simulations\1Object\1Epoch\firingRate.dat'
 
-function [fig, maxFullInvariance, maxMean, nrOfSingleCell, multiCell] = plotRegionInvariance(filename, region, depth)
+function [fig, fullInvariance, meanInvariance, nrOfSingleCell, multiCell] = plotRegionInvariance(filename, region, depth)
 
     INFO_ANALYSIS_FOLDER = '/Network/Servers/mac0.cns.ox.ac.uk/Volumes/Data/Users/mender/Dphil/InfoAnalysis';
 
@@ -47,30 +47,27 @@ function [fig, maxFullInvariance, maxMean, nrOfSingleCell, multiCell] = plotRegi
     
     numEpochs = historyDimensions.numEpochs;
     numTransforms = historyDimensions.numTransforms;
-    regionDimension = networkDimensions(region).dimension;
+    regionDimension = networkDimensions(region).dimension; 
+    MaxInfo = log2(historyDimensions.numObjects);
+    numCells = regionDimension*regionDimension;
     
     % Allocate data structure
     invariance = zeros(regionDimension, regionDimension, historyDimensions.numObjects);
     bins = zeros(numTransforms + 1,1);
     
     % Setup Max vars
-    maxFullInvariance = 0;
-    maxMean = 0;
-    
-    % detect if -nodisplay option is set
-    % http://www.mathworks.com/matlabcentral/newsreader/view_thread/136261
-    %{ 
-    s = get(0,'Screensize');
-    if s(3) == 1 && s(4) == 1,
-        progressbar = false;
-    else
-        progressbar = true;
-    end
-    %}
+    fullInvariance = 0;
+    meanInvariance = 0;
     
     fig = figure();
     
     floatError = 0.1;
+    
+    tic
+    
+    [pathstr, name, ext] = fileparts(filename);
+    
+    disp(['***Processing' pathstr]);
     
     % Iterate objects
     for o = 1:historyDimensions.numObjects,           % pick all objects,
@@ -78,6 +75,8 @@ function [fig, maxFullInvariance, maxMean, nrOfSingleCell, multiCell] = plotRegi
         % Zero out from last object
         bins = 0*bins;
         
+        % Old school: this was before I started using regionHistory and was
+        % array jedi!
         for row = 1:regionDimension,
 
             for col = 1:regionDimension,
@@ -102,81 +101,88 @@ function [fig, maxFullInvariance, maxMean, nrOfSingleCell, multiCell] = plotRegi
         hold all;
         
         % Update max values
-        maxFullInvariance = max(maxFullInvariance, b(numTransforms)); % The latter is the number of neurons that are fully invariant
-        maxMean = max(maxMean, dot((b./(sum(b))),1:numTransforms)); % The latter is the mean level of invariance
+        fullInvariance = fullInvariance + b(numTransforms); % The latter is the number of neurons that are fully invariant
+        meanInvariance = meanInvariance + dot((b./(sum(b))),1:numTransforms); % The latter is the mean level of invariance
     end
-    
-    axis tight;
-    
-    title(filename);
     
     fclose(fileID);
     
+    axis tight;
+    
     % Convert firingRate file into NetStates file
+    disp('Converting to NetStates1...');
     netStatesFilename = convertToNetstates(filename);
     
-    % Copy NetStates1 to info analysis folder
-    copyfile(netStatesFilename, [INFO_ANALYSIS_FOLDER '/NetStates1'])
     
-    MaxInfo = log2(historyDimensions.numObjects);
-    numCells = regionDimension*regionDimension;
+    title(pathstr);
+    tmpAnalysisDir = [pathstr '/InfoAnalysis'];
+    
+    % Copy 
+    disp('Copying infoanalysis folder...');
+    copyfile(INFO_ANALYSIS_FOLDER, tmpAnalysisDir);
+    
+    % Copy NetStates1 to info analysis folder
+    copyfile(netStatesFilename, tmpAnalysisDir);
 
     % Change present working directory to infoanalysis folder, and run analysis there
-    initialPwd = pwd;
-    cd(INFO_ANALYSIS_FOLDER);   % We have to be in the working directory of infoanalysis and run it from there, otherwise it will not find its file
+    disp('Doing infoanalysis...');
+    %initialPwd = pwd;
+    cd(tmpAnalysisDir);   % We have to be in the working directory of infoanalysis and run it from there, otherwise it will not find its file
     [status, result] = system(['./infoanalysis -f 1 -b 10 -l ' num2str(region - 2)]);
     
     if status,
-        result
-        return;
+        disp(['Infoanalysis error: ' result]);
+        exit;
     end
     
     % Load single cell & plot
-    system(['./infoplot -s -f 1 -x ' num2str(numCells) ' -y 3 -z -0.5 -l ' num2str(region - 2) ' -n "trace" -t "Single cell Analysis"']);
+    disp('Doing single cell infoplot...');
+    [status, result] = system(['./infoplot -s -f 1 -x ' num2str(numCells) ' -y 3 -z -0.5 -l ' num2str(region - 2) ' -n "trace" -t "Single cell Analysis"']);
     
     if status,
-        result
-        %return;
+        disp(['Infoplot error: ' result]);
+        exit;
+    else
+        load data0s;
+        subplot(3, 1, 2);
+        plot(data0s(:,2));
+        hold all;
+        line([1 numCells], [MaxInfo MaxInfo]);
+        axis([1 numCells 0 (MaxInfo+0.5)]);
+        title('Single cell');
     end
-    
-    load data0s;
-    subplot(3, 1, 2);
-    plot(data0s(:,2));
-    hold all;
-    line([1 numCells], [MaxInfo MaxInfo]);
-    axis([1 numCells 0 (MaxInfo+0.5)]);
-    title('Single cell');
     
     % Load multiple cell & plot
-    system(['./infoplot -m -f 1 -x ' num2str(numCells) ' -y 3 -z -0.5 -l ' num2str(region - 2) ' -n "trace" -t "Single cell Analysis"']);
+    disp('Doing multiple cell infoplot...');
+    [status, result] = system(['./infoplot -m -f 1 -x ' num2str(numCells) ' -y 3 -z -0.5 -l ' num2str(region - 2) ' -n "trace" -t "Single cell Analysis"']);
     
     if status,
-        result
-        %return;
+        disp(['Infoplot error: ' result]);
+        exit;
+    else
+        load data0m;
+        subplot(3, 1, 3);
+        plot(data0m(:,2));
+        hold all;
+        line([1 (historyDimensions.numObjects * 13)], [MaxInfo MaxInfo]); % I have no clue what x axis of multiple cell is, but seems to lie close to historyDimensions.numObjects * 10
+        axis([1 (historyDimensions.numObjects * 13) 0 (MaxInfo+0.5)]);
+        title('Multiple cell');
     end
     
-    load data0m;
-    subplot(3, 1, 3);
-    plot(data0m(:,2));
-    hold all;
-    line([1 (historyDimensions.numObjects * 13)], [MaxInfo MaxInfo]); % I have no clue what x axis of multiple cell is, but seems to lie close to historyDimensions.numObjects * 10
-    axis([1 (historyDimensions.numObjects * 13) 0 (MaxInfo+0.5)]);
-    title('Multiple cell');
+    elapsedTime = toc;
 
-    % Iterate objects
-    %for o = 1:historyDimensions.numObjects,           % pick all objects,
-    %    
-    %    subplot(historyDimensions.numObjects+1, 1, o+1);
-    %    imagesc(invariance(:, :, o));                    
-    %    colorbar
-    %    colormap(jet(historyDimensions.numTransforms + 1));
-    %end
+    meanInvariance = meanInvariance / historyDimensions.numObjects;
+    nrOfSingleCell = MaxInfo - max(data0s(:,2)); %max(data0s(:,2) >= MaxInfo) % Count cells 
+    multiCell = MaxInfo - max(data0m(:,2)); %nnz(data0m(:,2) >= MaxInfo) % Count cells 
     
-    maxFullInvariance
-    maxMean
-    nrOfSingleCell = nnz(data0s(:,2) >= MaxInfo) % Count cells 
-    multiCell = nnz(data0s(:,2) >= log2(historyDimensions.numObjects)) % Count cells 
+    % Give report
+    disp('***cSummary');
+    disp(['elapsedTime(s):' num2str(elapsedTime)]);
+    disp(['meanInvariance:' num2str(meanInvariance)]);
+    disp(['nrOfSingleCell:' num2str(nrOfSingleCell)]);
+    disp(['multiCell:' num2str(multiCell)]);
     
-    cd(initialPwd);
-    
+    % Cleanup
+    rmdir(tmpAnalysisDir, 's');
+    %cd(initialPwd);
     
