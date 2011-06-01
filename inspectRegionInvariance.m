@@ -245,7 +245,7 @@ function inspectRegionInvariance(folder, networkFile)
         
         for obj=1:numObjects,
             
-            plot(regionActivity{region - 1}(historyDimensions.numOutputsPrTransform, :, obj, numEpochs, row, col) > floatError);
+            plot(regionActivity{region - 1}(historyDimensions.numOutputsPrTransform, :, obj, numEpochs, row, col)); %> floatError
             hold all;
         end  
         
@@ -266,7 +266,9 @@ function inspectRegionInvariance(folder, networkFile)
         %axis square;
 
         % Setup callback
-        set(im2, 'ButtonDownFcn', {@connectivityCallBack, region - 1});
+        if region > 2,
+            set(im2, 'ButtonDownFcn', {@connectivityCallBack, region - 1});
+        end
     end
 end
 
