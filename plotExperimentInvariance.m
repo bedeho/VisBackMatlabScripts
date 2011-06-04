@@ -25,10 +25,8 @@ function plotExperimentInvariance(project, experiment)
     fileID = fopen(filename, 'w'); % did note use datestr(now) since it has string
     
     fprintf(fileID, '<h1>%s - %s</h1>\n', experiment, date());
-
     fprintf(fileID, '<table cellpadding="10" style="border: solid 1px">\n');
-
-    fprintf(fileID, '<tr> <th>Simulation</th> <th>Network</th> <th>#Invariant</th> <th>Mean(Invariance level)</th> <th>SCA</th> <th>MCA</th> <th>Figure</th> <th>Inspector</th> </tr>\n');
+    fprintf(fileID, '<tr> <th>Simulation</th> <th>Network</th> <th>#Invariant</th> <th>Mean(Invariance level)</th> <th>SCA</th> <th>MCA</th> <th>Figure</th> <th>Inspector</th> <th>Firing</th> <th>Activation</th> <th>InhibitedActivation</th> <th>Trace</th> </tr>\n');
     
     %h = waitbar(0, 'Plotting&Infoanalysis...');
     counter = 1;
@@ -41,6 +39,7 @@ function plotExperimentInvariance(project, experiment)
 
         if listing(d).isdir && ~any(strcmp(simulation, {'Filtered', 'Images', '.', '..'})),
             
+            % Waitbar messes up -nodisplay option
             %waitbar(counter/(nnz([listing(:).isdir]) - 2), h);
             disp(['******** Doing ' num2str(counter) ' out of ' num2str((nnz([listing(:).isdir]) - 2)) '********']); 
             counter = counter + 1;
@@ -51,8 +50,12 @@ function plotExperimentInvariance(project, experiment)
                 
                 netDir = [experimentFolder  simulation '/' summary(s).directory];
                 
-                figCommand = ['matlab:open(\''' netDir '/invariance.fig\'')'];
-                inspectorCommand = ['matlab:inspectRegionInvariance(\''' netDir '\'',\''' summary(s).directory '.txt\'')'];
+                figCommand                  = ['matlab:open(\''' netDir '/invariance.fig\'')'];
+                inspectorCommand            = ['matlab:inspectRegionInvariance(\''' netDir '\'',\''' summary(s).directory '.txt\'')'];
+                firingCommand               = ['matlab:plotNetworkHistory(\''' netDir '/firingRate.dat\'')'];
+                activationCommand           = ['matlab:plotNetworkHistory(\''' netDir '/activation.dat\'')'];
+                inhibitedActivationCommand  = ['matlab:plotNetworkHistory(\''' netDir '/inhibitedActivation.dat\'')'];
+                traceCommand                = ['matlab:plotNetworkHistory(\''' netDir '/trace.dat\'')'];
                 
                 fprintf(fileID, '<tr>\n'); %flip color here
                 fprintf(fileID, '<td> %s </td>\n', simulation);
@@ -74,6 +77,10 @@ function plotExperimentInvariance(project, experiment)
                 
                 fprintf(fileID, '<td> <input type="button" value="Figure" onclick="document.location=''%s''"/></td>\n', figCommand);
                 fprintf(fileID, '<td> <input type="button" value="Inspector" onclick="document.location=''%s''"/></td>\n', inspectorCommand);
+                fprintf(fileID, '<td> <input type="button" value="Firing" onclick="document.location=''%s''"/></td>\n', firingCommand);
+                fprintf(fileID, '<td> <input type="button" value="Activation" onclick="document.location=''%s''"/></td>\n', activationCommand);
+                fprintf(fileID, '<td> <input type="button" value="InhibitedActivation" onclick="document.location=''%s''"/></td>\n', inhibitedActivationCommand);
+                fprintf(fileID, '<td> <input type="button" value="Trace" onclick="document.location=''%s''"/></td>\n', traceCommand);
                 fprintf(fileID, '</tr>\n');
             end
             
@@ -86,4 +93,8 @@ function plotExperimentInvariance(project, experiment)
 
     fclose(fileID);
     
-    web(filename);
+    %web(filename);
+    
+    disp([experiment ' 100% DONE.']);
+    
+    

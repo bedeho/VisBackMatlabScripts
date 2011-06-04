@@ -85,8 +85,17 @@ function inspectRegionInvariance(folder, networkFile)
         axisVals(r-1, 2) = subplot(numRegions, 3, 3*(numRegions - r) + 2);
         
         % Plot region invarinceCount
-        w = regionActivity{r - 1}(historyDimensions.numOutputsPrTransform, :, :, numEpochs, :, :);
-        invarinceCount = squeeze(sum(sum(w > floatError))); %sum goes along first non singleton dimension, so it skeeps all our BS 1dimension
+        w = regionActivity{r - 1}(historyDimensions.numOutputsPrTransform, :, :, numEpochs, :, :) > floatError;
+        
+        if numTransforms > 1,
+            w = sum(w);
+        end
+        
+        if numObjects > 1,
+            w = sum(w);
+        end
+        
+        invarinceCount = squeeze(w); %sum goes along first non singleton dimension, so it skeeps all our BS 1dimension
         im = imagesc(invarinceCount);
         colorbar
         colormap(jet(max(max(invarinceCount)) + 1)); %();

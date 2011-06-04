@@ -113,7 +113,6 @@ function [fig, fullInvariance, meanInvariance, nrOfSingleCell, multiCell] = plot
     disp('Converting to NetStates1...');
     netStatesFilename = convertToNetstates(filename);
     
-    
     title(pathstr);
     tmpAnalysisDir = [pathstr '/InfoAnalysis'];
     
@@ -176,7 +175,7 @@ function [fig, fullInvariance, meanInvariance, nrOfSingleCell, multiCell] = plot
     multiCell = MaxInfo - max(data0m(:,2)); %nnz(data0m(:,2) >= MaxInfo) % Count cells 
     
     % Give report
-    disp('***cSummary');
+    %disp('***Summary');
     disp(['elapsedTime(s):' num2str(elapsedTime)]);
     disp(['meanInvariance:' num2str(meanInvariance)]);
     disp(['nrOfSingleCell:' num2str(nrOfSingleCell)]);
