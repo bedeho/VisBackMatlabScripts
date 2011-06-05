@@ -22,10 +22,10 @@ set = true;
 ext='.png';
 
 % READ: http://www.cs.rug.nl/~imaging/simplecell.html 
-psi   = [0, pi, -pi/2, pi/2];                        % phase, [0, pi, -pi/2, pi/2]
+psi   = [0, pi, -pi/2, pi/2];       % phase, [0, pi, -pi/2, pi/2]
 scale = [2];                        % wavelength (pixels)
 orient= [0, pi/4, pi/2, 3*pi/4];    % orientation
-bw    = 1.8;                        % bandwidth
+bw    = 1.5;                        % bandwidth
 gamma = 0.5;                        % aspect ratio
 
 % Create parameters file ===========================================
@@ -62,7 +62,7 @@ end
 % Save results for summary ===========================================
 
 fileID = fopen([inputDirectory filesep 'Summary.html'], 'w'); 
-fprintf(fileID, '<h1>Filtering - %s</h1>\n', date());
+fprintf(fileID, '<h1>Filtering - %s</h1>\n', datestr(now));
 
 fprintf(fileID,  '<ul>\n');
 fprintf(fileID, ['<ul> Phases - ' vPhases '</ul>\n']);
@@ -84,38 +84,40 @@ clear cell;% S;
 
 for i = 1:length(content)
     file = content(ind(i)).name;
+    
     if ~(content(ind(i)).isdir)
+        
         ignoreDir = any(strcmpi(file, {'private','CVS','.','..'}));
-        [~,fname,fext] = fileparts(file); % fver returned
         ignorePrefix = any(strncmp(file, {'@','.'}, 1));
+        
+        [pathstr, fname, fext] = fileparts(file);
+        
         if (~(ignoreDir || ignorePrefix) && strcmpi(ext,fext))
             
             % Open file
-            imgFile = [inputDirectory '/Images/' file];
+            imgFile = [inputDirectory filesep 'Images' filesep file];
             finfo = imfinfo(imgFile);
             
             % Test for expected image size
             if finfo.Height ~= imageSize || finfo.Width ~= imageSize,
-                disp(['UNEXPECTED IMAGE SIZE FOUND: ' finfo.Height ',' finfo.Width]);
-                exit;
+                error(['UNEXPECTED IMAGE SIZE FOUND: ' finfo.Height ',' finfo.Width]);
             end
             
             % Filter
             filtering(imgFile, psi, scale, orient, bw, gamma, set, paddingGrayScaleColor);
             
+            % Dump to file list
+            fprintf(iList, '%s\n', fname);
+            
             % Dump to summary            
-            [pathstr, name, ext] = fileparts([inputDirectory '/Filtered/' file]);
-            viewFilters = ['matlab:plotFilters(\''' pathstr filesep name '\'',' num2str(imageSize) ',' vOrients ',' vPhases ',' vScales ')'];
-            viewImage = ['matlab:figure;imshow(\''' inputDirectory '/Images/' file '\'')'];
+            viewFilters = ['matlab:plotFilters(\''' inputDirectory filesep 'Filtered' filesep fname '\'',' num2str(imageSize) ',' vOrients ',' vPhases ',' vScales ')'];
+            viewImage = ['matlab:figure;imshow(\''' imgFile '\'')'];
             
             fprintf(fileID, '<tr>\n');
-            fprintf(fileID, '<td>%s</td>\n', file);
+            fprintf(fileID, '<td>%s</td>\n', fname);
             fprintf(fileID, '<td><input type="button" value="View" onclick="document.location=''%s''"/></td>\n', viewFilters);
             fprintf(fileID, '<td><input type="button" value="View" onclick="document.location=''%s''"/></td>\n', viewImage);
             fprintf(fileID, '</tr>\n');
-            
-            % Dump to file list
-            fprintf(iList, '%s\n', fname); %was imagedir
         end
     end
 end
@@ -124,7 +126,6 @@ code = fclose(iList);
 if code ~= 0; error('Problem closing file list'); end
 
 fprintf(fileID, '</table>');
-
 fclose(fileID);
 
 % Cleanup ========================================
@@ -145,6 +146,5 @@ if (status ~= 0)
     disp(results); 
     error('Problem moving filtered folders to /Filtered directory'); 
 end
-
 
 web([inputDirectory filesep 'Summary.html']);

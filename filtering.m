@@ -1,12 +1,9 @@
 function [dim,FI,GF] = filtering(file, psi, scale, orient, bw, gamma, set, paddingColor)
     close all;
 
-
     if nargin < 8
         error('Not enough arguments passed');
     end
-
-    %orient=orient+(pi/8); % Masquelier+Thorpe2007
 
     finfo = imfinfo(file);
     fsize = finfo.Height * finfo.Width;
@@ -22,9 +19,9 @@ function [dim,FI,GF] = filtering(file, psi, scale, orient, bw, gamma, set, paddi
     maxF = zeros(ss,os,ps);
 
     disp(['Filtering image: ',file]);
-    disp(['Orientations: ',int2str(orient*180/pi), ' (degrees)']);
+    disp(['Orientations: ',int2str(rad2deg(orient)), ' (degrees)']);
     disp(['Wavelengths: ',int2str(scale), ' (pixels)']);
-    disp(['Phases: ',int2str(psi*180/pi), ' (degrees)']);
+    disp(['Phases: ',int2str(rad2deg(psi)), ' (degrees)']);
 
     I = imread(file);
 
@@ -32,7 +29,7 @@ function [dim,FI,GF] = filtering(file, psi, scale, orient, bw, gamma, set, paddi
         I = rgb2gray(I);
     end
 
-    if isa(I,'double')~=1 
+    if ~isa(I,'double') 
         I = double(I);
     end
 
@@ -67,10 +64,10 @@ function [dim,FI,GF] = filtering(file, psi, scale, orient, bw, gamma, set, paddi
     % Not meaningfull to take std since
     % mean is always zero, so is just quirky norm (1/(N-1) factor),
     % We do it once later, with proper norm.
-    disp(['Std dev of the image: ',num2str(std2(I))]);
-    if (std2(paddedImage))
-        paddedImage = paddedImage / std2(paddedImage); % Divide by standard deviation to give unit variance
-    end
+    %disp(['Std dev of the image: ',num2str(std2(I))]);
+    %if (std2(paddedImage))
+    %    paddedImage = paddedImage / std2(paddedImage); % Divide by standard deviation to give unit variance
+    %end
 
     %figure; imshow(paddedImage); title('Normalized Image');
 
@@ -87,7 +84,7 @@ function [dim,FI,GF] = filtering(file, psi, scale, orient, bw, gamma, set, paddi
 
         mkdir(outputDir);
     end
-
+    
     for p=1:ps
 
         if ~set
@@ -99,29 +96,33 @@ function [dim,FI,GF] = filtering(file, psi, scale, orient, bw, gamma, set, paddi
             for o=1:os
 
                 % Create Gabor Filter
-                GF{s,o,p}=double(gabor_fn(bw,gamma,psi(p),scale(s),orient(o)));
+                GF{s,o,p} = double(gabor_fn(bw,gamma,psi(p),scale(s),orient(o)));
 
                 % COMMENTED OUT
                 % 03.06.11 by Bedeho Mender
-                % Not meaningfull to to subtract mean, it is already
-                % zero since sum of filter is 0.
+                % In theory this is pointless, since filter sum is 0,
+                % however the discrete and finite part GF{s,o,p}
+                % does not, so we just give it zero sum by subtracting
+                % mean.
                 %Set Gabor filter mean to 0
-                GF{s,o,p}=GF{s,o,p} - mean2(GF{s,o,p}); 
+                GF{s,o,p} = GF{s,o,p} - mean2(GF{s,o,p}); 
 
                 % COMMENTED OUT
                 % 03.06.11 by Bedeho Mender
                 % We do normalization after convolution
                 %Normalize gabor filter
-                GF{s,o,p}=GF{s,o,p} / sqrt(GF{s,o,p}(:)' * GF{s,o,p}(:)); % Set Euclidean norm to 1
+                GF{s,o,p} = GF{s,o,p} / norm(GF{s,o,p}(:));
 
                 if ~set
                     figure(fi);
                     subplot(ss,os,((s-1)*os)+o);
                     imshow(GF{s,o,p}/2+0.5);
                 end
-
+                
                 % Convolve padded image with Gabor filter
                 tmp = conv2(paddedImage, GF{s,o,p}, 'same');
+                %%% DO NOT USE tmp = normalize_SIMON(paddedImage, tmp, length(GF{s,o,p}));
+                
                 %tmp = conv_SIMON(paddedImage, GF{s,o,p}); 
                 
                 % Copy out part of padded image convolution that corresponds to
@@ -134,18 +135,23 @@ function [dim,FI,GF] = filtering(file, psi, scale, orient, bw, gamma, set, paddi
                 % Normalize with selfconvolution of gabor filter to control for
                 % varying size of gabor filer for diffrent parameter
                 % combinations
-                FI{s,o,p}=FI{s,o,p}/max(max(abs(conv2(GF{s,o,p},GF{s,o,p}))));
+                %FI{s,o,p}=FI{s,o,p}/max(max(abs(conv2(GF{s,o,p},GF{s,o,p}))));
 
                 % COMMENTED OUT
                 % 03.06.11 by Bedeho Mender
                 % Our normalization takes care of it 
-                %Giv unit variance
-                FI{s,o,p} = FI{s,o,p} / std2(FI{s,o,p});
-
+                %Give unit variance
+                %FI{s,o,p} = FI{s,o,p} / std2(FI{s,o,p});
+                
+                FI{s,o,p} = FI{s,o,p} / norm(FI{s,o,p});
+                
+                % Cut away negatives
+                FI{s,o,p}(FI{s,o,p} < 0) = 0;
+                
                 if set % Save file
                     filtFileName = ['' outputDir filesep name '.' int2str(scale(s)) '.' int2str(rad2deg(orient(o))) '.' int2str(rad2deg(psi(p))) '.gbo' '']; %sprintf('%s',outputDir);
                     outFile = fopen(filtFileName,'w');
-                    count = fwrite(outFile,FI{s,o,p}','float'); % Transpose to make row major
+                    count = fwrite(outFile, FI{s,o,p}','float'); % Transpose to make row major
                     %disp(FI{s,o,p});
 
                     if count ~= fsize
@@ -177,25 +183,51 @@ end
 % not vectorized
 % filter and image must be square
 % filter must have odd dimension
+% TOOO SLOW
 function res = conv_SIMON(image, filter)
 
     imageDim = length(image);
     filterDim = length(filter);
     hFltDim = floor(filterDim/2);
-    
     res = zeros(imageDim);
     
+    fVector = filter(:);
     imgSpace = (hFltDim + 1):(imageDim-hFltDim);
-    
-    filterNorm = norm(filter(:));
+    fNorm = norm(fVector);
+    fltBase = -hFltDim:hFltDim;
     
     % Pick image position to apply filter on
     for imgRow=imgSpace,
         for imgCol=imgSpace,
             
-            img = image(imgRow + (-hFltDim:hFltDim), imgCol + (-hFltDim:hFltDim));
-            imgNorm = norm(img(:));
-            res(imgRow, imgCol) = dot(img(:), filter(:))/(filterNorm * imgNorm);
+            img = image(imgRow + fltBase, imgCol + fltBase);
+            patch = img(:);
+            imgNorm = norm(patch);
+            
+            res(imgRow, imgCol) = dot(patch, fVector)/(fNorm * imgNorm);
         end
     end
 end
+
+% NOT TESTED
+%{
+function res = normalize_SIMON(image, convResult, filterDim)
+
+    imageDim = length(image);
+    hFltDim = floor(filterDim/2);
+    res = zeros(length(convResult));
+    
+    imgSpace = (hFltDim + 1):(imageDim-hFltDim);
+    fltBase = -hFltDim:hFltDim;
+    
+    % Pick image position to apply filter on
+    for imgRow=imgSpace,
+        for imgCol=imgSpace,
+            
+            img = image(imgRow + fltBase, imgCol + fltBase);
+            
+            res(imgRow, imgCol) = convResult(imgRow, imgCol)/norm(img(:));
+        end
+    end
+end
+%} 

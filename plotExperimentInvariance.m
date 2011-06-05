@@ -24,7 +24,7 @@ function plotExperimentInvariance(project, experiment)
     filename = [experimentFolder 'Summary.html'];
     fileID = fopen(filename, 'w'); % did note use datestr(now) since it has string
     
-    fprintf(fileID, '<h1>%s - %s</h1>\n', experiment, date());
+    fprintf(fileID, '<h1>%s - %s</h1>\n', experiment, datestr(now));
     fprintf(fileID, '<table cellpadding="10" style="border: solid 1px">\n');
     fprintf(fileID, '<tr> <th>Simulation</th> <th>Network</th> <th>#Invariant</th> <th>Mean(Invariance level)</th> <th>SCA</th> <th>MCA</th> <th>Figure</th> <th>Inspector</th> <th>Firing</th> <th>Activation</th> <th>InhibitedActivation</th> <th>Trace</th> </tr>\n');
     
@@ -90,7 +90,6 @@ function plotExperimentInvariance(project, experiment)
     %close(h);
     
     fprintf(fileID, '</table>');
-
     fclose(fileID);
     
     %web(filename);

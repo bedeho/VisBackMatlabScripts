@@ -41,11 +41,14 @@ function plotFilters(folders, V1_size, vOrients, vPhases, vScales)
                 
                 index = length(vPhases)*length(vScales)*(o - 1) + length(vScales)*(p - 1) + s;
                 
-                pMatrix = arrayfun(@ramp, reshape(v, [V1_size V1_size]));
-                %pMatrix = reshape(v, [V1_size V1_size]);
+                % Read data into matrix, but data is reshaped
+                % column wise, while data is saved row wise, sow 
+                % we must transpose
+                %pMatrix = arrayfun(@ramp, reshape(v, [V1_size V1_size]))';
+                pMatrix = reshape(v, [V1_size V1_size])'; 
                 
                 subplot(length(vOrients), length(vPhases)*length(vScales), index);
-                imagesc(pMatrix);
+                imagesc(pMatrix); 
                 
                 colorbar
                 title({['Orrient (deg) ' num2str(vOrients(o)) ', Phase ' num2str(vPhases(p)) ', Scale ' num2str(vScales(s))] ..., 
