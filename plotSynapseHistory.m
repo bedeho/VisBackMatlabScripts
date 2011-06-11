@@ -37,9 +37,8 @@ function plotSynapseHistory(folder, region, depth, row, col, maxEpoch)
     % Get history array
     synapses = synapseHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, maxEpoch);
     
-    %format('longE'); % output full floats, no rounding!!
+    fig = figure();
     
-    figure();
     for s=1:length(synapses),
 
         % Plot
@@ -49,6 +48,8 @@ function plotSynapseHistory(folder, region, depth, row, col, maxEpoch)
     end
     
     fclose(fileID);
+    
+    makeFigureFullScreen(fig);
     
     %=====================================================================================================================
     % FIRING

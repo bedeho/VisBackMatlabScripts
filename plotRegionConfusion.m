@@ -65,10 +65,12 @@ function plotRegionConfusion(filename, region, depth)
         end
     end
     
-    figure();
+    fig = figure();
     imagesc(confusion);
     colorbar
 
     fclose(fileID);
+    
+    makeFigureFullScreen(fig);
 
     

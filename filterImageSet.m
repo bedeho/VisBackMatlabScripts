@@ -1,4 +1,4 @@
-function [] = filterImageSet(inputDirectory, imageSize)
+function [] = filterImageSet(inputDirectory, imageSize, filterScale)
 
 %inputDirectory = Directory where we look for /Images folder with
 %input pictures, and where we save /Filtered folder with output and
@@ -9,8 +9,13 @@ function [] = filterImageSet(inputDirectory, imageSize)
 %against real image size prior to filtering as safety, been burned
 %to many times!!!
 
-if nargin < 2,
-    error('Arguments not supplied');
+if nargin < 3
+    
+    filterScale = 16;
+
+    if nargin < 2,
+        error('Argument imageSize not supplied');
+    end
 end
 
 tic;
@@ -23,7 +28,7 @@ ext='.png';
 
 % READ: http://www.cs.rug.nl/~imaging/simplecell.html 
 psi   = [0, pi, -pi/2, pi/2];       % phase, [0, pi, -pi/2, pi/2]
-scale = [2];                        % wavelength (pixels)
+scale = filterScale;                % wavelength (pixels)
 orient= [0, pi/4, pi/2, 3*pi/4];    % orientation
 bw    = 1.5;                        % bandwidth
 gamma = 0.5;                        % aspect ratio

@@ -5,10 +5,9 @@
 %  Created by Bedeho Mender on 29/04/11.
 %  Copyright 2011 OFTNAI. All rights reserved.
 %
-%  PLOT REGION INVARIANCE
+%  INSPECT CONNECTIVITY
 %  Input=========
 %  filename: filename of weight file
-%  standalone: whether gui should be shown (i.e standalone == true)
 %  Output========
 %
 

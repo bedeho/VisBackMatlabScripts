@@ -33,14 +33,12 @@ function plotNeuronHistory(filename, region, depth, row, col, maxEpoch)
     % Get history array
     activity = neuronHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, maxEpoch);
     
-    %format('longE'); % output full floats, no rounding!!
-    
     % Plot
     v = activity(:, :, :, 1:maxEpoch);
     
     streamSize = maxEpoch * historyDimensions.epochSize;
     vect = reshape(v, [1 streamSize]);
-    figure();
+    fig = figure();
     plot(vect);
     
     % Draw vertical divider for each transform
@@ -64,4 +62,6 @@ function plotNeuronHistory(filename, region, depth, row, col, maxEpoch)
     axis tight;
     
     fclose(fileID);
+    
+    makeFigureFullScreen(fig);
     

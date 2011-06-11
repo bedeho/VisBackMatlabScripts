@@ -47,6 +47,11 @@ function [activity] = regionHistory(fileID, historyDimensions, neuronOffsets, ne
         buffer = fread(fileID, streamSize, SOURCE_PLATFORM_FLOAT);
 
         activity = reshape(buffer, [historyDimensions.numOutputsPrTransform historyDimensions.numTransforms historyDimensions.numObjects maxEpoch dimension dimension]);
+        
+        % Because file is saved in row major,
+        % and reshape fills in buffer in column major,
+        % we have to permute the last two dimensions (row,col)
+        activity = permute(activity, [1 2 3 4 6 5]);
     else
         %When we are looking for partial epoch history, then we have to
         %seek betweene neurons, so we just use neuronHistory() routine

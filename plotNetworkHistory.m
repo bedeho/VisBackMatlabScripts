@@ -45,7 +45,7 @@ function plotNetworkHistory(filename, depth, maxEpoch)
         for o=1:historyDimensions.numObjects,
             for t=1:historyDimensions.numTransforms,
 
-                figure();
+                fig = figure();
                 title(['Epoch: ', num2str(e), ', Object:', num2str(o), ', Transform:', num2str(t)]);
                 plotCounter = 1;
                 
@@ -55,7 +55,7 @@ function plotNetworkHistory(filename, depth, maxEpoch)
                     
                     for ti=1:historyDimensions.numOutputsPrTransform,
 
-                        subplot(historyDimensions.numOutputsPrTransform, numRegions-1, plotCounter);
+                        subplot(numRegions-1, historyDimensions.numOutputsPrTransform, plotCounter);
 
                         a = activity{r-1}(ti, t, o, e, :, :);
                         imagesc(reshape(a, [dimension dimension]));
@@ -66,7 +66,8 @@ function plotNetworkHistory(filename, depth, maxEpoch)
                         plotCounter = plotCounter + 1;
                     end
                 end
-                
+
+                makeFigureFullScreen(fig);
                 pause
             end
         end

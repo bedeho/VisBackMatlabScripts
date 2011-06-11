@@ -51,7 +51,7 @@ function [] = plotRegionStability(filename, region, depth, objects, maxEpoch)
     plotDim = ceil(sqrt(historyDimensions.numTransforms));
     stability = zeros(maxEpoch - 1); % To plot
     
-    figure();
+    fig = figure();
     
     for t=1:historyDimensions.numTransforms, % pick all transforms
 
@@ -74,6 +74,8 @@ function [] = plotRegionStability(filename, region, depth, objects, maxEpoch)
     end
     
     fclose(fileID);
+    
+    makeFigureFullScreen(fig);
     
     function [res] = newValuesInSecond(first, second)
         res = 0;

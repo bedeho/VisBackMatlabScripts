@@ -54,7 +54,7 @@ function inspectRegionInvariance(folder, networkFile)
     %axisVals(i,1) = axisVals(i,2) = for region V(i+1)
     %axisVals(i,3) = for region Vi
     
-    figure();
+    fig = figure();
     
     % Iterate regions to
     % 1) Do initial plots
@@ -133,6 +133,8 @@ function inspectRegionInvariance(folder, networkFile)
         end
     end
     
+    makeFigureFullScreen(fig);
+    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % CALLBACKS
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -141,12 +143,8 @@ function inspectRegionInvariance(folder, networkFile)
         
         % Extract region,row,col
         region = varargin{3};
-        
-        %axes(axisVals(region-1, 2));
-        %set(gcf,'CurrentAxes',axisVals(region-1, 2)) 
-        %v = round(ginput(1));
-        %row = v(2);
-        %col = v(1);
+
+        buttonClick = get(gcf,'SelectionType');
         
         pos=get(axisVals(region-1, 2), 'CurrentPoint');
         [row, col] = imagescClick(pos(1, 2), pos(1, 1), networkDimensions(region).dimension);
@@ -154,12 +152,17 @@ function inspectRegionInvariance(folder, networkFile)
         disp(['You clicked R:' num2str(region) ', row:' num2str(pos(1, 2)) ', col:', num2str(pos(1, 1))]);
         disp(['You clicked R:' num2str(region) ', row:' num2str(row) ', col:', num2str(col)]);
 
-        updateInvariancePlot(region, row, col);
-        
-        % For top region, initiate weight plot
-        %if region == numRegions,
-            updateWeightPlot(region, row, col);
-        %end
+        if strcmp(buttonClick, 'normal'), % Normal left mouse click
+            
+            updateInvariancePlot(region, row, col);
+
+            % For top region, initiate weight plot
+            %if region == numRegions,
+                updateWeightPlot(region, row, col);
+            %end
+        else % Right mouse click, open synapse history
+            plotSynapseHistory(folder, region, 1, row, col, numEpochs);
+        end
     end
     
     function connectivityCallBack(varargin)
@@ -266,7 +269,7 @@ function inspectRegionInvariance(folder, networkFile)
     function updateWeightPlot(region, row, col) 
 
         % Get weightbox
-        weights = afferentSynapseMatrix(connectivityFileID, networkDimensions, neuronOffsets2, region, depth, col, row, region - 1, 1);
+        weights = afferentSynapseMatrix(connectivityFileID, networkDimensions, neuronOffsets2, region, depth, row, col, region - 1, 1);
 
         % Save axis
         axisVals(region - 1, 3) = subplot(numRegions, 3, 3*(numRegions - region - 1 + 1) + 3);
