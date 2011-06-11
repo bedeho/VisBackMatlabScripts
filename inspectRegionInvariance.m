@@ -47,6 +47,8 @@ function inspectRegionInvariance(folder, networkFile)
     numObjects = historyDimensions.numObjects;
     floatError = 0.1;
     
+    THRESHOLD = 0.2;
+    
     % Allocate datastructure
     regionActivity = cell(numRegions - 1);
     axisVals = zeros(numRegions, 3);
@@ -152,16 +154,13 @@ function inspectRegionInvariance(folder, networkFile)
         disp(['You clicked R:' num2str(region) ', row:' num2str(pos(1, 2)) ', col:', num2str(pos(1, 1))]);
         disp(['You clicked R:' num2str(region) ', row:' num2str(row) ', col:', num2str(col)]);
 
-        if strcmp(buttonClick, 'normal'), % Normal left mouse click
+        if strcmp(buttonClick, 'alt'), % Normal left mouse click
+            
+            plotSynapseHistory(folder, region, 1, row, col, numEpochs);
+        else % Right mouse click, open synapse history
             
             updateInvariancePlot(region, row, col);
-
-            % For top region, initiate weight plot
-            %if region == numRegions,
-                updateWeightPlot(region, row, col);
-            %end
-        else % Right mouse click, open synapse history
-            plotSynapseHistory(folder, region, 1, row, col, numEpochs);
+            updateWeightPlot(region, row, col);
         end
     end
     
@@ -200,8 +199,6 @@ function inspectRegionInvariance(folder, networkFile)
             for k = 1:numFeatures,
                 drawFeature(features(k).row, features(k).col, features(k).depth);
             end
-            
-            set(gca,'YDir','reverse');
         else
              % this is needed in case there are no features found, because in this
              % case we would ordinarily not get the content cleared, even
@@ -211,16 +208,13 @@ function inspectRegionInvariance(folder, networkFile)
             plot([0 v1Dimension+1], [(v1Dimension+1)/2 (v1Dimension+1)/2], 'r');
         end
         
-        axis([0 v1Dimension+1 0 v1Dimension+1]); 
-        
-        axis square;
+        set(gca,'YDir','reverse');
+        axis tight;
         
         updateInvariancePlot(region, row, col);
         
         % sources = cell  of struct  (1..n_i).(col,row,depth, productWeight)  
         function [sources] = findV1Sources(region, depth, row, col)
-
-            THRESHOLD = 0.2;
 
             if region == 1, % termination condition, V1 cells return them self
 
