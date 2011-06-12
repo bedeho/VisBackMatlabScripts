@@ -124,8 +124,6 @@ function plotSynapseHistory(folder, region, depth, row, col, maxEpoch)
     
     plot(vect, 'y');
     hold on;
-    
-    min(vect)
 
     fclose(fileID);
     
