@@ -47,7 +47,7 @@ function inspectRegionInvariance(folder, networkFile)
     numObjects = historyDimensions.numObjects;
     floatError = 0.1;
     
-    THRESHOLD = 0.2;
+    THRESHOLD = 0.15;
     
     % Allocate datastructure
     regionActivity = cell(numRegions - 1);
@@ -155,10 +155,8 @@ function inspectRegionInvariance(folder, networkFile)
         disp(['You clicked R:' num2str(region) ', row:' num2str(row) ', col:', num2str(col)]);
 
         if strcmp(buttonClick, 'alt'), % Normal left mouse click
-            
             plotSynapseHistory(folder, region, 1, row, col, numEpochs);
         else % Right mouse click, open synapse history
-            
             updateInvariancePlot(region, row, col);
             updateWeightPlot(region, row, col);
         end
@@ -169,7 +167,7 @@ function inspectRegionInvariance(folder, networkFile)
         % Extract region,row,col
         region = varargin{3};
         
-        pos=get(axisVals(region, 3), 'CurrentPoint');
+        pos = get(axisVals(region, 3), 'CurrentPoint');
         
         %row = imagescClick(pos(1, 2));
         %col = imagescClick(pos(1, 1));
@@ -208,8 +206,11 @@ function inspectRegionInvariance(folder, networkFile)
             plot([0 v1Dimension+1], [(v1Dimension+1)/2 (v1Dimension+1)/2], 'r');
         end
         
+        % Since we use plot axis for feature plot,
+        % which has reversed axis, we must reverse axis
         set(gca,'YDir','reverse');
-        axis tight;
+        
+        axis([0 v1Dimension+1 0 v1Dimension+1]);
         
         updateInvariancePlot(region, row, col);
         

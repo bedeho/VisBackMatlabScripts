@@ -96,8 +96,36 @@ function plotSynapseHistory(folder, region, depth, row, col, maxEpoch)
     
     streamSize = maxEpoch * historyDimensions.epochSize;
     vect = reshape(v, [1 streamSize]);
-    plot(vect,'m');
+    plot(vect, 'g');
     hold on;
+
+    fclose(fileID);
+    
+    %=====================================================================================================================
+    % ACTIVATION
+    %=====================================================================================================================
+        
+    traceRateFile = [folder '/activation.dat'];
+    
+    % Open file
+    fileID = fopen(traceRateFile);
+    
+    % Read header
+    [networkDimensions, historyDimensions, neuronOffsets] = loadHistoryHeader(fileID);
+    
+    % Get history array
+    activity = neuronHistory(fileID, networkDimensions, historyDimensions, neuronOffsets, region, depth, row, col, maxEpoch);
+    
+    % Plot
+    v = activity(:, :, :, 1:maxEpoch);
+    
+    streamSize = maxEpoch * historyDimensions.epochSize;
+    vect = reshape(v, [1 streamSize]);
+    
+    plot(vect, 'y');
+    hold on;
+    
+    min(vect)
 
     fclose(fileID);
     
@@ -124,4 +152,6 @@ function plotSynapseHistory(folder, region, depth, row, col, maxEpoch)
     end
     
     axis tight;
+    
+    title(['Row ' num2str(row) ' Col ' num2str(col) ' Region ' num2str(region)]);
     
