@@ -209,8 +209,8 @@ function drawFeature(row, col, depth, weight)
     [orrientation, wavelength, phase] = decodeDepth(depth);
     featureOrrientation = orrientation + 90; % orrientation is the param to the filter, but it corresponds to a perpendicular image feature
     
-    dx = halfSegmentLength * cos(featureOrrientation);
-    dy = halfSegmentLength * sin(featureOrrientation);
+    dx = halfSegmentLength * cos(deg2rad(featureOrrientation));
+    dy = halfSegmentLength * sin(deg2rad(featureOrrientation));
     
     x1 = col - dx;
     x2 = col + dx;
@@ -222,7 +222,7 @@ function drawFeature(row, col, depth, weight)
 
 function [orrientation, wavelength, phase] = decodeDepth(depth)
 
-    Phases = [0, 180];
+    Phases = [0, 180, -90, 90];
     Orrientations = [0, 45, 90, 135];
     Wavelengths = [4];
     

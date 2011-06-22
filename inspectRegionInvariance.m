@@ -48,6 +48,9 @@ function inspectRegionInvariance(folder, networkFile)
     floatError = 0.1;
     
     THRESHOLD = 0.15;
+    Phases = [0, 180, -90, 90];
+    Orrientations = [0, 45, 90, 135];
+    Wavelengths = [2];
     
     % Allocate datastructure
     regionActivity = cell(numRegions - 1);
@@ -206,6 +209,9 @@ function inspectRegionInvariance(folder, networkFile)
             plot([0 v1Dimension+1], [(v1Dimension+1)/2 (v1Dimension+1)/2], 'r');
         end
         
+        % weird issue with shrinking...
+        %title(['Threshold:' num2str(THRESHOLD) ', Phase:' num2str(Phases) ', Orrientations:' num2str(Orrientations) ',Wavelengths' num2str(Wavelengths)]);
+        
         % Since we use plot axis for feature plot,
         % which has reversed axis, we must reverse axis
         set(gca,'YDir','reverse');
@@ -275,8 +281,44 @@ function inspectRegionInvariance(folder, networkFile)
         % Setup callback
         if region > 2,
             set(im2, 'ButtonDownFcn', {@connectivityCallBack, region - 1});
+        %else
+            %title(['Threshold:' num2str(THRESHOLD) ', Phase:' num2str(Phases) ', Orrientations:' num2str(Orrientations) ',Wavelengths' num2str(Wavelengths)]);
         end
+        
     end
+
+    function drawFeature(row, col, depth)
+
+        halfSegmentLength = 3;%0.5;
+        [orrientation, wavelength, phase] = decodeDepth(depth);
+        featureOrrientation = orrientation + 90; % orrientation is the param to the filter, but it corresponds to a perpendicular image feature
+
+        dx = halfSegmentLength * cos(deg2rad(featureOrrientation));
+        dy = halfSegmentLength * sin(deg2rad(featureOrrientation));
+
+        x1 = col - dx;
+        x2 = col + dx;
+        y1 = row - dy;
+        y2 = row + dy;
+        plot([x1 x2], [y1 y2], '-r');
+        hold on;
+
+    end 
+
+    function [orrientation, wavelength, phase] = decodeDepth(depth)
+
+        depth = uint8(depth)-1; % These formula expect C indexed depth, since I copied from project
+
+        w = mod((idivide(depth, length(Phases))), length(Wavelengths));
+        wavelength = Wavelengths(w+1);
+
+        ph = mod(depth, length(Phases));
+        phase = Phases(ph+1);
+
+        o = idivide(depth, (length(Wavelengths) * length(Phases)));
+        orrientation = Orrientations(o+1);
+    end 
+
 end
 
 % Made with random experiemtnation with imagesc behavior, MAY not work
@@ -301,38 +343,4 @@ function [row, col] = imagescClick(i, j, dimension)
     end
 end
 
-function drawFeature(row, col, depth)
 
-    halfSegmentLength = 3;%0.5;
-    [orrientation, wavelength, phase] = decodeDepth(depth);
-    featureOrrientation = orrientation + 90; % orrientation is the param to the filter, but it corresponds to a perpendicular image feature
-
-    dx = halfSegmentLength * cos(deg2rad(featureOrrientation));
-    dy = halfSegmentLength * sin(deg2rad(featureOrrientation));
-
-    x1 = col - dx;
-    x2 = col + dx;
-    y1 = row - dy;
-    y2 = row + dy;
-    plot([x1 x2], [y1 y2], '-r');
-    hold on;
-
-end   
-
-function [orrientation, wavelength, phase] = decodeDepth(depth)
-
-    Phases = [0, 180, -90, 90];
-    Orrientations = [0, 45, 90, 135];
-    Wavelengths = [2];
-    
-    depth = uint8(depth)-1; % These formula expect C indexed depth, since I copied from project
-
-    w = mod((idivide(depth, length(Phases))), length(Wavelengths));
-    wavelength = Wavelengths(w+1);
-    
-    ph = mod(depth, length(Phases));
-    phase = Phases(ph+1);
-    
-    o = idivide(depth, (length(Wavelengths) * length(Phases)));
-    orrientation = Orrientations(o+1);
-end 
