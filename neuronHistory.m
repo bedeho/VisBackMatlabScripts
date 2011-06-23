@@ -35,7 +35,11 @@ function [activity] = neuronHistory(fileID, networkDimensions, historyDimensions
     
     % Read into buffer
     streamSize = maxEpoch * historyDimensions.epochSize;
-    buffer = fread(fileID, streamSize, SOURCE_PLATFORM_FLOAT);
+    [buffer count] = fread(fileID, streamSize, SOURCE_PLATFORM_FLOAT);
+    
+    if count ~= streamSize,
+        error(['Read ' num2str(count) ' bytes, ' num2str(streamSize) ' expected ']);
+    end
     
     % Make history array
     activity = reshape(buffer, [historyDimensions.numOutputsPrTransform historyDimensions.numTransforms historyDimensions.numObjects maxEpoch]);

@@ -44,7 +44,11 @@ function [activity] = regionHistory(fileID, historyDimensions, neuronOffsets, ne
 
         % Read into buffer
         streamSize = dimension * dimension * maxEpoch * historyDimensions.epochSize;
-        buffer = fread(fileID, streamSize, SOURCE_PLATFORM_FLOAT);
+        [buffer count] = fread(fileID, streamSize, SOURCE_PLATFORM_FLOAT);
+        
+        if count ~= streamSize,
+            error(['Read ' num2str(count) ' bytes, ' num2str(streamSize) ' expected ']);
+        end
 
         activity = reshape(buffer, [historyDimensions.numOutputsPrTransform historyDimensions.numTransforms historyDimensions.numObjects maxEpoch dimension dimension]);
         
