@@ -37,11 +37,17 @@ function [summary] = plotSimulationRegionInvariance(project, experiment, simulat
         
         if listing(d).isdir == 1 && ~strcmp(directory,'Training') && ~strcmp(directory,'.') && ~strcmp(directory,'..'),
             
-            [fig, fullInvariance, meanInvariance, nrOfSingleCell, multiCell] = plotRegionInvariance([simulationFolder directory '/firingRate.dat']);
+            [fig, figImg, fullInvariance, meanInvariance, nrOfSingleCell, multiCell] = plotRegionInvariance([simulationFolder directory '/firingRate.dat']);
+            
+            fig2 = plotRegionPercentile([simulationFolder directory '/sparsityPercentileValue.dat']);
             
             saveas(fig,[simulationFolder directory '/invariance.fig']);
+            saveas(figImg,[simulationFolder directory '/invariance.png']);
+            saveas(fig2,[simulationFolder directory '/sparsityPercentileValue.fig']);
             
             delete(fig);
+            delete(figImg);
+            delete(fig2);
             
             % Save results for summary
             summary(counter).directory = directory;

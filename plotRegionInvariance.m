@@ -19,7 +19,7 @@
 
 % 'D:\Oxford\Work\Projects\VisBack\Simulations\1Object\1Epoch\firingRate.dat'
 
-function [fig, fullInvariance, meanInvariance, nrOfSingleCell, multiCell] = plotRegionInvariance(filename, region, depth)
+function [fig, figImg, fullInvariance, meanInvariance, nrOfSingleCell, multiCell] = plotRegionInvariance(filename, region, depth)
 
     INFO_ANALYSIS_FOLDER = '/Network/Servers/mac0.cns.ox.ac.uk/Volumes/Data/Users/mender/Dphil/InfoAnalysis';
 
@@ -60,6 +60,7 @@ function [fig, fullInvariance, meanInvariance, nrOfSingleCell, multiCell] = plot
     meanInvariance = 0;
     
     fig = figure();
+    figImg = figure();
     
     floatError = 0.1;
     
@@ -68,6 +69,8 @@ function [fig, fullInvariance, meanInvariance, nrOfSingleCell, multiCell] = plot
     [pathstr, name, ext] = fileparts(filename);
     
     disp(['***Processing' pathstr]);
+    
+    barPlot = zeros(historyDimensions.numObjects, numTransforms);
     
     % Iterate objects
     for o = 1:historyDimensions.numObjects,           % pick all objects,
@@ -94,11 +97,16 @@ function [fig, fullInvariance, meanInvariance, nrOfSingleCell, multiCell] = plot
         end
         
         b = bins(2:length(bins));
-        
-        %subplot(historyDimensions.numObjects+1, 1,1);
+        figure(fig); % Set as present figure
         subplot(3, 1, 1);
         plot(b);
         hold all;
+        
+        barPlot(o,:) = b;
+        
+        %figure(figImg); % Set as present figure
+        %plot(b); %./numCells Normalize
+        %hold all;
         
         % Update max values
         fullInvariance = fullInvariance + b(numTransforms); % The latter is the number of neurons that are fully invariant
@@ -107,6 +115,12 @@ function [fig, fullInvariance, meanInvariance, nrOfSingleCell, multiCell] = plot
     
     fclose(fileID);
     
+    figure(figImg); % Set as present figure
+    bar(barPlot'); %./numCells Normalize
+    hold all;
+    axis tight;
+    
+    figure(fig); % Set as present figure
     axis tight;
     
     % Convert firingRate file into NetStates file
@@ -169,10 +183,12 @@ function [fig, fullInvariance, meanInvariance, nrOfSingleCell, multiCell] = plot
     end
     
     elapsedTime = toc;
+    
+    format('short')
 
-    meanInvariance = meanInvariance / historyDimensions.numObjects;
-    nrOfSingleCell = MaxInfo - max(data0s(:,2)); %max(data0s(:,2) >= MaxInfo) % Count cells 
-    multiCell = MaxInfo - max(data0m(:,2)); %nnz(data0m(:,2) >= MaxInfo) % Count cells 
+    meanInvariance = single(meanInvariance / historyDimensions.numObjects);
+    nrOfSingleCell = single(MaxInfo - max(data0s(:,2))); %max(data0s(:,2) >= MaxInfo) % Count cells 
+    multiCell = single(MaxInfo - max(data0m(:,2))); %nnz(data0m(:,2) >= MaxInfo) % Count cells 
     
     % Give report
     %disp('***Summary');

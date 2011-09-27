@@ -59,7 +59,7 @@ function plotNeuronHistory(filename, region, depth, row, col, maxEpoch)
         gridxy(x, 'Color', 'k', 'Linestyle', '-');
     end
     
-    %axis tight;
+    axis([1 streamSize -.1 (max(vect)+0.2)])
     
     fclose(fileID);
     

@@ -8,7 +8,6 @@
 %  PLOT REGION PERCENTILE
 %  Input=========
 %  filename: filename of weight file
-%  
 %  Output========
 %
 

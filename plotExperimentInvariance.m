@@ -21,16 +21,57 @@ function plotExperimentInvariance(project, experiment)
     listing = dir(experimentFolder); 
     
     % Save results for summary
-    filename = [experimentFolder 'Summary.html'];
+    filename = [experimentFolder 'Summary_' num2str(length(listing)) '.html']; % Make name that is always original so we dont overwrite old summary which is from previous xGridCleanup run of partial results from this same parameter search
     fileID = fopen(filename, 'w'); % did note use datestr(now) since it has string
     
+    fprintf(fileID, '<html><head>\n');
+    fprintf(fileID, '<style type="text/css" title="currentStyle">\n');
+    fprintf(fileID, '@import "/Network/Servers/mac0.cns.ox.ac.uk/Volumes/Data/Users/mender/Dphil/Projects/VisBack/Scripts/DataTables-1.8.2/media/css/demo_page.css";\n');
+	fprintf(fileID, '@import "/Network/Servers/mac0.cns.ox.ac.uk/Volumes/Data/Users/mender/Dphil/Projects/VisBack/Scripts/DataTables-1.8.2/media/css/demo_table.css";\n');
+	fprintf(fileID, '</style>\n');
+	fprintf(fileID, '<script type="text/javascript" language="javascript" src="/Network/Servers/mac0.cns.ox.ac.uk/Volumes/Data/Users/mender/Dphil/Projects/VisBack/Scripts/DataTables-1.8.2/media/js/jquery.js"></script>\n');
+	fprintf(fileID, '<script type="text/javascript" language="javascript" src="/Network/Servers/mac0.cns.ox.ac.uk/Volumes/Data/Users/mender/Dphil/Projects/VisBack/Scripts/DataTables-1.8.2/media/js/jquery.dataTables.js"></script>\n');
+	fprintf(fileID, '<script type="text/javascript" charset="utf-8">\n');
+	fprintf(fileID, '$(document).ready(function() { $("#example").dataTable();});\n');
+	fprintf(fileID, '</script>\n');
+    fprintf(fileID, '</head>\n');
+    fprintf(fileID, '<body>\n');
     fprintf(fileID, '<h1>%s - %s</h1>\n', experiment, datestr(now));
-    fprintf(fileID, '<table cellpadding="10" style="border: solid 1px">\n');
-    fprintf(fileID, '<tr> <th>Simulation</th> <th>Network</th> <th>#Invariant</th> <th>Mean(Invariance level)</th> <th>SCA</th> <th>MCA</th> <th>Figure</th> <th>Inspector</th> <th>Firing</th> <th>Activation</th> <th>InhibitedActivation</th> <th>Trace</th> </tr>\n');
+    fprintf(fileID, '<table id="example" class="display" cellpadding="10" style="border: solid 1px">\n');
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Find an example of simulation directory - HORRIBLY CODED
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    for d = 1:length(listing),
+
+        simulation = listing(d).name;
+
+        if listing(d).isdir && ~any(strcmp(simulation, {'Filtered', 'Images', '.', '..'})),
+            parameters = getParameters(listing(d).name);
+            break;
+        end
+    end
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    fprintf(fileID, '<thead><tr>');
+    fprintf(fileID, '<th>Name</th>');
+    fprintf(fileID, '<th>Result</th>');
+    for p = 1:length(parameters),
+        fprintf(fileID, ['<th>' parameters{p,1} '</th>']);
+    end
+    fprintf(fileID, '<th>#</th>');
+    fprintf(fileID, '<th>Mean</th>');
+    fprintf(fileID, '<th>SCA</th>');
+    fprintf(fileID, '<th>MCA</th>');
+    fprintf(fileID, '<th>Action</th>');
+    fprintf(fileID, '</tr></thead>');
     
     %h = waitbar(0, 'Plotting&Infoanalysis...');
     counter = 1;
     
+    format('short');
+    
+    fprintf(fileID, '<tbody>\n');
     for d = 1:length(listing),
 
         % We are only looking for directories, but not the
@@ -51,36 +92,60 @@ function plotExperimentInvariance(project, experiment)
                 netDir = [experimentFolder  simulation '/' summary(s).directory];
                 
                 figCommand                  = ['matlab:open(\''' netDir '/invariance.fig\'')'];
+                fig2Command                 = ['matlab:open(\''' netDir '/sparsityPercentileValue.fig\'')'];
                 inspectorCommand            = ['matlab:inspectRegionInvariance(\''' netDir '\'',\''' summary(s).directory '.txt\'')'];
                 firingCommand               = ['matlab:plotNetworkHistory(\''' netDir '/firingRate.dat\'')'];
                 activationCommand           = ['matlab:plotNetworkHistory(\''' netDir '/activation.dat\'')'];
                 inhibitedActivationCommand  = ['matlab:plotNetworkHistory(\''' netDir '/inhibitedActivation.dat\'')'];
                 traceCommand                = ['matlab:plotNetworkHistory(\''' netDir '/trace.dat\'')'];
                 
-                fprintf(fileID, '<tr>\n'); %flip color here
-                fprintf(fileID, '<td> %s </td>\n', simulation);
-                fprintf(fileID, '<td> %s </td>\n', summary(s).directory);
-                fprintf(fileID, '<td> %d </td>\n', summary(s).fullInvariance);
-                fprintf(fileID, '<td> %d </td>\n', summary(s).meanInvariance);
+                % Start row
+                fprintf(fileID, '<tr>'); %flip color here
                 
-                if summary(s).nrOfSingleCell < 0.1,
-                    fprintf(fileID, '<td style=''background-color:green;''> %d </td>\n', summary(s).nrOfSingleCell);
-                else    
-                    fprintf(fileID, '<td> %d </td>\n', summary(s).nrOfSingleCell);
-                end
+                    % Name
+                    fprintf(fileID, '<td> %s </td>', summary(s).directory);
+                    
+                    % Result
+                    fprintf(fileID, '<td><img src="%s" width="370px" height="300px"/></td>', [netDir '/invariance.png']);
+                     
+                    % Parameters
+                    parameters = getParameters(simulation);
+                    
+                    for p = 1:length(parameters),
+                        fprintf(fileID, ['<td> ' parameters{p,2} ' </td>']);
+                    end
+                    
+                    % #
+                    fprintf(fileID, '<td> %d </td>', summary(s).fullInvariance);
+                    
+                    % Mean
+                    fprintf(fileID, '<td> %d </td>', summary(s).meanInvariance);
+                    
+                    % SCA
+                    if summary(s).nrOfSingleCell < 0.1,
+                        fprintf(fileID, '<td style=''background-color:green;''> %d </td>', summary(s).nrOfSingleCell);
+                    else    
+                        fprintf(fileID, '<td> %d </td>', summary(s).nrOfSingleCell);
+                    end
+                    
+                    % MCA
+                    if summary(s).multiCell < 0.1,
+                        fprintf(fileID, '<td style=''background-color:green;''> %d </td>', summary(s).multiCell);
+                    else
+                        fprintf(fileID, '<td> %d </td>', summary(s).multiCell);
+                    end
+
+                    % Action
+                    fprintf(fileID, '<td>');
+                    fprintf(fileID, '<input type="button" value="Figure" onclick="document.location=''%s''"/></br>', figCommand);
+                    fprintf(fileID, '<input type="button" value="Inspect" onclick="document.location=''%s''"/></br>', inspectorCommand);
+                    fprintf(fileID, '<input type="button" value="Firing" onclick="document.location=''%s''"/></br>', firingCommand);
+                    fprintf(fileID, '<input type="button" value="Activation" onclick="document.location=''%s''"/></br>', activationCommand);
+                    fprintf(fileID, '<input type="button" value="IActivation" onclick="document.location=''%s''"/></br>', inhibitedActivationCommand);
+                    fprintf(fileID, '<input type="button" value="Trace" onclick="document.location=''%s''"/></br>', traceCommand);
+                    fprintf(fileID, '<input type="button" value="Percentile" onclick="document.location=''%s''"/></br>', fig2Command);
+                    fprintf(fileID, '</td>');
                 
-                if summary(s).multiCell < 0.1,
-                    fprintf(fileID, '<td style=''background-color:green;''> %d </td>\n', summary(s).multiCell);
-                else
-                    fprintf(fileID, '<td> %d </td>\n', summary(s).multiCell);
-                end
-                
-                fprintf(fileID, '<td> <input type="button" value="Figure" onclick="document.location=''%s''"/></td>\n', figCommand);
-                fprintf(fileID, '<td> <input type="button" value="Inspector" onclick="document.location=''%s''"/></td>\n', inspectorCommand);
-                fprintf(fileID, '<td> <input type="button" value="Firing" onclick="document.location=''%s''"/></td>\n', firingCommand);
-                fprintf(fileID, '<td> <input type="button" value="Activation" onclick="document.location=''%s''"/></td>\n', activationCommand);
-                fprintf(fileID, '<td> <input type="button" value="InhibitedActivation" onclick="document.location=''%s''"/></td>\n', inhibitedActivationCommand);
-                fprintf(fileID, '<td> <input type="button" value="Trace" onclick="document.location=''%s''"/></td>\n', traceCommand);
                 fprintf(fileID, '</tr>\n');
             end
             
@@ -89,11 +154,25 @@ function plotExperimentInvariance(project, experiment)
     
     %close(h);
     
-    fprintf(fileID, '</table>');
+    fprintf(fileID, '</table></body></html>');
     fclose(fileID);
     
     %web(filename);
     
     disp([experiment ' 100% DONE.']);
+    
+    function [parameters] = getParameters(experiment)
+        
+        % Get a sample simulation name
+        columns = strsplit(experiment, '_');
+        nrOfParams = length(columns) - 1;
+        
+        parameters = cell(nrOfParams,2);
+        
+        for p = 1:nrOfParams,
+            pair = strsplit(char(columns(p)),'='); % columns(p) is a 1x1 cell
+            parameters{p,1} = char(pair(1));
+            parameters{p,2} = char(pair(2));
+        end
     
     
