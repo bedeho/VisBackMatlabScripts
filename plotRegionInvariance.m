@@ -197,6 +197,10 @@ function [fig, figImg, fullInvariance, meanInvariance, nrOfSingleCell, multiCell
     disp(['nrOfSingleCell:' num2str(nrOfSingleCell)]);
     disp(['multiCell:' num2str(multiCell)]);
     
+    % Make copy of single and multiple cell files
+    copyfile('data0s', pathstr);
+    copyfile('data0m', pathstr);
+    
     % Cleanup
     rmdir(tmpAnalysisDir, 's');
     %cd(initialPwd);

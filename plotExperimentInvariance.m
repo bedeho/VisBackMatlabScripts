@@ -47,7 +47,7 @@ function plotExperimentInvariance(project, experiment)
         simulation = listing(d).name;
 
         if listing(d).isdir && ~any(strcmp(simulation, {'Filtered', 'Images', '.', '..'})),
-            parameters = getParameters(listing(d).name);
+            [parameters, nrOfParams] = getParameters(listing(d).name);
             break;
         end
     end
@@ -55,8 +55,9 @@ function plotExperimentInvariance(project, experiment)
     
     fprintf(fileID, '<thead><tr>');
     fprintf(fileID, '<th>Name</th>');
+    fprintf(fileID, '<th>Network</th>');
     fprintf(fileID, '<th>Result</th>');
-    for p = 1:length(parameters),
+    for p = 1:nrOfParams,
         fprintf(fileID, ['<th>' parameters{p,1} '</th>']);
     end
     fprintf(fileID, '<th>#</th>');
@@ -103,6 +104,9 @@ function plotExperimentInvariance(project, experiment)
                 fprintf(fileID, '<tr>'); %flip color here
                 
                     % Name
+                    fprintf(fileID, '<td> %s </td>', simulation);
+                    
+                    % Network
                     fprintf(fileID, '<td> %s </td>', summary(s).directory);
                     
                     % Result
@@ -111,7 +115,7 @@ function plotExperimentInvariance(project, experiment)
                     % Parameters
                     parameters = getParameters(simulation);
                     
-                    for p = 1:length(parameters),
+                    for p = 1:nrOfParams,
                         fprintf(fileID, ['<td> ' parameters{p,2} ' </td>']);
                     end
                     
@@ -161,7 +165,7 @@ function plotExperimentInvariance(project, experiment)
     
     disp([experiment ' 100% DONE.']);
     
-    function [parameters] = getParameters(experiment)
+    function [parameters, nrOfParams] = getParameters(experiment)
         
         % Get a sample simulation name
         columns = strsplit(experiment, '_');
