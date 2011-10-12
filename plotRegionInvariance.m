@@ -21,10 +21,10 @@
 
 function [fig, figImg, fullInvariance, meanInvariance, nrOfSingleCell, multiCell] = plotRegionInvariance(filename, region, depth)
 
-    INFO_ANALYSIS_FOLDER = '/Network/Servers/mac0.cns.ox.ac.uk/Volumes/Data/Users/mender/Dphil/InfoAnalysis';
-
     % Import global variables
     declareGlobalVars();
+    
+    global INFO_ANALYSIS_FOLDER;
 
     % Open file
     fileID = fopen(filename);
@@ -128,24 +128,38 @@ function [fig, figImg, fullInvariance, meanInvariance, nrOfSingleCell, multiCell
     netStatesFilename = convertToNetstates(filename);
     
     title(pathstr);
-    tmpAnalysisDir = [pathstr '/InfoAnalysis'];
+    tmpAnalysisDir = [pathstr '/TempInfoAnalysis'];
+    
+    % Make folder
+    status = mkdir(tmpAnalysisDir);
+    
+    if ~status,
+        error(['Could not make folder ' tmpAnalysisDir]);
+    end
     
     % Copy 
     disp('Copying infoanalysis folder...');
-    copyfile(INFO_ANALYSIS_FOLDER, tmpAnalysisDir);
+    [status, message] = copyfile(INFO_ANALYSIS_FOLDER, tmpAnalysisDir);
+    
+    if ~status,
+        error(['Could not copy ' INFO_ANALYSIS_FOLDER ' to ' tmpAnalysisDir]);
+    end
     
     % Copy NetStates1 to info analysis folder
-    copyfile(netStatesFilename, tmpAnalysisDir);
+    [status, message] = copyfile(netStatesFilename, tmpAnalysisDir);
+    
+    if ~status,
+        error(['Could not copy ' netStatesFilename ' to ' tmpAnalysisDir]);
+    end
 
     % Change present working directory to infoanalysis folder, and run analysis there
     disp('Doing infoanalysis...');
-    %initialPwd = pwd;
+    initialPwd = pwd;
     cd(tmpAnalysisDir);   % We have to be in the working directory of infoanalysis and run it from there, otherwise it will not find its file
     [status, result] = system(['./infoanalysis -f 1 -b 10 -l ' num2str(region - 2)]);
     
     if status,
-        disp(['Infoanalysis error: ' result]);
-        exit;
+        error(['Infoanalysis error: ' result]);
     end
     
     % Load single cell & plot
@@ -153,8 +167,7 @@ function [fig, figImg, fullInvariance, meanInvariance, nrOfSingleCell, multiCell
     [status, result] = system(['./infoplot -s -f 1 -x ' num2str(numCells) ' -y 3 -z -0.5 -l ' num2str(region - 2) ' -n "trace" -t "Single cell Analysis"']);
     
     if status,
-        disp(['Infoplot error: ' result]);
-        exit;
+        error(['Infoplot error: ' result]);
     else
         load data0s;
         subplot(3, 1, 2);
@@ -170,8 +183,7 @@ function [fig, figImg, fullInvariance, meanInvariance, nrOfSingleCell, multiCell
     [status, result] = system(['./infoplot -m -f 1 -x ' num2str(numCells) ' -y 3 -z -0.5 -l ' num2str(region - 2) ' -n "trace" -t "Single cell Analysis"']);
     
     if status,
-        disp(['Infoplot error: ' result]);
-        exit;
+        error(['Infoplot error: ' result]);
     else
         load data0m;
         subplot(3, 1, 3);
@@ -203,5 +215,5 @@ function [fig, figImg, fullInvariance, meanInvariance, nrOfSingleCell, multiCell
     
     % Cleanup
     rmdir(tmpAnalysisDir, 's');
-    %cd(initialPwd);
+    cd(initialPwd);
     

@@ -7,15 +7,16 @@
 %
 %  PLOT REGION INVARIANCE FOR ALL SIMULATION FILES IN ALL SIMULATIONS
 %  Input=========
-%  project: project name
 %  experiment: experiment name
-%  simulation: simulation name
 
-function plotExperimentInvariance(project, experiment)
+function plotExperimentInvariance(experiment)
 
-    PROJECTS_FOLDER = '/Network/Servers/mac0.cns.ox.ac.uk/Volumes/Data/Users/mender/Dphil/Projects/';  % must have trailing slash
+    % Import global variables
+    declareGlobalVars();
+    
+    global EXPERIMENTS_FOLDER;
 
-    experimentFolder = [PROJECTS_FOLDER project '/Simulations/' experiment '/'];
+    experimentFolder = [EXPERIMENTS_FOLDER experiment '/'];
     
     % Iterate simulations in this experiment folder
     listing = dir(experimentFolder); 
@@ -40,7 +41,7 @@ function plotExperimentInvariance(project, experiment)
     fprintf(fileID, '<table id="example" class="display" cellpadding="10" style="border: solid 1px">\n');
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Find an example of simulation directory - HORRIBLY CODED
+    % Find an example of simulation directory to extract column names- HORRIBLY CODED
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     for d = 1:length(listing),
 
@@ -86,7 +87,7 @@ function plotExperimentInvariance(project, experiment)
             disp(['******** Doing ' num2str(counter) ' out of ' num2str((nnz([listing(:).isdir]) - 2)) '********']); 
             counter = counter + 1;
             
-            summary = plotSimulationRegionInvariance(project, experiment, simulation);
+            summary = plotSimulationRegionInvariance(experiment, simulation);
 
             for s=1:length(summary),
                 
@@ -163,7 +164,7 @@ function plotExperimentInvariance(project, experiment)
     
     %web(filename);
     
-    disp([experiment ' 100% DONE.']);
+    disp(['DONE...']);
     
     function [parameters, nrOfParams] = getParameters(experiment)
         

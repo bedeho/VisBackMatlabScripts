@@ -7,19 +7,17 @@
 %
 %  PLOT REGION INVARIANCE FOR ALL SIMULATION FILES
 %  Input=========
-%  project: project name
 %  experiment: experiment name
 %  simulation: simulation name
 
-function [summary] = plotSimulationRegionInvariance(project, experiment, simulation)
+function [summary] = plotSimulationRegionInvariance(experiment, simulation)
 
     % Import global variables
     declareGlobalVars();
     
-    global PROJECTS_FOLDER;
+    global EXPERIMENTS_FOLDER;
 
-    experimentFolder = [PROJECTS_FOLDER project '/Simulations/' experiment '/'];
-    simulationFolder = [experimentFolder  simulation '/'];
+    simulationFolder = [EXPERIMENTS_FOLDER experiment '/' simulation '/'];
 
     % Iterate all network result folders in this simulation folder
     listing = dir(simulationFolder);
@@ -37,13 +35,20 @@ function [summary] = plotSimulationRegionInvariance(project, experiment, simulat
         
         if listing(d).isdir == 1 && ~strcmp(directory,'Training') && ~strcmp(directory,'.') && ~strcmp(directory,'..'),
             
-            [fig, figImg, fullInvariance, meanInvariance, nrOfSingleCell, multiCell] = plotRegionInvariance([simulationFolder directory '/firingRate.dat']);
+            netDir = [simulationFolder directory];
             
-            fig2 = plotRegionPercentile([simulationFolder directory '/sparsityPercentileValue.dat']);
+            [fig, figImg, fullInvariance, meanInvariance, nrOfSingleCell, multiCell] = plotRegionInvariance([netDir '/firingRate.dat']);
             
-            saveas(fig,[simulationFolder directory '/invariance.fig']);
-            saveas(figImg,[simulationFolder directory '/invariance.png']);
-            saveas(fig2,[simulationFolder directory '/sparsityPercentileValue.fig']);
+            fig2 = plotRegionPercentile([netDir '/sparsityPercentileValue.dat']);
+            
+            % Crazy matlab error if you do not change directory from what
+            % plotRegionInvariance() left you in, which is tempinfoanalysis
+            % folder which is gone.
+            % cd(simulationFolder);
+            
+            saveas(fig,[netDir '/invariance.fig']);
+            saveas(figImg,[netDir '/invariance.png']);
+            saveas(fig2,[netDir '/sparsityPercentileValue.fig']);
             
             delete(fig);
             delete(figImg);

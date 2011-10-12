@@ -6,13 +6,13 @@
 %  Copyright 2011 OFTNAI. All rights reserved.
 %
 
-function declareGlobalVars() 
+function declareGlobalVars()
 
-    global PROJECTS_FOLDER;
-    PROJECTS_FOLDER = '/Network/Servers/mac0.cns.ox.ac.uk/Volumes/Data/Users/mender/Dphil/Projects/';  % must have trailing slash
-
+    global EXPERIMENTS_FOLDER;
+    EXPERIMENTS_FOLDER = '/Network/Servers/mac0.cns.ox.ac.uk/Volumes/Data/Users/mender/Dphil/Projects/VisBack/Experiments/';  % must have trailing slash
     
-
+    global INFO_ANALYSIS_FOLDER;
+    INFO_ANALYSIS_FOLDER = '/Network/Servers/mac0.cns.ox.ac.uk/Volumes/Data/Users/mender/Dphil/Projects/VisBack/Scripts/InfoAnalysis/';
 
     % Reason added abstraction was because
     % perhaps data is produced on system which
