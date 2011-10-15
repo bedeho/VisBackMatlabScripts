@@ -1,4 +1,4 @@
-function [] = filterImageSet(inputDirectory, imageSize, filterScale)
+function [] = filterImageSet(inputDirectory, nrOfObjects, nrOfTransforms, imageSize, filterScale)
 
 %inputDirectory = Directory where we look for /Images folder with
 %input pictures, and where we save /Filtered folder with output and
@@ -9,15 +9,6 @@ function [] = filterImageSet(inputDirectory, imageSize, filterScale)
 %against real image size prior to filtering as safety, been burned
 %to many times!!!
 
-if nargin < 3
-    
-    filterScale = 16;
-
-    if nargin < 2,
-        error('Argument imageSize not supplied');
-    end
-end
-
 tic;
 imageParamFile = 'FilterParameters.txt';
 imageListFile = 'FileList.txt';
@@ -25,6 +16,7 @@ paddingGrayScaleColor = 127;
 outdir = [inputDirectory '/Filtered'];
 set = true;
 ext='.png';
+token = '*';
 
 % READ: http://www.cs.rug.nl/~imaging/simplecell.html 
 psi   = [0, pi, -pi/2, pi/2];       % phase, [0, pi, -pi/2, pi/2]
@@ -87,6 +79,8 @@ cell = struct2cell(content);
 [~,ind] = sort_nat(cell(1,:)); % Sort numerically according to first row (name)
 clear cell;% S;
 
+filesOutputted = 0;
+
 for i = 1:length(content)
     file = content(ind(i)).name;
     
@@ -114,6 +108,12 @@ for i = 1:length(content)
             % Dump to file list
             fprintf(iList, '%s\n', fname);
             
+            % Output star if we are going from one object to the next
+            filesOutputted = filesOutputted + 1;
+            if mod(filesOutputted, nrOfTransforms) == 0,
+                fprintf(iList, [token '\n']);
+            end
+            
             % Dump to summary            
             viewFilters = ['matlab:plotFilters(\''' inputDirectory filesep 'Filtered' filesep fname '\'',' num2str(imageSize) ',' vOrients ',' vPhases ',' vScales ')'];
             viewImage = ['matlab:figure;imshow(\''' imgFile '\'')'];
@@ -125,6 +125,11 @@ for i = 1:length(content)
             fprintf(fileID, '</tr>\n');
         end
     end
+end
+
+% Check
+if nrOfTransforms * nrOfObjects ~= filesOutputted,
+  error('The number of files in file list does not equal nrOfTransforms * nrOfObjects\n');   
 end
 
 code = fclose(iList);
