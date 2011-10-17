@@ -38,7 +38,6 @@ function inspectRegionInvariance(folder, networkFile)
     % Read header
     [networkDimensions, neuronOffsets2] = loadWeightFileHeader(connectivityFileID);
         
-    
     % Setup vars
     numRegions = length(networkDimensions);
     depth = 1;
@@ -73,8 +72,32 @@ function inspectRegionInvariance(folder, networkFile)
         % Save axis
         axisVals(r-1,1) = subplot(numRegions, 3, 3*(numRegions - r) + 1);
         
-        w = regionActivity{r - 1}(historyDimensions.numOutputsPrTransform, :, :, numEpochs, :, :);
-        q = reshape(sum(w > floatError), [numObjects regionDimension*regionDimension]); %sum goes along first non singleton dimension, so it skeeps all our BS 1dimension
+        raw = regionActivity{r - 1}(historyDimensions.numOutputsPrTransform, :, :, numEpochs, :, :);
+        raw = raw > floatError;
+        
+        if numTransforms > 1,
+            
+            if numObjects > 1,
+                responsePrObject = sum(raw);
+                responsePrCell = sum(responsePrObject);
+                responsePrCell = squeeze(responsePrCell); % sum leaves singleton dimention
+            else
+                responsePrObject = sum(raw);
+                responsePrCell = responsePrObject;
+            end
+        else
+                
+            if numObjects > 1,
+                responsePrObject = squeeze(raw);
+                responsePrCell = sum(responsePrObject);
+                responsePrCell = squeeze(responsePrCell); % sum leaves singleton dimention
+            else
+                responsePrObject = squeeze(raw);
+                responsePrCell = responsePrObject;
+            end
+        end
+        
+        q = reshape(responsePrObject, [numObjects regionDimension*regionDimension]); %sum goes along first non singleton dimension, so it skeeps all our BS 1dimension
 
         % Plot invariance historgram for region
         for o=1:numObjects,
@@ -89,21 +112,9 @@ function inspectRegionInvariance(folder, networkFile)
         % Save axis
         axisVals(r-1, 2) = subplot(numRegions, 3, 3*(numRegions - r) + 2);
         
-        % Plot region invarinceCount
-        w = regionActivity{r - 1}(historyDimensions.numOutputsPrTransform, :, :, numEpochs, :, :) > floatError;
-        
-        if numTransforms > 1,
-            w = sum(w);
-        end
-        
-        if numObjects > 1,
-            w = sum(w);
-        end
-        
-        invarinceCount = squeeze(w); %sum goes along first non singleton dimension, so it skeeps all our BS 1dimension
-        im = imagesc(invarinceCount);
+        im = imagesc(responsePrCell);
         colorbar
-        colormap(jet(max(max(invarinceCount)) + 1)); %();
+        colormap(jet(max(max(responsePrCell)) + 1)); %();
         
         axis tight;
         
@@ -262,7 +273,11 @@ function inspectRegionInvariance(folder, networkFile)
             hold all;
         end  
         
-        axis([1 numTransforms -0.1 1.1]);
+        if numTransforms > 1,
+            axis([1 numTransforms -0.1 1.1]);
+        else
+            axis([0 2 -0.1 1.1]);
+        end
         
         hold;
     end

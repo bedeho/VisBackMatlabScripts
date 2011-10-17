@@ -164,7 +164,13 @@ function plotExperimentInvariance(experiment)
     
     %web(filename);
     
-    disp(['DONE...']);
+    % Thanks to DanTheMans excellent advice, now we dont
+    % have to fire up terminal insessantly
+    
+    
+    disp('DONE...');
+    system('stty echo');
+    
     
     function [parameters, nrOfParams] = getParameters(experiment)
         
