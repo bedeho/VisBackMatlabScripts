@@ -8,11 +8,13 @@
 
 function declareGlobalVars()
 
+	base = '/Network/Servers/mac0.cns.ox.ac.uk/Volumes/Data/Users/mender/Dphil/Projects/VisBack/'; % must have trailing slash
+
     global EXPERIMENTS_FOLDER;
-    EXPERIMENTS_FOLDER = '/Network/Servers/mac0.cns.ox.ac.uk/Volumes/Data/Users/mender/Dphil/Projects/VisBack/Experiments/';  % must have trailing slash
+    EXPERIMENTS_FOLDER = [base 'Experiments/'];  
     
     global INFO_ANALYSIS_FOLDER;
-    INFO_ANALYSIS_FOLDER = '/Network/Servers/mac0.cns.ox.ac.uk/Volumes/Data/Users/mender/Dphil/Projects/VisBack/Scripts/InfoAnalysis/';
+    INFO_ANALYSIS_FOLDER = [base 'Scripts/InfoAnalysis/'];
 
     % Reason added abstraction was because
     % perhaps data is produced on system which
