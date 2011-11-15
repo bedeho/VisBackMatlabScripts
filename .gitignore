@@ -5,3 +5,6 @@
 .*
 # ignore matlab tmp files
 *~
+
+# Data file
+declareGlobalVars.m
