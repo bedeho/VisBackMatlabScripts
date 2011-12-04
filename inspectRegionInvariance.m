@@ -267,11 +267,16 @@ function inspectRegionInvariance(folder, networkFile)
         % Populate invariance plot
         subplot(numRegions, 3, [3*(numRegions-1) + 1, 3*(numRegions-1) + 3]);
         
-        for obj=1:numObjects,
-            
-            plot(regionActivity{region - 1}(historyDimensions.numOutputsPrTransform, :, obj, numEpochs, row, col)); %> floatError
-            hold all;
-        end  
+        % Old style
+        %for obj=1:numObjects,
+        %    
+        %    plot(regionActivity{region - 1}(historyDimensions.numOutputsPrTransform, :, obj, numEpochs, row, col)); %> floatError
+        %    hold all;
+        %end
+        
+        Y = squeeze(regionActivity{region - 1}(historyDimensions.numOutputsPrTransform, :, :, numEpochs, row, col))
+        bar(Y);
+        
         
         if numTransforms > 1,
             axis([1 numTransforms -0.1 1.1]);
