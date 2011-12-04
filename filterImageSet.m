@@ -1,4 +1,4 @@
-function [] = filterImageSet(inputDirectory, nrOfObjects, nrOfTransforms, imageSize, filterScale)
+function [] = filterImageSet(inputDirectory, nrOfObjects, nrOfTransforms, imageSize, filterScale, paddingGrayScaleColor)
 
 %inputDirectory = Directory where we look for /Images folder with
 %input pictures, and where we save /Filtered folder with output and
@@ -12,7 +12,8 @@ function [] = filterImageSet(inputDirectory, nrOfObjects, nrOfTransforms, imageS
 tic;
 imageParamFile = 'FilterParameters.txt';
 imageListFile = 'FileList.txt';
-paddingGrayScaleColor = 127;
+%paddingGrayScaleColor = 128; % Perfect gray is 127.5, so 127 and 128 work
+%equally well, but make sure that it matches background of stimuli
 outdir = [inputDirectory '/Filtered'];
 set = true;
 ext='.png';
