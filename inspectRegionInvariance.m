@@ -183,13 +183,7 @@ function inspectRegionInvariance(folder, networkFile)
         
         pos = get(axisVals(region, 3), 'CurrentPoint');
         
-        %row = imagescClick(pos(1, 2));
-        %col = imagescClick(pos(1, 1));
-        
-        [row, col] = imagescClick(pos(1, 2), pos(1, 1), networkDimensions(region).dimension);
-        
-        disp(['You clicked R:' num2str(region) ', row:' num2str(pos(1, 2)) ', col:', num2str(pos(1, 1))]);
-        disp(['You clicked R:' num2str(region) ', row:' num2str(row) ', col:', num2str(col)]);
+        [row, col] = imagescClick(pos(1, 2), pos(1, 1), networkDimensions(region).dimension, networkDimensions(region).dimension);
         
         if region > 2,
             updateWeightPlot(region, row, col);
@@ -340,27 +334,4 @@ function inspectRegionInvariance(folder, networkFile)
     end 
 
 end
-
-% Made with random experiemtnation with imagesc behavior, MAY not work
-% in other settings because of border BS, check it out later, use
-% ginput() if possible 
-function [row, col] = imagescClick(i, j, dimension)
-
-    if i < 1
-        row = 1;
-    else
-        row = floor(i);
-    end
-
-    if j < 0.5
-        col = 1;
-    else
-        col = round(j);
-
-        if col > dimension,
-            col = dimension;
-        end
-    end
-end
-
 
