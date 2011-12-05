@@ -269,6 +269,7 @@ function inspectRegionInvariance(folder, networkFile)
         %end
         
         Y = squeeze(regionActivity{region - 1}(historyDimensions.numOutputsPrTransform, :, :, numEpochs, row, col))
+        cla
         bar(Y);
         
         
