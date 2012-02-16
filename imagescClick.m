@@ -8,6 +8,10 @@
 
 function [row, col] = imagescClick(i, j, y_dimension, x_dimension)
 
+    if nargin == 3
+	x_dimension = y_dimension
+    end
+
     % [0.5,1.5) => 1, [1.5,2.5) => 2, ...
     row = ceil(i - 0.5);
     col = ceil(j - 0.5);
